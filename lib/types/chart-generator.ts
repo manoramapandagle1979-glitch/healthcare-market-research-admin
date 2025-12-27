@@ -1,0 +1,83 @@
+// Chart Generator Type Definitions
+
+export type ChartType = 'bar' | 'stacked-bar' | 'pie';
+
+export type ChartOrientation = 'vertical' | 'horizontal';
+
+export type LogoPosition = 'top-left' | 'top-right' | 'bottom-right';
+
+export type ColorTheme = 'default' | 'custom';
+
+export interface ChartMetadata {
+  title: string;
+  subtitle?: string;
+  xAxisLabel?: string;
+  yAxisLabel?: string;
+  unitSuffix?: string;
+  decimalPrecision: 0 | 1 | 2;
+  showLegend: boolean;
+  showGridlines: boolean;
+}
+
+export interface DataSeries {
+  id: string;
+  name: string;
+  color: string;
+  values: number[];
+}
+
+export interface DataSource {
+  labels: string[]; // X-axis categories (e.g., years)
+  series: DataSeries[]; // Multiple data series
+}
+
+export interface LogoConfig {
+  file: File | null;
+  previewUrl: string | null;
+  position: LogoPosition;
+  opacity: number; // 0-100
+}
+
+export interface ChartConfig {
+  chartType: ChartType;
+  orientation: ChartOrientation;
+  colorTheme: ColorTheme;
+}
+
+export interface ChartConfiguration {
+  chartType: ChartType;
+  orientation: ChartOrientation;
+  colorTheme: ColorTheme;
+  metadata: ChartMetadata;
+  dataSource: DataSource;
+  logo: LogoConfig;
+}
+
+export interface ExportOptions {
+  format: 'png' | 'webp';
+  resolution: '1200x700' | '2400x1400';
+}
+
+export interface ValidationError {
+  field: string;
+  message: string;
+}
+
+export interface ValidationResult {
+  isValid: boolean;
+  errors: ValidationError[];
+}
+
+// Serializable configuration (for JSON export - excludes File objects)
+export interface SerializableChartConfiguration {
+  chartType: ChartType;
+  orientation: ChartOrientation;
+  colorTheme: ColorTheme;
+  metadata: ChartMetadata;
+  dataSource: DataSource;
+  logo: {
+    position: LogoPosition;
+    opacity: number;
+    // Note: file and previewUrl excluded - user must re-upload
+  };
+}

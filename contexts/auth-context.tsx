@@ -21,27 +21,29 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
-  const initializeUser = useCallback(() => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Initialize user from token on mount
+  useEffect(() => {
     const token = tokenStorage.getToken();
     if (!token) {
-      return null;
+      setIsLoading(false);
+      return;
     }
 
     const payload = decodeToken(token);
     if (payload) {
-      return {
+      setUser({
         id: payload.id,
         email: payload.email,
         role: payload.role,
-      };
+      });
     } else {
       tokenStorage.clearAll();
-      return null;
     }
+    setIsLoading(false);
   }, []);
-
-  const [user, setUser] = useState<User | null>(initializeUser);
-  const [isLoading] = useState(false);
 
   const loadUserFromToken = useCallback(() => {
     const token = tokenStorage.getToken();
@@ -121,12 +123,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(
     async (email: string, password: string) => {
-      const data = await authApi.login({ email, password });
+      setIsLoading(true);
+      try {
+        const data = await authApi.login({ email, password });
 
-      tokenStorage.setToken(data.token);
-      tokenStorage.setRefreshToken(data.refreshToken);
-      setUser(data.user);
-      router.push('/dashboard');
+        tokenStorage.setToken(data.token);
+        tokenStorage.setRefreshToken(data.refreshToken);
+        setUser(data.user);
+        router.push('/dashboard');
+      } finally {
+        setIsLoading(false);
+      }
     },
     [router]
   );

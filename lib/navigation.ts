@@ -74,6 +74,12 @@ export const navigationItems: NavigationItem[] = [
     roles: ['admin', 'editor'],
   },
   {
+    title: 'Chart Generator',
+    href: '/chart-generator',
+    icon: BarChart3,
+    roles: ['admin', 'editor'],
+  },
+  {
     title: 'Media',
     href: '/media',
     icon: Image,
