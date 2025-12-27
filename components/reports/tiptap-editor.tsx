@@ -28,6 +28,11 @@ import {
   AlignRight,
   Undo,
   Redo,
+  Columns3,
+  Rows3,
+  TableProperties,
+  Trash2,
+  Plus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -60,10 +65,25 @@ export function TiptapEditor({
       }),
       Table.configure({
         resizable: true,
+        HTMLAttributes: {
+          class: 'tiptap-table',
+        },
       }),
-      TableRow,
-      TableCell,
-      TableHeader,
+      TableRow.configure({
+        HTMLAttributes: {
+          class: 'tiptap-table-row',
+        },
+      }),
+      TableCell.configure({
+        HTMLAttributes: {
+          class: 'tiptap-table-cell',
+        },
+      }),
+      TableHeader.configure({
+        HTMLAttributes: {
+          class: 'tiptap-table-header',
+        },
+      }),
       Underline,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
@@ -78,7 +98,7 @@ export function TiptapEditor({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none min-h-[300px] p-4',
+        class: 'focus:outline-none min-h-[300px] p-4',
       },
     },
   });
@@ -238,6 +258,138 @@ export function TiptapEditor({
         <Button type="button" variant="ghost" size="sm" onClick={insertTable}>
           <TableIcon className="h-4 w-4" />
         </Button>
+
+        {/* Table manipulation controls - only show when inside a table */}
+        {editor.isActive('table') && (
+          <>
+            <Separator orientation="vertical" className="h-8" />
+
+            {/* Row operations */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => editor.chain().focus().addRowBefore().run()}
+              title="Add row before"
+            >
+              <Plus className="h-3 w-3" />
+              <Rows3 className="h-4 w-4" />
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => editor.chain().focus().addRowAfter().run()}
+              title="Add row after"
+            >
+              <Rows3 className="h-4 w-4" />
+              <Plus className="h-3 w-3" />
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => editor.chain().focus().deleteRow().run()}
+              title="Delete row"
+            >
+              <Rows3 className="h-4 w-4" />
+              <Trash2 className="h-3 w-3" />
+            </Button>
+
+            <Separator orientation="vertical" className="h-8" />
+
+            {/* Column operations */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => editor.chain().focus().addColumnBefore().run()}
+              title="Add column before"
+            >
+              <Plus className="h-3 w-3" />
+              <Columns3 className="h-4 w-4" />
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => editor.chain().focus().addColumnAfter().run()}
+              title="Add column after"
+            >
+              <Columns3 className="h-4 w-4" />
+              <Plus className="h-3 w-3" />
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => editor.chain().focus().deleteColumn().run()}
+              title="Delete column"
+            >
+              <Columns3 className="h-4 w-4" />
+              <Trash2 className="h-3 w-3" />
+            </Button>
+
+            <Separator orientation="vertical" className="h-8" />
+
+            {/* Cell operations */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => editor.chain().focus().mergeCells().run()}
+              disabled={!editor.can().mergeCells()}
+              title="Merge cells"
+            >
+              <TableProperties className="h-4 w-4" />
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => editor.chain().focus().splitCell().run()}
+              disabled={!editor.can().splitCell()}
+              title="Split cell"
+            >
+              <TableProperties className="h-4 w-4 rotate-180" />
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => editor.chain().focus().toggleHeaderRow().run()}
+              title="Toggle header row"
+            >
+              <Rows3 className="h-4 w-4 font-bold" />
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => editor.chain().focus().toggleHeaderColumn().run()}
+              title="Toggle header column"
+            >
+              <Columns3 className="h-4 w-4 font-bold" />
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => editor.chain().focus().deleteTable().run()}
+              title="Delete table"
+            >
+              <Trash2 className="h-4 w-4 text-destructive" />
+            </Button>
+          </>
+        )}
 
         <Separator orientation="vertical" className="h-8" />
 

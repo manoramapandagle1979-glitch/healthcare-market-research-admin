@@ -23,55 +23,77 @@ export interface ChartPreviewRef {
   getExportContainer: () => HTMLDivElement | null;
 }
 
-export const ChartPreview = forwardRef<ChartPreviewRef>((props, ref) => {
-  const chartRef = useRef<ReactEChartsCore>(null);
-  const exportContainerRef = useRef<HTMLDivElement>(null);
-  const { chartConfig, metadata, dataSource, logo } = useChartGenerator();
+interface ChartPreviewProps {
+  width?: number;
+  height?: number;
+}
 
-  const chartOption: EChartsOption = useMemo(() => {
-    return buildEChartsConfig({
-      chartType: chartConfig.chartType,
-      orientation: chartConfig.orientation,
-      metadata,
-      dataSource,
-      logo,
-    });
-  }, [chartConfig, metadata, dataSource, logo]);
+export const ChartPreview = forwardRef<ChartPreviewRef, ChartPreviewProps>(
+  ({ width = 1200, height = 600 }, ref) => {
+    const chartRef = useRef<ReactEChartsCore>(null);
+    const exportContainerRef = useRef<HTMLDivElement>(null);
+    const { chartConfig, metadata, dataSource, logo } = useChartGenerator();
 
-  // Expose methods to parent
-  useImperativeHandle(ref, () => ({
-    getChartInstance: () => chartRef.current,
-    getExportContainer: () => exportContainerRef.current,
-  }));
+    const chartOption: EChartsOption = useMemo(() => {
+      return buildEChartsConfig({
+        chartType: chartConfig.chartType,
+        orientation: chartConfig.orientation,
+        metadata,
+        dataSource,
+        logo,
+      });
+    }, [chartConfig, metadata, dataSource, logo]);
 
-  // Handle window resize to ensure chart resizes properly
-  React.useEffect(() => {
-    const handleResize = () => {
+    // Expose methods to parent
+    useImperativeHandle(ref, () => ({
+      getChartInstance: () => chartRef.current,
+      getExportContainer: () => exportContainerRef.current,
+    }));
+
+    // Handle window resize to ensure chart resizes properly
+    React.useEffect(() => {
+      const handleResize = () => {
+        if (chartRef.current) {
+          const instance = chartRef.current.getEchartsInstance();
+          if (instance) {
+            instance.resize();
+          }
+        }
+      };
+
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Resize chart when width/height props change
+    React.useEffect(() => {
       if (chartRef.current) {
         const instance = chartRef.current.getEchartsInstance();
         if (instance) {
           instance.resize();
         }
       }
-    };
+    }, [width, height]);
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  return (
-    <div className="w-full bg-white rounded-md p-4 border border-border">
-      {/* Clean export container without padding/borders */}
-      <div ref={exportContainerRef} className="w-full bg-white">
-        <ReactECharts
-          ref={chartRef}
-          option={chartOption}
-          style={{ height: '500px', width: '100%' }}
-          opts={{ renderer: 'canvas', resize: true }}
-        />
+    return (
+      <div className="w-full bg-white rounded-md p-4 border border-border overflow-auto">
+        {/* Clean export container without padding/borders */}
+        <div
+          ref={exportContainerRef}
+          className="bg-white mx-auto"
+          style={{ width: `${width}px`, maxWidth: '100%' }}
+        >
+          <ReactECharts
+            ref={chartRef}
+            option={chartOption}
+            notMerge={true}
+            style={{ height: `${height}px`, width: '100%' }}
+            opts={{ renderer: 'canvas', resize: true }}
+          />
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 ChartPreview.displayName = 'ChartPreview';

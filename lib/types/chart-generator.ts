@@ -53,9 +53,13 @@ export interface ChartConfiguration {
   logo: LogoConfig;
 }
 
+export type ResolutionPreset = '1200x700' | '1920x1080' | '2400x1400' | '3840x2160' | 'custom';
+
 export interface ExportOptions {
   format: 'png' | 'webp';
-  resolution: '1200x700' | '2400x1400';
+  resolution: ResolutionPreset;
+  customWidth?: number;
+  customHeight?: number;
 }
 
 export interface ValidationError {

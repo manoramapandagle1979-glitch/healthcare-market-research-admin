@@ -22,8 +22,8 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  token: string;
-  refreshToken: string;
+  access_token: string;
+  refresh_token: string;
   user: User;
 }
 
@@ -42,6 +42,6 @@ export interface RefreshRequest {
 }
 
 export interface RefreshResponse {
-  token: string;
-  refreshToken?: string;
+  access_token: string;
+  refresh_token?: string;
 }

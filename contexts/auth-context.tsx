@@ -106,9 +106,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         authApi
           .refreshToken(refreshToken)
           .then(data => {
-            tokenStorage.setToken(data.token);
-            if (data.refreshToken) {
-              tokenStorage.setRefreshToken(data.refreshToken);
+            tokenStorage.setToken(data.access_token);
+            if (data.refresh_token) {
+              tokenStorage.setRefreshToken(data.refresh_token);
             }
             loadUserFromToken();
           })
@@ -127,8 +127,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const data = await authApi.login({ email, password });
 
-        tokenStorage.setToken(data.token);
-        tokenStorage.setRefreshToken(data.refreshToken);
+        tokenStorage.setToken(data.access_token);
+        tokenStorage.setRefreshToken(data.refresh_token);
         setUser(data.user);
         router.push('/dashboard');
       } finally {

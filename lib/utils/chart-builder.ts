@@ -24,7 +24,7 @@ export function buildEChartsConfig(config: ChartBuilderConfig): EChartsOption {
     title: {
       text: metadata.title,
       subtext: metadata.subtitle,
-      left: 'center',
+      left: 40,
       top: 20,
       textStyle: {
         fontSize: 24,
@@ -53,7 +53,7 @@ export function buildEChartsConfig(config: ChartBuilderConfig): EChartsOption {
     legend: metadata.showLegend
       ? {
           show: true,
-          bottom: 20,
+          bottom: 10,
           left: 'center',
           itemGap: 20,
           itemWidth: 14,
@@ -71,8 +71,8 @@ export function buildEChartsConfig(config: ChartBuilderConfig): EChartsOption {
     baseConfig.grid = {
       left: '10%',
       right: '10%',
-      bottom: metadata.showLegend ? '15%' : '10%',
-      top: metadata.subtitle ? '25%' : '20%',
+      bottom: metadata.showLegend ? '12%' : '8%',
+      top: metadata.subtitle ? '20%' : '15%',
       containLabel: true,
     };
 

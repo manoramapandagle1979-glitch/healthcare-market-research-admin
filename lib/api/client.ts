@@ -51,9 +51,9 @@ class ApiClient {
       throw new ApiError(401, 'Token refresh failed - invalid response');
     }
 
-    tokenStorage.setToken(json.data.token);
-    if (json.data.refreshToken) {
-      tokenStorage.setRefreshToken(json.data.refreshToken);
+    tokenStorage.setToken(json.data.access_token);
+    if (json.data.refresh_token) {
+      tokenStorage.setRefreshToken(json.data.refresh_token);
     }
   }
 

@@ -4,7 +4,7 @@ import { EXPORT_RESOLUTIONS } from '@/lib/config/chart-generator';
 
 export async function exportChartAsImage(
   chartElement: HTMLElement,
-  chartInstance: unknown,
+  chartInstance: any,
   options: ExportOptions,
   chartTitle?: string
 ): Promise<void> {
@@ -13,10 +13,19 @@ export async function exportChartAsImage(
   const originalHeight = chartElement.style.height;
 
   try {
-    const resolution =
-      options.resolution === '2400x1400' ? EXPORT_RESOLUTIONS.highres : EXPORT_RESOLUTIONS.standard;
+    // Determine resolution based on preset or custom values
+    let resolution: { width: number; height: number };
 
-    const pixelRatio = options.resolution === '2400x1400' ? 2 : 1;
+    if (options.resolution === 'custom' && options.customWidth && options.customHeight) {
+      resolution = { width: options.customWidth, height: options.customHeight };
+    } else if (options.resolution !== 'custom') {
+      resolution = EXPORT_RESOLUTIONS[options.resolution];
+    } else {
+      throw new Error('Invalid resolution configuration');
+    }
+
+    // Calculate pixel ratio based on resolution size
+    const pixelRatio = resolution.width >= 2400 || resolution.height >= 1400 ? 2 : 1;
 
     // Step 1: Temporarily set fixed dimensions on the chart container
     chartElement.style.width = `${resolution.width}px`;
@@ -143,6 +152,87 @@ function downloadImage(dataUrl: string, format: 'png' | 'webp', chartTitle?: str
   link.download = `${sanitizedTitle}-${timestamp}.${format}`;
   link.href = dataUrl;
   link.click();
+}
+
+export async function generateChartPreview(
+  chartElement: HTMLElement,
+  chartInstance: any,
+  options: ExportOptions
+): Promise<string> {
+  // Store original styles to restore later
+  const originalWidth = chartElement.style.width;
+  const originalHeight = chartElement.style.height;
+
+  try {
+    // Determine resolution based on preset or custom values
+    let resolution: { width: number; height: number };
+
+    if (options.resolution === 'custom' && options.customWidth && options.customHeight) {
+      resolution = { width: options.customWidth, height: options.customHeight };
+    } else if (options.resolution !== 'custom') {
+      resolution = EXPORT_RESOLUTIONS[options.resolution];
+    } else {
+      throw new Error('Invalid resolution configuration');
+    }
+
+    const pixelRatio = resolution.width >= 2400 || resolution.height >= 1400 ? 2 : 1;
+
+    // Temporarily set fixed dimensions
+    chartElement.style.width = `${resolution.width}px`;
+    chartElement.style.height = `${resolution.height}px`;
+
+    // Resize ECharts instance
+    if (chartInstance) {
+      const echartsInstance = chartInstance.getEchartsInstance();
+      if (echartsInstance) {
+        echartsInstance.resize({
+          width: resolution.width,
+          height: resolution.height,
+        });
+        await new Promise(resolve => setTimeout(resolve, 150));
+      }
+    }
+
+    const exportOptions = {
+      pixelRatio,
+      width: resolution.width,
+      height: resolution.height,
+      backgroundColor: '#ffffff',
+      cacheBust: true,
+      style: {
+        margin: '0',
+        padding: '0',
+        transform: 'scale(1)',
+      },
+      filter: (node: HTMLElement) => {
+        const excludeClasses = ['border', 'rounded-md', 'shadow'];
+        const hasExcludedClass = excludeClasses.some(cls => node.className?.includes?.(cls));
+        return !hasExcludedClass || node.tagName === 'CANVAS' || node.tagName === 'DIV';
+      },
+    };
+
+    let dataUrl: string;
+
+    if (options.format === 'png') {
+      dataUrl = await toPng(chartElement, exportOptions);
+    } else {
+      const pngDataUrl = await toPng(chartElement, exportOptions);
+      dataUrl = await convertPngToWebp(pngDataUrl, resolution.width, resolution.height);
+    }
+
+    return dataUrl;
+  } finally {
+    // Restore original dimensions
+    chartElement.style.width = originalWidth;
+    chartElement.style.height = originalHeight;
+
+    if (chartInstance) {
+      const echartsInstance = chartInstance.getEchartsInstance();
+      if (echartsInstance) {
+        echartsInstance.resize();
+      }
+    }
+  }
 }
 
 export function checkBrowserSupport(): { supported: boolean; message?: string } {

@@ -31,8 +31,20 @@ export const CHART_CONSTRAINTS = {
 
 // Export resolutions
 export const EXPORT_RESOLUTIONS = {
-  standard: { width: 1200, height: 700 },
-  highres: { width: 2400, height: 1400 },
+  '1200x700': { width: 1200, height: 700, label: 'Standard (1200 × 700)' },
+  '1920x1080': { width: 1920, height: 1080, label: 'Full HD (1920 × 1080)' },
+  '2400x1400': { width: 2400, height: 1400, label: 'High-Res (2400 × 1400)' },
+  '3840x2160': { width: 3840, height: 2160, label: '4K (3840 × 2160)' },
+};
+
+// Graph size constraints
+export const GRAPH_SIZE_CONSTRAINTS = {
+  MIN_WIDTH: 400,
+  MAX_WIDTH: 2000,
+  MIN_HEIGHT: 300,
+  MAX_HEIGHT: 1500,
+  DEFAULT_WIDTH: 1200,
+  DEFAULT_HEIGHT: 600,
 };
 
 // Logo constraints
