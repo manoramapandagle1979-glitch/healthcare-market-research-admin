@@ -7,16 +7,15 @@ import type ReactEChartsCore from 'echarts-for-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useChartGenerator } from '@/hooks/use-chart-generator';
 import { buildEChartsConfig } from '@/lib/utils/chart-builder';
-import type { EChartsReactProps } from 'echarts-for-react';
 
-const ReactECharts = dynamic<EChartsReactProps>(() => import('echarts-for-react'), {
+const ReactECharts = dynamic(() => import('echarts-for-react'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-[500px] flex items-center justify-center">
       <Skeleton className="w-full h-full" />
     </div>
   ),
-});
+}) as typeof ReactEChartsCore;
 
 export interface ChartPreviewRef {
   getChartInstance: () => ReactEChartsCore | null;
@@ -88,7 +87,7 @@ export const ChartPreview = forwardRef<ChartPreviewRef, ChartPreviewProps>(
             option={chartOption}
             notMerge={true}
             style={{ height: `${height}px`, width: '100%' }}
-            opts={{ renderer: 'canvas', resize: true }}
+            opts={{ renderer: 'canvas' }}
           />
         </div>
       </div>

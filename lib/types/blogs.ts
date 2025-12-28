@@ -27,7 +27,13 @@ export interface BlogMetadata {
   metaDescription?: string;
   keywords?: string[];
   canonicalUrl?: string;
+  ogTitle?: string;
+  ogDescription?: string;
   ogImage?: string;
+  ogType?: string;
+  twitterCard?: 'summary' | 'summary_large_image';
+  schemaJson?: string;
+  robotsDirective?: string;
 }
 
 // Version history item

@@ -5,7 +5,14 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { BlogFiltersComponent } from '@/components/blogs/blog-filters';
 import { BlogList } from '@/components/blogs/blog-list';
-import { Pagination } from '@/components/ui/pagination';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 import { useBlogs } from '@/hooks/use-blogs';
 import { useAuth } from '@/contexts/auth-context';
 import { Plus, RefreshCw } from 'lucide-react';
@@ -113,11 +120,47 @@ export default function BlogPage() {
 
       {/* Pagination */}
       {!isLoading && totalPages > 1 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={page => updateFilters({ ...filters, page })}
-        />
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={e => {
+                  e.preventDefault();
+                  if (currentPage > 1) updateFilters({ ...filters, page: currentPage - 1 });
+                }}
+                aria-disabled={currentPage <= 1}
+              />
+            </PaginationItem>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <PaginationItem key={page}>
+                <PaginationLink
+                  href="#"
+                  isActive={page === currentPage}
+                  onClick={e => {
+                    e.preventDefault();
+                    if (page !== currentPage) updateFilters({ ...filters, page });
+                  }}
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={e => {
+                  e.preventDefault();
+                  if (currentPage < totalPages)
+                    updateFilters({ ...filters, page: currentPage + 1 });
+                }}
+                aria-disabled={currentPage >= totalPages}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       )}
 
       {/* Delete Confirmation Dialog */}

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ReportFiltersComponent } from '@/components/reports/report-filters';
 import { ReportList } from '@/components/reports/report-list';
-import { Pagination } from '@/components/ui/pagination';
+import { PaginationWrapper as Pagination } from '@/components/ui/pagination-wrapper';
 import { useReports } from '@/hooks/use-reports';
 import { useAuth } from '@/contexts/auth-context';
 import { Plus, RefreshCw } from 'lucide-react';

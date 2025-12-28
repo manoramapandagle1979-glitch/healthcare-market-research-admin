@@ -118,18 +118,23 @@
 
 ### Frontend
 
-- [ ] Chart builder UI (Bar – Phase 1)
-- [ ] Manual data entry
-- [ ] CSV upload
-- [ ] Chart preview
-- [ ] Export to WEBP
+- [x] Chart builder UI (Bar, Stacked Bar, Pie charts)
+- [x] Manual data entry (interactive table editor)
+- [x] CSV upload (with validation and error handling)
+- [x] CSV export (for data backup)
+- [x] Chart preview (real-time with ECharts)
+- [x] Export to WEBP and PNG (multiple resolutions)
+- [x] Logo upload and positioning
+- [x] Color customization
+- [x] Chart metadata (title, subtitle, axis labels, etc.)
+- [x] Configuration import/export (JSON)
 
 ### Backend
 
-- [ ] Chart data schema
-- [ ] Chart image generation service
-- [ ] WEBP export endpoint
-- [ ] Chart linking to reports/blogs
+- [x] Chart data schema
+- [x] Chart image generation service
+- [x] WEBP export endpoint
+- [x] Chart linking to reports/blogs
 
 ---
 
@@ -176,7 +181,6 @@
 ### Frontend
 
 - [ ] Pricing editor per report
-- [ ] Access type selector (Free / Paid / Subscription)
 - [ ] Sales preview mode
 
 ### Backend

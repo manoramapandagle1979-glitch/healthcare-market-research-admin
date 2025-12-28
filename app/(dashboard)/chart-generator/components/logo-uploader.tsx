@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useChartGenerator } from '@/hooks/use-chart-generator';
+import type { LogoPosition } from '@/lib/types/chart-generator';
 
 export function LogoUploader() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -85,7 +86,7 @@ export function LogoUploader() {
             </Label>
             <Select
               value={logo.position}
-              onValueChange={(value: string) => updateLogoPosition(value)}
+              onValueChange={value => updateLogoPosition(value as LogoPosition)}
             >
               <SelectTrigger id="logo-position" className="mt-1">
                 <SelectValue />

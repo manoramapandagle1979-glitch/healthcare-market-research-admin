@@ -15,6 +15,7 @@ import { Switch } from '@/components/ui/switch';
 import { useChartGenerator } from '@/hooks/use-chart-generator';
 import { DataTableEditor } from './data-table-editor';
 import { LogoUploader } from './logo-uploader';
+import { CSVImportExport } from './csv-import-export';
 import { CHART_CONSTRAINTS } from '@/lib/config/chart-generator';
 
 export function DataInputPanel() {
@@ -156,7 +157,8 @@ export function DataInputPanel() {
         <CardHeader>
           <CardTitle>Data</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <CSVImportExport />
           <DataTableEditor />
         </CardContent>
       </Card>

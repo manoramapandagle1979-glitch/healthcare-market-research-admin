@@ -1,14 +1,4 @@
-import {
-  LayoutDashboard,
-  FileText,
-  PenSquare,
-  BarChart3,
-  Image,
-  Users,
-  MessageSquare,
-  Settings,
-  DollarSign,
-} from 'lucide-react';
+import { LayoutDashboard, FileText, PenSquare, BarChart3 } from 'lucide-react';
 
 export type UserRole = 'admin' | 'editor' | 'viewer';
 
@@ -67,48 +57,48 @@ export const navigationItems: NavigationItem[] = [
       },
     ],
   },
-  {
-    title: 'Charts',
-    href: '/charts',
-    icon: BarChart3,
-    roles: ['admin', 'editor'],
-  },
+  // {
+  //   title: 'Charts',
+  //   href: '/charts',
+  //   icon: BarChart3,
+  //   roles: ['admin', 'editor'],
+  // },
   {
     title: 'Chart Generator',
     href: '/chart-generator',
     icon: BarChart3,
     roles: ['admin', 'editor'],
   },
-  {
-    title: 'Media',
-    href: '/media',
-    icon: Image,
-    roles: ['admin', 'editor'],
-  },
-  {
-    title: 'Leads',
-    href: '/leads',
-    icon: MessageSquare,
-    roles: ['admin', 'editor'],
-  },
-  {
-    title: 'Pricing',
-    href: '/pricing',
-    icon: DollarSign,
-    roles: ['admin'],
-  },
-  {
-    title: 'Users',
-    href: '/users',
-    icon: Users,
-    roles: ['admin'],
-  },
-  {
-    title: 'Settings',
-    href: '/settings',
-    icon: Settings,
-    roles: ['admin'],
-  },
+  // {
+  //   title: 'Media',
+  //   href: '/media',
+  //   icon: Image,
+  //   roles: ['admin', 'editor'],
+  // },
+  // {
+  //   title: 'Leads',
+  //   href: '/leads',
+  //   icon: MessageSquare,
+  //   roles: ['admin', 'editor'],
+  // },
+  // {
+  //   title: 'Pricing',
+  //   href: '/pricing',
+  //   icon: DollarSign,
+  //   roles: ['admin'],
+  // },
+  // {
+  //   title: 'Users',
+  //   href: '/users',
+  //   icon: Users,
+  //   roles: ['admin'],
+  // },
+  // {
+  //   title: 'Settings',
+  //   href: '/settings',
+  //   icon: Settings,
+  //   roles: ['admin'],
+  // },
 ];
 
 export function filterNavigationByRole(
