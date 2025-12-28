@@ -36,8 +36,25 @@ import { validateSEO } from '@/lib/validation/seo';
 import { SEO_LIMITS, ROBOTS_DIRECTIVES } from '@/lib/config/seo';
 import type { UseFormReturn } from 'react-hook-form';
 
+type SEOFormValues = Record<string, unknown> & {
+  metadata?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    keywords?: string[];
+    canonicalUrl?: string;
+
+    ogTitle?: string;
+    ogDescription?: string;
+    ogImage?: string;
+
+    twitterCard?: 'summary' | 'summary_large_image' | (string & {});
+    robotsDirective?: string;
+    schemaJson?: string;
+  };
+};
+
 interface SEOMetadataSectionProps {
-  form: UseFormReturn<Record<string, unknown>>;
+  form: UseFormReturn<SEOFormValues>;
   contentType: 'blog' | 'report';
   currentTitle: string;
   currentDescription: string;
@@ -71,17 +88,17 @@ export function SEOMetadataSection({
 
   const handleAddKeyword = () => {
     if (keywordInput.trim()) {
-      const currentKeywords = metadata?.keywords || [];
+      const currentKeywords: string[] = metadata?.keywords || [];
       form.setValue('metadata.keywords', [...currentKeywords, keywordInput.trim()]);
       setKeywordInput('');
     }
   };
 
   const handleRemoveKeyword = (index: number) => {
-    const currentKeywords = metadata?.keywords || [];
+    const currentKeywords: string[] = metadata?.keywords || [];
     form.setValue(
       'metadata.keywords',
-      currentKeywords.filter((_: string, i: number) => i !== index)
+      currentKeywords.filter((_, i) => i !== index)
     );
   };
 

@@ -9,10 +9,9 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { cn } from '@/lib/utils';
-import type { SEOWarning } from '@/lib/validation/seo';
 
 interface SEOValidationAlertProps {
-  warnings: SEOWarning[];
+  warnings: any[];
   className?: string;
 }
 
