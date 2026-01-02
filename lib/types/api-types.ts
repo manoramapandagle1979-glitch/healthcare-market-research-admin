@@ -246,8 +246,8 @@ export interface ApiCategoryDetailResponse extends ApiResponse<ApiCategory> {
 // ============ Type Guards ============
 export function isApiError(response: unknown): response is ApiResponse<never> {
   return (
-    response &&
     typeof response === 'object' &&
+    response !== null &&
     'success' in response &&
     response.success === false &&
     'error' in response &&

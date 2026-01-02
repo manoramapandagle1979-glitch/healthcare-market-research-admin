@@ -10,6 +10,7 @@ import type {
   ReportResponse,
   ReportFormData,
   Report,
+  ReportFormat,
 } from '@/lib/types/reports';
 import {
   fetchReportsMock,

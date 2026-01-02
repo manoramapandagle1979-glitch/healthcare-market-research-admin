@@ -72,6 +72,12 @@ export function CSVImportExport() {
 
   const handleExport = () => {
     try {
+      // Type guard: CSV export only works for DataSource (not MapDataSource)
+      if ('data' in dataSource) {
+        toast.error('CSV export is not available for map charts');
+        return;
+      }
+
       exportToCSV(dataSource, metadata.title || 'chart-data');
       toast.success('CSV exported successfully');
     } catch (error) {

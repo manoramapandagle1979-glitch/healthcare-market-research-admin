@@ -58,7 +58,7 @@ export function buildEChartsConfig(config: ChartBuilderConfig): EChartsOption {
         chartType === 'pie' || chartType === 'donut'
           ? '{b}: {c}' + (metadata.unitSuffix || '') + ' ({d}%)'
           : chartType === 'world-map'
-            ? (params: { name: string; value?: number }) => {
+            ? (params: any) => {
                 return `${params.name}<br/>${params.value || 'No data'}${metadata.unitSuffix || ''}`;
               }
             : undefined,
