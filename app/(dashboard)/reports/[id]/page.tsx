@@ -2,13 +2,14 @@
 
 import { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ReportForm } from '@/components/reports/report-form';
+import { ReportFormTabs } from '@/components/reports/report-form-tabs';
 import { VersionHistory } from '@/components/reports/version-history';
 import { useReport } from '@/hooks/use-report';
 import { useAuth } from '@/contexts/auth-context';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import type { ReportFormData } from '@/lib/types/reports';
 
 export default function EditReportPage() {
   const params = useParams();
@@ -49,6 +50,13 @@ export default function EditReportPage() {
     );
   }
 
+  const handleSaveTab = async (tabKey: string, data: Partial<ReportFormData>) => {
+    // Save individual tab data as draft
+    console.log(`Saving tab ${tabKey} for report ${reportId}:`, data);
+    // You can implement partial save to API here
+    // For now, this is a placeholder for tab-level save
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -58,11 +66,12 @@ export default function EditReportPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <ReportForm
+          <ReportFormTabs
             report={report}
             onSubmit={async data => {
               await saveReport(reportId, data);
             }}
+            onSaveTab={handleSaveTab}
             onPreview={() => router.push(`/reports/${reportId}/preview`)}
             isSaving={isSaving}
           />

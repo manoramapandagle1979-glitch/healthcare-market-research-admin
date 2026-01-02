@@ -1,6 +1,6 @@
 // Chart Generator Type Definitions
 
-export type ChartType = 'bar' | 'stacked-bar' | 'pie';
+export type ChartType = 'bar' | 'stacked-bar' | 'pie' | 'donut' | 'world-map';
 
 export type ChartOrientation = 'vertical' | 'horizontal';
 
@@ -17,6 +17,7 @@ export interface ChartMetadata {
   decimalPrecision: 0 | 1 | 2;
   showLegend: boolean;
   showGridlines: boolean;
+  mapColorScheme?: 'blue' | 'green' | 'red' | 'purple';
 }
 
 export interface DataSeries {
@@ -29,6 +30,18 @@ export interface DataSeries {
 export interface DataSource {
   labels: string[]; // X-axis categories (e.g., years)
   series: DataSeries[]; // Multiple data series
+}
+
+export interface MapDataPoint {
+  countryCode: string; // ISO 3166-1 alpha-3 code (e.g., 'USA', 'CHN')
+  countryName: string; // Display name (e.g., 'United States', 'China')
+  value: number; // Numeric value for the country
+}
+
+export interface MapDataSource {
+  data: MapDataPoint[];
+  minValue?: number; // Auto-calculated if not provided
+  maxValue?: number; // Auto-calculated if not provided
 }
 
 export interface LogoConfig {
@@ -49,7 +62,7 @@ export interface ChartConfiguration {
   orientation: ChartOrientation;
   colorTheme: ColorTheme;
   metadata: ChartMetadata;
-  dataSource: DataSource;
+  dataSource: DataSource | MapDataSource;
   logo: LogoConfig;
 }
 
@@ -78,7 +91,7 @@ export interface SerializableChartConfiguration {
   orientation: ChartOrientation;
   colorTheme: ColorTheme;
   metadata: ChartMetadata;
-  dataSource: DataSource;
+  dataSource: DataSource | MapDataSource;
   logo: {
     position: LogoPosition;
     opacity: number;

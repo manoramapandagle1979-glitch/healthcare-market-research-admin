@@ -8,6 +8,7 @@ import type {
   ColorTheme,
   ChartMetadata,
   DataSource,
+  MapDataSource,
   DataSeries,
   LogoConfig,
   ChartConfig,
@@ -19,6 +20,7 @@ import {
   DEFAULT_METADATA,
   DEFAULT_LOGO_CONFIG,
   SAMPLE_DATA,
+  SAMPLE_MAP_DATA,
   DEFAULT_CHART_COLORS,
 } from '@/lib/config/chart-generator';
 import { validateChartConfiguration, validateLogoFile } from '@/lib/utils/chart-validation';
@@ -27,7 +29,7 @@ interface ChartGeneratorContextType {
   // State
   chartConfig: ChartConfig;
   metadata: ChartMetadata;
-  dataSource: DataSource;
+  dataSource: DataSource | MapDataSource;
   logo: LogoConfig;
   validationResult: ValidationResult;
 
@@ -40,7 +42,7 @@ interface ChartGeneratorContextType {
   updateMetadata: (updates: Partial<ChartMetadata>) => void;
 
   // Data source actions
-  updateDataSource: (dataSource: DataSource) => void;
+  updateDataSource: (dataSource: DataSource | MapDataSource) => void;
   addDataRow: () => void;
   removeDataRow: (index: number) => void;
   updateDataLabel: (index: number, label: string) => void;
@@ -68,7 +70,7 @@ const ChartGeneratorContext = createContext<ChartGeneratorContextType | undefine
 export function ChartGeneratorProvider({ children }: { children: ReactNode }) {
   const [chartConfig, setChartConfig] = useState<ChartConfig>(DEFAULT_CHART_CONFIG);
   const [metadata, setMetadata] = useState<ChartMetadata>(DEFAULT_METADATA);
-  const [dataSource, setDataSource] = useState<DataSource>(SAMPLE_DATA);
+  const [dataSource, setDataSource] = useState<DataSource | MapDataSource>(SAMPLE_DATA);
   const [logo, setLogo] = useState<LogoConfig>(DEFAULT_LOGO_CONFIG);
   const [validationResult, setValidationResult] = useState<ValidationResult>({
     isValid: true,
@@ -77,7 +79,16 @@ export function ChartGeneratorProvider({ children }: { children: ReactNode }) {
 
   // Chart config actions
   const setChartType = useCallback((type: ChartType) => {
-    setChartConfig(prev => ({ ...prev, chartType: type }));
+    setChartConfig(prev => {
+      // Switch to appropriate data structure
+      if (type === 'world-map') {
+        setDataSource(SAMPLE_MAP_DATA);
+      } else if (prev.chartType === 'world-map') {
+        // Switching from world-map to another type
+        setDataSource(SAMPLE_DATA);
+      }
+      return { ...prev, chartType: type };
+    });
   }, []);
 
   const setOrientation = useCallback((orientation: ChartOrientation) => {
@@ -89,13 +100,18 @@ export function ChartGeneratorProvider({ children }: { children: ReactNode }) {
 
     // If switching to default theme, reset series colors
     if (theme === 'default') {
-      setDataSource(prev => ({
-        ...prev,
-        series: prev.series.map((series, index) => ({
-          ...series,
-          color: DEFAULT_CHART_COLORS[index % DEFAULT_CHART_COLORS.length],
-        })),
-      }));
+      setDataSource(prev => {
+        if ('series' in prev) {
+          return {
+            ...prev,
+            series: prev.series.map((series, index) => ({
+              ...series,
+              color: DEFAULT_CHART_COLORS[index % DEFAULT_CHART_COLORS.length],
+            })),
+          };
+        }
+        return prev;
+      });
     }
   }, []);
 
@@ -105,88 +121,120 @@ export function ChartGeneratorProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Data source actions
-  const updateDataSource = useCallback((newDataSource: DataSource) => {
+  const updateDataSource = useCallback((newDataSource: DataSource | MapDataSource) => {
     setDataSource(newDataSource);
   }, []);
 
   const addDataRow = useCallback(() => {
     setDataSource(prev => {
-      const newLabel = `Category ${prev.labels.length + 1}`;
-      const newLabels = [...prev.labels, newLabel];
-      const newSeries = prev.series.map(series => ({
-        ...series,
-        values: [...series.values, 0],
-      }));
-      return { labels: newLabels, series: newSeries };
+      if ('series' in prev) {
+        const newLabel = `Category ${prev.labels.length + 1}`;
+        const newLabels = [...prev.labels, newLabel];
+        const newSeries = prev.series.map(series => ({
+          ...series,
+          values: [...series.values, 0],
+        }));
+        return { labels: newLabels, series: newSeries };
+      }
+      return prev;
     });
   }, []);
 
   const removeDataRow = useCallback((index: number) => {
     setDataSource(prev => {
-      const newLabels = prev.labels.filter((_, i) => i !== index);
-      const newSeries = prev.series.map(series => ({
-        ...series,
-        values: series.values.filter((_, i) => i !== index),
-      }));
-      return { labels: newLabels, series: newSeries };
+      if ('series' in prev) {
+        const newLabels = prev.labels.filter((_, i) => i !== index);
+        const newSeries = prev.series.map(series => ({
+          ...series,
+          values: series.values.filter((_, i) => i !== index),
+        }));
+        return { labels: newLabels, series: newSeries };
+      }
+      return prev;
     });
   }, []);
 
   const updateDataLabel = useCallback((index: number, label: string) => {
     setDataSource(prev => {
-      const newLabels = [...prev.labels];
-      newLabels[index] = label;
-      return { ...prev, labels: newLabels };
+      if ('series' in prev) {
+        const newLabels = [...prev.labels];
+        newLabels[index] = label;
+        return { ...prev, labels: newLabels };
+      }
+      return prev;
     });
   }, []);
 
   const addDataSeries = useCallback(() => {
     setDataSource(prev => {
-      const newSeriesId = `series-${Date.now()}`;
-      const colorIndex = prev.series.length % DEFAULT_CHART_COLORS.length;
-      const newSeries: DataSeries = {
-        id: newSeriesId,
-        name: `Series ${prev.series.length + 1}`,
-        color: DEFAULT_CHART_COLORS[colorIndex],
-        values: new Array(prev.labels.length).fill(0),
-      };
-      return { ...prev, series: [...prev.series, newSeries] };
+      if ('series' in prev) {
+        const newSeriesId = `series-${Date.now()}`;
+        const colorIndex = prev.series.length % DEFAULT_CHART_COLORS.length;
+        const newSeries: DataSeries = {
+          id: newSeriesId,
+          name: `Series ${prev.series.length + 1}`,
+          color: DEFAULT_CHART_COLORS[colorIndex],
+          values: new Array(prev.labels.length).fill(0),
+        };
+        return { ...prev, series: [...prev.series, newSeries] };
+      }
+      return prev;
     });
   }, []);
 
   const removeDataSeries = useCallback((seriesId: string) => {
-    setDataSource(prev => ({
-      ...prev,
-      series: prev.series.filter(s => s.id !== seriesId),
-    }));
+    setDataSource(prev => {
+      if ('series' in prev) {
+        return {
+          ...prev,
+          series: prev.series.filter(s => s.id !== seriesId),
+        };
+      }
+      return prev;
+    });
   }, []);
 
   const updateSeriesName = useCallback((seriesId: string, name: string) => {
-    setDataSource(prev => ({
-      ...prev,
-      series: prev.series.map(s => (s.id === seriesId ? { ...s, name } : s)),
-    }));
+    setDataSource(prev => {
+      if ('series' in prev) {
+        return {
+          ...prev,
+          series: prev.series.map(s => (s.id === seriesId ? { ...s, name } : s)),
+        };
+      }
+      return prev;
+    });
   }, []);
 
   const updateSeriesColor = useCallback((seriesId: string, color: string) => {
-    setDataSource(prev => ({
-      ...prev,
-      series: prev.series.map(s => (s.id === seriesId ? { ...s, color } : s)),
-    }));
+    setDataSource(prev => {
+      if ('series' in prev) {
+        return {
+          ...prev,
+          series: prev.series.map(s => (s.id === seriesId ? { ...s, color } : s)),
+        };
+      }
+      return prev;
+    });
   }, []);
 
   const updateSeriesValue = useCallback((seriesId: string, index: number, value: number) => {
-    setDataSource(prev => ({
-      ...prev,
-      series: prev.series.map(s => {
-        if (s.id === seriesId) {
-          const newValues = [...s.values];
-          newValues[index] = value;
-          return { ...s, values: newValues };
-        }
-        return s;
-      }),
-    }));
+    setDataSource(prev => {
+      if ('series' in prev) {
+        return {
+          ...prev,
+          series: prev.series.map(s => {
+            if (s.id === seriesId) {
+              const newValues = [...s.values];
+              newValues[index] = value;
+              return { ...s, values: newValues };
+            }
+            return s;
+          }),
+        };
+      }
+      return prev;
+    });
   }, []);
 
   // Logo actions
@@ -241,10 +289,10 @@ export function ChartGeneratorProvider({ children }: { children: ReactNode }) {
   }, [logo.previewUrl]);
 
   const validateConfiguration = useCallback((): ValidationResult => {
-    const result = validateChartConfiguration(metadata, dataSource);
+    const result = validateChartConfiguration(metadata, dataSource, chartConfig.chartType);
     setValidationResult(result);
     return result;
-  }, [metadata, dataSource]);
+  }, [metadata, dataSource, chartConfig.chartType]);
 
   const exportConfiguration = useCallback((): string => {
     const config: SerializableChartConfiguration = {
@@ -280,7 +328,11 @@ export function ChartGeneratorProvider({ children }: { children: ReactNode }) {
       }));
 
       // Validate imported configuration
-      const result = validateChartConfiguration(config.metadata, config.dataSource);
+      const result = validateChartConfiguration(
+        config.metadata,
+        config.dataSource,
+        config.chartType
+      );
       setValidationResult(result);
 
       if (result.isValid) {

@@ -2,11 +2,13 @@
 
 import React, { forwardRef, useImperativeHandle, useRef, useMemo } from 'react';
 import dynamic from 'next/dynamic';
+import * as echarts from 'echarts';
 import type { EChartsOption } from 'echarts';
 import type ReactEChartsCore from 'echarts-for-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useChartGenerator } from '@/hooks/use-chart-generator';
 import { buildEChartsConfig } from '@/lib/utils/chart-builder';
+import worldMapData from '@/lib/data/world-map.json';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), {
   ssr: false,
@@ -16,6 +18,15 @@ const ReactECharts = dynamic(() => import('echarts-for-react'), {
     </div>
   ),
 }) as typeof ReactEChartsCore;
+
+// Register world map immediately when module loads (client-side only)
+if (typeof window !== 'undefined') {
+  try {
+    echarts.registerMap('world', worldMapData as Parameters<typeof echarts.registerMap>[1]);
+  } catch (error) {
+    console.error('Failed to register world map:', error);
+  }
+}
 
 export interface ChartPreviewRef {
   getChartInstance: () => ReactEChartsCore | null;

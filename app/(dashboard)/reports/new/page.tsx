@@ -1,10 +1,11 @@
 'use client';
 
-import { ReportForm } from '@/components/reports/report-form';
+import { ReportFormTabs } from '@/components/reports/report-form-tabs';
 import { useReport } from '@/hooks/use-report';
 import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import type { ReportFormData } from '@/lib/types/reports';
 
 export default function CreateReportPage() {
   const { user } = useAuth();
@@ -18,6 +19,13 @@ export default function CreateReportPage() {
     }
   }, [user, router]);
 
+  const handleSaveTab = async (tabKey: string, data: Partial<ReportFormData>) => {
+    // Save individual tab data as draft
+    console.log(`Saving tab ${tabKey}:`, data);
+    // You can implement partial save to localStorage or API here
+    // For now, this is a placeholder for tab-level save
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -27,10 +35,11 @@ export default function CreateReportPage() {
         </p>
       </div>
 
-      <ReportForm
+      <ReportFormTabs
         onSubmit={async data => {
           await saveReport(null, data);
         }}
+        onSaveTab={handleSaveTab}
         isSaving={isSaving}
       />
     </div>

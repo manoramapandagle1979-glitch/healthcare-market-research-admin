@@ -1,5 +1,6 @@
 import type {
   DataSource,
+  MapDataSource,
   ChartMetadata,
   LogoConfig,
   ChartConfig,
@@ -17,6 +18,30 @@ export const DEFAULT_CHART_COLORS = [
   '#9A8C98', // Mauve
 ];
 
+// Choropleth color schemes for world maps
+export const MAP_COLOR_SCHEMES = {
+  blue: {
+    min: '#E3F2FD', // Light blue
+    mid: '#5B8EBC', // Default blue
+    max: '#1565C0', // Dark blue
+  },
+  green: {
+    min: '#E8F5E9', // Light green
+    mid: '#7FC9A0', // Default green
+    max: '#2E7D32', // Dark green
+  },
+  red: {
+    min: '#FFEBEE', // Light red
+    mid: '#E76F51', // Default terracotta
+    max: '#C62828', // Dark red
+  },
+  purple: {
+    min: '#F3E5F5', // Light purple
+    mid: '#8E7CC3', // Default lavender
+    max: '#6A1B9A', // Dark purple
+  },
+};
+
 // Data constraints
 export const CHART_CONSTRAINTS = {
   MAX_ROWS: 20,
@@ -27,6 +52,13 @@ export const CHART_CONSTRAINTS = {
   SUBTITLE_MAX_LENGTH: 150,
   LABEL_MAX_LENGTH: 50,
   UNIT_SUFFIX_MAX_LENGTH: 20,
+};
+
+// World map specific constraints
+export const MAP_CONSTRAINTS = {
+  MAX_COUNTRIES: 200, // Maximum countries to display
+  MIN_COUNTRIES: 1, // Minimum countries required
+  COUNTRY_NAME_MAX_LENGTH: 50,
 };
 
 // Export resolutions
@@ -79,6 +111,22 @@ export const SAMPLE_DATA: DataSource = {
   ],
 };
 
+// Sample world map data
+export const SAMPLE_MAP_DATA: MapDataSource = {
+  data: [
+    { countryCode: 'USA', countryName: 'United States', value: 350 },
+    { countryCode: 'CHN', countryName: 'China', value: 420 },
+    { countryCode: 'DEU', countryName: 'Germany', value: 180 },
+    { countryCode: 'JPN', countryName: 'Japan', value: 230 },
+    { countryCode: 'IND', countryName: 'India', value: 150 },
+    { countryCode: 'GBR', countryName: 'United Kingdom', value: 120 },
+    { countryCode: 'FRA', countryName: 'France', value: 110 },
+    { countryCode: 'BRA', countryName: 'Brazil', value: 95 },
+  ],
+  minValue: 0,
+  maxValue: 500,
+};
+
 // Default metadata
 export const DEFAULT_METADATA: ChartMetadata = {
   title: 'Global Medical Device Market (USD Billion)',
@@ -89,6 +137,7 @@ export const DEFAULT_METADATA: ChartMetadata = {
   decimalPrecision: 1,
   showLegend: true,
   showGridlines: true,
+  mapColorScheme: 'blue',
 };
 
 // Default chart configuration

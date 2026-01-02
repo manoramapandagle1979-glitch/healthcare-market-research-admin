@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, PenSquare, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, FileText, PenSquare, BarChart3, Users } from 'lucide-react';
 
 export type UserRole = 'admin' | 'editor' | 'viewer';
 
@@ -36,6 +36,12 @@ export const navigationItems: NavigationItem[] = [
         roles: ['admin', 'editor'],
       },
     ],
+  },
+  {
+    title: 'Research Team',
+    href: '/authors',
+    icon: Users,
+    roles: ['admin', 'editor'],
   },
   {
     title: 'Blog',

@@ -1,4 +1,20 @@
-// User reference (reuse from existing auth)
+// ============ API Response Wrappers (from swagger) ============
+export interface ApiResponse<T = unknown> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  meta?: ApiMeta;
+}
+
+export interface ApiMeta {
+  page?: number;
+  limit?: number;
+  total?: number;
+  total_pages?: number;
+  cursor?: string;
+}
+
+// User reference (Legacy - kept as string for backward compatibility)
 export interface UserReference {
   id: string;
   email: string;
@@ -18,7 +34,10 @@ export type ReportSectionKey =
   | 'keyPlayers'
   | 'regional'
   | 'trends'
-  | 'conclusion';
+  | 'conclusion'
+  | 'marketDetails'
+  | 'keyFindings'
+  | 'tableOfContents';
 
 // Section metadata for UI rendering
 export interface ReportSectionMeta {
@@ -38,6 +57,50 @@ export interface ReportSections {
   regional: string;
   trends: string;
   conclusion: string;
+  marketDetails: string;
+  keyFindings: string;
+  tableOfContents: string;
+  marketDrivers: string;
+  challenges: string;
+}
+
+// Market Metrics
+export interface MarketMetrics {
+  currentRevenue?: string;
+  currentYear?: number;
+  forecastRevenue?: string;
+  forecastYear?: number;
+  cagr?: string;
+  cagrStartYear?: number;
+  cagrEndYear?: number;
+}
+
+// Report Author (Legacy - kept as string for backward compatibility)
+export interface ReportAuthor {
+  id: string;
+  name: string;
+  role?: string;
+  credentials?: string;
+  bio?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Key Player (company in market)
+export interface KeyPlayer {
+  name: string;
+  marketShare?: string;
+  rank?: number;
+  description?: string;
+}
+
+// Report Format
+export type ReportFormat = 'PDF' | 'Excel' | 'Word' | 'PowerPoint';
+
+// FAQ item
+export interface FAQ {
+  question: string;
+  answer: string;
 }
 
 // SEO metadata
@@ -50,7 +113,7 @@ export interface ReportMetadata {
   ogDescription?: string;
   ogImage?: string;
   ogType?: string;
-  twitterCard?: 'summary' | 'summary_large_image';
+  twitterCard?: string; // Changed to string for API compatibility
   schemaJson?: string;
   robotsDirective?: string;
 }
@@ -74,16 +137,23 @@ export interface Report {
   summary: string;
   category: string;
   geography: string[];
-  publishDate: string;
+  publishDate?: string; // Custom publish date
   price: number;
+  discountedPrice: number;
   accessType: AccessType;
   status: ReportStatus;
+  pageCount?: number;
+  formats?: ReportFormat[];
+  marketMetrics?: MarketMetrics;
+  authorIds?: string[]; // References to authors
+  keyPlayers?: KeyPlayer[]; // Structured key players with market share
   sections: ReportSections;
+  faqs?: FAQ[];
   metadata: ReportMetadata;
   versions?: ReportVersion[];
   createdAt: string;
   updatedAt: string;
-  author: UserReference;
+  author: UserReference; // System author (who created in admin)
 }
 
 // List filters
@@ -116,9 +186,35 @@ export interface ReportFormData {
   summary: string;
   category: string;
   geography: string[];
+  publishDate?: string;
   price: number;
+  discountedPrice: number;
   accessType: AccessType;
   status: ReportStatus;
+  pageCount?: number;
+  formats?: ReportFormat[];
+  marketMetrics?: MarketMetrics;
+  authorIds?: string[];
+  keyPlayers?: KeyPlayer[];
   sections: ReportSections;
+  faqs?: FAQ[];
   metadata: ReportMetadata;
+}
+
+// Author Form Data
+export interface AuthorFormData {
+  name: string;
+  role?: string;
+  credentials?: string;
+  bio?: string;
+}
+
+// Authors API Response
+export interface AuthorsResponse {
+  authors: ReportAuthor[];
+  total: number;
+}
+
+export interface AuthorResponse {
+  author: ReportAuthor;
 }

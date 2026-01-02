@@ -1,6 +1,6 @@
 import { config } from '@/lib/config';
 import { tokenStorage, isTokenExpired } from '@/lib/auth/token';
-import type { ApiResponse, RefreshResponse } from '@/lib/types/auth';
+import type { ApiResponse as SwaggerApiResponse } from '@/lib/types/api-types';
 
 export class ApiError extends Error {
   constructor(
@@ -37,7 +37,7 @@ class ApiClient {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ refreshToken }),
+      body: JSON.stringify({ refresh_token: refreshToken }),
     });
 
     if (!response.ok) {
@@ -45,10 +45,16 @@ class ApiClient {
       throw new ApiError(401, 'Token refresh failed');
     }
 
-    const json: ApiResponse<RefreshResponse> = await response.json();
-    if (!json.data) {
+    const json: SwaggerApiResponse<{
+      access_token: string;
+      refresh_token: string;
+      token_type: string;
+      expires_in: number;
+    }> = await response.json();
+
+    if (!json.success || !json.data) {
       tokenStorage.clearAll();
-      throw new ApiError(401, 'Token refresh failed - invalid response');
+      throw new ApiError(401, json.error || 'Token refresh failed - invalid response');
     }
 
     tokenStorage.setToken(json.data.access_token);

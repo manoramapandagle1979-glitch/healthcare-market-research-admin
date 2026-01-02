@@ -14,12 +14,13 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { useChartGenerator } from '@/hooks/use-chart-generator';
 import { DataTableEditor } from './data-table-editor';
+import { MapDataEditor } from './map-data-editor';
 import { LogoUploader } from './logo-uploader';
 import { CSVImportExport } from './csv-import-export';
 import { CHART_CONSTRAINTS } from '@/lib/config/chart-generator';
 
 export function DataInputPanel() {
-  const { metadata, updateMetadata } = useChartGenerator();
+  const { chartConfig, metadata, updateMetadata } = useChartGenerator();
 
   return (
     <div className="space-y-6">
@@ -60,29 +61,34 @@ export function DataInputPanel() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="x-axis-label">X-Axis Label</Label>
-              <Input
-                id="x-axis-label"
-                value={metadata.xAxisLabel || ''}
-                onChange={e => updateMetadata({ xAxisLabel: e.target.value })}
-                placeholder="e.g., Year"
-                maxLength={CHART_CONSTRAINTS.LABEL_MAX_LENGTH}
-              />
-            </div>
+          {/* Only show axis labels for charts that have axes */}
+          {chartConfig.chartType !== 'pie' &&
+            chartConfig.chartType !== 'donut' &&
+            chartConfig.chartType !== 'world-map' && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="x-axis-label">X-Axis Label</Label>
+                  <Input
+                    id="x-axis-label"
+                    value={metadata.xAxisLabel || ''}
+                    onChange={e => updateMetadata({ xAxisLabel: e.target.value })}
+                    placeholder="e.g., Year"
+                    maxLength={CHART_CONSTRAINTS.LABEL_MAX_LENGTH}
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="y-axis-label">Y-Axis Label</Label>
-              <Input
-                id="y-axis-label"
-                value={metadata.yAxisLabel || ''}
-                onChange={e => updateMetadata({ yAxisLabel: e.target.value })}
-                placeholder="e.g., Revenue"
-                maxLength={CHART_CONSTRAINTS.LABEL_MAX_LENGTH}
-              />
-            </div>
-          </div>
+                <div className="space-y-2">
+                  <Label htmlFor="y-axis-label">Y-Axis Label</Label>
+                  <Input
+                    id="y-axis-label"
+                    value={metadata.yAxisLabel || ''}
+                    onChange={e => updateMetadata({ yAxisLabel: e.target.value })}
+                    placeholder="e.g., Revenue"
+                    maxLength={CHART_CONSTRAINTS.LABEL_MAX_LENGTH}
+                  />
+                </div>
+              </div>
+            )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -128,16 +134,21 @@ export function DataInputPanel() {
               />
             </div>
 
-            <div className="flex items-center justify-between">
-              <Label htmlFor="show-gridlines" className="cursor-pointer">
-                Show Gridlines
-              </Label>
-              <Switch
-                id="show-gridlines"
-                checked={metadata.showGridlines}
-                onCheckedChange={checked => updateMetadata({ showGridlines: checked })}
-              />
-            </div>
+            {/* Only show gridlines toggle for bar charts */}
+            {chartConfig.chartType !== 'pie' &&
+              chartConfig.chartType !== 'donut' &&
+              chartConfig.chartType !== 'world-map' && (
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="show-gridlines" className="cursor-pointer">
+                    Show Gridlines
+                  </Label>
+                  <Switch
+                    id="show-gridlines"
+                    checked={metadata.showGridlines}
+                    onCheckedChange={checked => updateMetadata({ showGridlines: checked })}
+                  />
+                </div>
+              )}
           </div>
         </CardContent>
       </Card>
@@ -159,7 +170,7 @@ export function DataInputPanel() {
         </CardHeader>
         <CardContent className="space-y-4">
           <CSVImportExport />
-          <DataTableEditor />
+          {chartConfig.chartType === 'world-map' ? <MapDataEditor /> : <DataTableEditor />}
         </CardContent>
       </Card>
     </div>

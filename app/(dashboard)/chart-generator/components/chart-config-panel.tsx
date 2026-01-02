@@ -16,7 +16,8 @@ import { ColorPicker } from './color-picker';
 import type { ChartType, ChartOrientation, ColorTheme } from '@/lib/types/chart-generator';
 
 export function ChartConfigPanel() {
-  const { chartConfig, setChartType, setOrientation, setColorTheme } = useChartGenerator();
+  const { chartConfig, metadata, setChartType, setOrientation, setColorTheme, updateMetadata } =
+    useChartGenerator();
 
   return (
     <Card>
@@ -38,33 +39,37 @@ export function ChartConfigPanel() {
               <SelectItem value="bar">Bar Chart</SelectItem>
               <SelectItem value="stacked-bar">Stacked Bar Chart</SelectItem>
               <SelectItem value="pie">Pie Chart</SelectItem>
+              <SelectItem value="donut">Donut Chart</SelectItem>
+              <SelectItem value="world-map">World Map</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {/* Orientation (only for bar charts) */}
-        {chartConfig.chartType !== 'pie' && (
-          <div className="space-y-3">
-            <Label>Orientation</Label>
-            <RadioGroup
-              value={chartConfig.orientation}
-              onValueChange={(value: ChartOrientation) => setOrientation(value)}
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="vertical" id="vertical" />
-                <Label htmlFor="vertical" className="font-normal cursor-pointer">
-                  Vertical
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="horizontal" id="horizontal" />
-                <Label htmlFor="horizontal" className="font-normal cursor-pointer">
-                  Horizontal
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
-        )}
+        {chartConfig.chartType !== 'pie' &&
+          chartConfig.chartType !== 'donut' &&
+          chartConfig.chartType !== 'world-map' && (
+            <div className="space-y-3">
+              <Label>Orientation</Label>
+              <RadioGroup
+                value={chartConfig.orientation}
+                onValueChange={(value: ChartOrientation) => setOrientation(value)}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="vertical" id="vertical" />
+                  <Label htmlFor="vertical" className="font-normal cursor-pointer">
+                    Vertical
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="horizontal" id="horizontal" />
+                  <Label htmlFor="horizontal" className="font-normal cursor-pointer">
+                    Horizontal
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+          )}
 
         {/* Color Theme */}
         <div className="space-y-3">
@@ -87,6 +92,44 @@ export function ChartConfigPanel() {
             </div>
           </RadioGroup>
         </div>
+
+        {/* Map Color Scheme (only for world maps) */}
+        {chartConfig.chartType === 'world-map' && (
+          <div className="space-y-3">
+            <Label>Map Color Scheme</Label>
+            <RadioGroup
+              value={metadata.mapColorScheme || 'blue'}
+              onValueChange={(value: 'blue' | 'green' | 'red' | 'purple') =>
+                updateMetadata({ mapColorScheme: value })
+              }
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="blue" id="scheme-blue" />
+                <Label htmlFor="scheme-blue" className="font-normal cursor-pointer">
+                  Blue (Default)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="green" id="scheme-green" />
+                <Label htmlFor="scheme-green" className="font-normal cursor-pointer">
+                  Green
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="red" id="scheme-red" />
+                <Label htmlFor="scheme-red" className="font-normal cursor-pointer">
+                  Red
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="purple" id="scheme-purple" />
+                <Label htmlFor="scheme-purple" className="font-normal cursor-pointer">
+                  Purple
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+        )}
 
         {/* Custom Color Picker */}
         <ColorPicker />

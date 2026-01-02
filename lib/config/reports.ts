@@ -3,66 +3,39 @@ import type { ReportSectionMeta } from '@/lib/types/reports';
 // Section metadata for rendering
 export const REPORT_SECTIONS: ReportSectionMeta[] = [
   {
-    key: 'executiveSummary',
-    label: 'Executive Summary',
-    placeholder: 'Provide a high-level overview of the report findings...',
-    required: true,
-  },
-  {
-    key: 'marketOverview',
-    label: 'Market Overview',
+    key: 'marketDetails',
+    label: 'Market Details',
     placeholder: 'Describe the overall market landscape...',
     required: true,
   },
   {
-    key: 'marketSize',
-    label: 'Market Size & Forecast',
-    placeholder: 'Detail market size, growth rates, and forecasts...',
+    key: 'keyFindings',
+    label: 'Key Findings',
+    placeholder: 'Highlight the most important insights and discoveries...',
     required: true,
   },
   {
-    key: 'competitive',
-    label: 'Competitive Landscape',
-    placeholder: 'Analyze competitive dynamics and market structure...',
-    required: true,
-  },
-  {
-    key: 'keyPlayers',
-    label: 'Key Players',
-    placeholder: 'Profile major companies and market participants...',
-    required: false,
-  },
-  {
-    key: 'regional',
-    label: 'Regional Analysis',
-    placeholder: 'Break down market by geographic regions...',
-    required: false,
-  },
-  {
-    key: 'trends',
-    label: 'Trends & Opportunities',
-    placeholder: 'Identify emerging trends and growth opportunities...',
-    required: false,
-  },
-  {
-    key: 'conclusion',
-    label: 'Conclusion',
-    placeholder: 'Summarize key findings and recommendations...',
+    key: 'tableOfContents',
+    label: 'Table of Contents',
+    placeholder: 'Outline the main sections and topics covered in the report...',
     required: true,
   },
 ];
 
 // Categories (expand as needed)
 export const REPORT_CATEGORIES = [
-  'Pharmaceuticals',
-  'Medical Devices',
-  'Healthcare IT',
+  'Animal Health',
   'Biotechnology',
-  'Diagnostics',
-  'Telemedicine',
-  'Digital Health',
-  'Clinical Research',
-  'Other',
+  'Clinical Diagnostics',
+  'Dental',
+  'Healthcare IT',
+  'Healthcare Services',
+  'Laboratory Equipment',
+  'Life Sciences',
+  'Medical Devices',
+  'Medical Imaging',
+  'Pharmaceuticals',
+  'Therapeutic Area',
 ] as const;
 
 // Geographies
@@ -74,6 +47,9 @@ export const GEOGRAPHIES = [
   'Middle East & Africa',
   'Global',
 ] as const;
+
+// Report Formats
+export const REPORT_FORMATS = ['PDF', 'Excel', 'Word', 'PowerPoint'] as const;
 
 // Pagination defaults
 export const REPORTS_PER_PAGE = 10;

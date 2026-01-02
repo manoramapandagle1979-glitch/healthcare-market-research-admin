@@ -4,14 +4,16 @@ import type {
   ChartOrientation,
   ChartMetadata,
   DataSource,
+  MapDataSource,
   LogoConfig,
 } from '@/lib/types/chart-generator';
+import { MAP_COLOR_SCHEMES } from '@/lib/config/chart-generator';
 
 interface ChartBuilderConfig {
   chartType: ChartType;
   orientation: ChartOrientation;
   metadata: ChartMetadata;
-  dataSource: DataSource;
+  dataSource: DataSource | MapDataSource;
   logo: LogoConfig;
 }
 
@@ -39,7 +41,12 @@ export function buildEChartsConfig(config: ChartBuilderConfig): EChartsOption {
       },
     },
     tooltip: {
-      trigger: chartType === 'pie' ? 'item' : 'axis',
+      trigger:
+        chartType === 'pie' || chartType === 'donut'
+          ? 'item'
+          : chartType === 'world-map'
+            ? 'item'
+            : 'axis',
       backgroundColor: 'rgba(255, 255, 255, 0.95)',
       borderColor: '#e5e7eb',
       borderWidth: 1,
@@ -48,26 +55,34 @@ export function buildEChartsConfig(config: ChartBuilderConfig): EChartsOption {
         fontSize: 13,
       },
       formatter:
-        chartType === 'pie' ? '{b}: {c}' + (metadata.unitSuffix || '') + ' ({d}%)' : undefined,
+        chartType === 'pie' || chartType === 'donut'
+          ? '{b}: {c}' + (metadata.unitSuffix || '') + ' ({d}%)'
+          : chartType === 'world-map'
+            ? (params: { name: string; value?: number }) => {
+                return `${params.name}<br/>${params.value || 'No data'}${metadata.unitSuffix || ''}`;
+              }
+            : undefined,
     },
-    legend: metadata.showLegend
-      ? {
-          show: true,
-          bottom: 10,
-          left: 'center',
-          itemGap: 20,
-          itemWidth: 14,
-          itemHeight: 14,
-          textStyle: {
-            fontSize: 12,
-            color: '#4b5563',
-          },
-        }
-      : { show: false },
+    legend:
+      metadata.showLegend && chartType !== 'world-map'
+        ? {
+            show: true,
+            bottom: 10,
+            left: 'center',
+            itemGap: 20,
+            itemWidth: 14,
+            itemHeight: 14,
+            textStyle: {
+              fontSize: 12,
+              color: '#4b5563',
+            },
+          }
+        : { show: false },
   };
 
   // Add grid configuration for bar charts
-  if (chartType !== 'pie') {
+  if (chartType !== 'pie' && chartType !== 'donut' && chartType !== 'world-map') {
+    const standardDataSource = dataSource as DataSource;
     baseConfig.grid = {
       left: '10%',
       right: '10%',
@@ -80,7 +95,7 @@ export function buildEChartsConfig(config: ChartBuilderConfig): EChartsOption {
     if (orientation === 'vertical') {
       baseConfig.xAxis = {
         type: 'category',
-        data: dataSource.labels,
+        data: standardDataSource.labels,
         name: metadata.xAxisLabel,
         nameLocation: 'middle',
         nameGap: 30,
@@ -166,9 +181,10 @@ export function buildEChartsConfig(config: ChartBuilderConfig): EChartsOption {
         },
       };
 
+      const standardDataSource = dataSource as DataSource;
       baseConfig.yAxis = {
         type: 'category',
-        data: dataSource.labels,
+        data: standardDataSource.labels,
         name: metadata.yAxisLabel,
         nameLocation: 'middle',
         nameGap: 80,
@@ -191,8 +207,34 @@ export function buildEChartsConfig(config: ChartBuilderConfig): EChartsOption {
         },
       };
     }
+  } else if (chartType === 'world-map') {
+    // Clear axis and grid for map
+    baseConfig.grid = undefined;
+    baseConfig.xAxis = undefined;
+    baseConfig.yAxis = undefined;
+
+    // Add visualMap for choropleth coloring
+    const mapData = dataSource as MapDataSource;
+    const colorScheme = MAP_COLOR_SCHEMES[metadata.mapColorScheme || 'blue'];
+
+    baseConfig.visualMap = {
+      min: mapData.minValue ?? 0,
+      max: mapData.maxValue ?? 100,
+      text: ['High', 'Low'],
+      realtime: false,
+      calculable: true,
+      inRange: {
+        color: [colorScheme.min, colorScheme.mid, colorScheme.max],
+      },
+      textStyle: {
+        color: '#4b5563',
+        fontSize: 12,
+      },
+      left: 'left',
+      bottom: '10%',
+    };
   } else {
-    // Explicitly clear axis and grid for pie charts to prevent collision
+    // Explicitly clear axis and grid for pie/donut charts to prevent collision
     baseConfig.grid = undefined;
     baseConfig.xAxis = undefined;
     baseConfig.yAxis = undefined;
@@ -212,27 +254,152 @@ export function buildEChartsConfig(config: ChartBuilderConfig): EChartsOption {
 function buildSeriesConfig(
   chartType: ChartType,
   orientation: ChartOrientation,
-  dataSource: DataSource,
+  dataSource: DataSource | MapDataSource,
   metadata: ChartMetadata
 ): EChartsOption['series'] {
+  if (chartType === 'donut') {
+    // Donut chart series - similar to pie but with inner radius
+    const standardDataSource = dataSource as DataSource;
+    const donutData =
+      standardDataSource.series.length > 0
+        ? standardDataSource.series[0].values.map((val, idx) => ({
+            value: Number(val.toFixed(metadata.decimalPrecision)),
+            name: standardDataSource.labels[idx],
+            itemStyle: {
+              color: standardDataSource.series[0]?.color || '#5B8EBC',
+            },
+          }))
+        : [];
+
+    // If multiple series for donut chart, aggregate like pie
+    if (standardDataSource.series.length > 1) {
+      const aggregatedData = standardDataSource.labels.map((label, labelIdx) => {
+        const totalValue = standardDataSource.series.reduce(
+          (sum, series) => sum + (series.values[labelIdx] || 0),
+          0
+        );
+        return {
+          value: Number(totalValue.toFixed(metadata.decimalPrecision)),
+          name: label,
+        };
+      });
+
+      return [
+        {
+          type: 'pie',
+          radius: ['40%', '70%'], // Inner and outer radius for donut
+          center: ['50%', '55%'],
+          data: aggregatedData,
+          itemStyle: {
+            borderRadius: 8,
+            borderColor: '#ffffff',
+            borderWidth: 2,
+          },
+          label: {
+            show: true,
+            formatter: '{b}: {c}' + (metadata.unitSuffix || '') + ' ({d}%)',
+            fontSize: 12,
+            color: '#4b5563',
+          },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.2)',
+            },
+          },
+        },
+      ];
+    }
+
+    return [
+      {
+        type: 'pie',
+        radius: ['40%', '70%'], // Key difference: inner radius creates donut hole
+        center: ['50%', '55%'],
+        data: donutData,
+        itemStyle: {
+          borderRadius: 8,
+          borderColor: '#ffffff',
+          borderWidth: 2,
+        },
+        label: {
+          show: true,
+          formatter: '{b}: {c}' + (metadata.unitSuffix || '') + ' ({d}%)',
+          fontSize: 12,
+          color: '#4b5563',
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.2)',
+          },
+        },
+      },
+    ];
+  }
+
+  if (chartType === 'world-map') {
+    const mapData = dataSource as MapDataSource;
+
+    // Transform MapDataSource to ECharts map format
+    const echartsMapData = mapData.data.map(point => ({
+      name: point.countryName,
+      value: Number(point.value.toFixed(metadata.decimalPrecision)),
+    }));
+
+    return [
+      {
+        type: 'map',
+        map: 'world', // Uses built-in world map
+        roam: false, // Disable zoom/pan as requested
+        itemStyle: {
+          borderColor: '#ffffff',
+          borderWidth: 1,
+          areaColor: '#f5f5f5', // Default color for countries with no data
+        },
+        emphasis: {
+          itemStyle: {
+            areaColor: '#FFA500',
+            borderColor: '#fff',
+            borderWidth: 2,
+          },
+          label: {
+            show: true,
+            color: '#1a1a1a',
+            fontSize: 12,
+          },
+        },
+        label: {
+          show: false, // Don't show labels by default
+          fontSize: 10,
+          color: '#4b5563',
+        },
+        data: echartsMapData,
+      },
+    ];
+  }
+
   if (chartType === 'pie') {
+    const standardDataSource = dataSource as DataSource;
     // Pie chart series
     const pieData =
-      dataSource.series.length > 0
-        ? dataSource.series[0].values.map((val, idx) => ({
+      standardDataSource.series.length > 0
+        ? standardDataSource.series[0].values.map((val, idx) => ({
             value: Number(val.toFixed(metadata.decimalPrecision)),
-            name: dataSource.labels[idx],
+            name: standardDataSource.labels[idx],
             itemStyle: {
-              color: dataSource.series[0]?.color || '#5B8EBC',
+              color: standardDataSource.series[0]?.color || '#5B8EBC',
             },
           }))
         : [];
 
     // If multiple series for pie chart, use first series data with all series colors
-    if (dataSource.series.length > 1) {
+    if (standardDataSource.series.length > 1) {
       // Aggregate all series for pie chart
-      const aggregatedData = dataSource.labels.map((label, labelIdx) => {
-        const totalValue = dataSource.series.reduce(
+      const aggregatedData = standardDataSource.labels.map((label, labelIdx) => {
+        const totalValue = standardDataSource.series.reduce(
           (sum, series) => sum + (series.values[labelIdx] || 0),
           0
         );
@@ -299,7 +466,8 @@ function buildSeriesConfig(
   }
 
   // Bar chart series (stacked or regular)
-  return dataSource.series.map(series => ({
+  const standardDataSource = dataSource as DataSource;
+  return standardDataSource.series.map(series => ({
     name: series.name,
     type: 'bar',
     data: series.values.map(val => Number(val.toFixed(metadata.decimalPrecision))),

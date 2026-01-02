@@ -25,11 +25,11 @@ import {
   FormDescription,
 } from '@/components/ui/form';
 import { SectionEditor } from './section-editor';
-import { REPORT_CATEGORIES, GEOGRAPHIES } from '@/lib/config/reports';
+import { REPORT_CATEGORIES, GEOGRAPHIES, REPORT_FORMATS } from '@/lib/config/reports';
 import type { ReportFormData, Report } from '@/lib/types/reports';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Save, Eye } from 'lucide-react';
+import { Save, Eye, Plus, Trash2, HelpCircle, User, Building2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 
@@ -39,9 +39,35 @@ const reportFormSchema = z.object({
   summary: z.string().min(50, 'Summary must be at least 50 characters'),
   category: z.string().min(1, 'Category is required'),
   geography: z.array(z.string()).min(1, 'Select at least one geography'),
+  publishDate: z.string().optional(),
   price: z.number().min(0, 'Price must be positive'),
+  discountedPrice: z.number().min(0, 'Discounted price must be positive'),
   accessType: z.enum(['free', 'paid']),
   status: z.enum(['draft', 'published']),
+  pageCount: z.number().min(1, 'Page count must be at least 1').optional(),
+  formats: z.array(z.enum(['PDF', 'Excel', 'Word', 'PowerPoint'])).optional(),
+  marketMetrics: z
+    .object({
+      currentRevenue: z.string().optional(),
+      currentYear: z.number().optional(),
+      forecastRevenue: z.string().optional(),
+      forecastYear: z.number().optional(),
+      cagr: z.string().optional(),
+      cagrStartYear: z.number().optional(),
+      cagrEndYear: z.number().optional(),
+    })
+    .optional(),
+  authorIds: z.array(z.string()).optional(),
+  keyPlayers: z
+    .array(
+      z.object({
+        name: z.string().min(2, 'Company name must be at least 2 characters'),
+        marketShare: z.string().optional(),
+        rank: z.number().optional(),
+        description: z.string().optional(),
+      })
+    )
+    .optional(),
   sections: z.object({
     executiveSummary: z.string().min(100, 'Executive summary is required (min 100 chars)'),
     marketOverview: z.string().min(100, 'Market overview is required (min 100 chars)'),
@@ -51,11 +77,32 @@ const reportFormSchema = z.object({
     regional: z.string(),
     trends: z.string(),
     conclusion: z.string().min(50, 'Conclusion is required (min 50 chars)'),
+    marketDetails: z.string().min(100, 'Market details is required (min 100 chars)'),
+    keyFindings: z.string().min(100, 'Key findings is required (min 100 chars)'),
+    tableOfContents: z.string().min(50, 'Table of contents is required (min 50 chars)'),
+    marketDrivers: z.string().min(50, 'Market drivers is required (min 50 chars)'),
+    challenges: z.string().min(50, 'Challenges & restraints is required (min 50 chars)'),
   }),
+  faqs: z
+    .array(
+      z.object({
+        question: z.string().min(5, 'Question must be at least 5 characters'),
+        answer: z.string().min(10, 'Answer must be at least 10 characters'),
+      })
+    )
+    .optional(),
   metadata: z.object({
     metaTitle: z.string().optional(),
     metaDescription: z.string().optional(),
     keywords: z.array(z.string()).optional(),
+    canonicalUrl: z.string().url().optional().or(z.literal('')),
+    ogTitle: z.string().optional(),
+    ogDescription: z.string().optional(),
+    ogImage: z.string().url().optional().or(z.literal('')),
+    ogType: z.string().optional(),
+    twitterCard: z.string().optional(),
+    schemaJson: z.string().optional(),
+    robotsDirective: z.string().optional(),
   }),
 });
 
@@ -77,20 +124,43 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
           summary: report.summary,
           category: report.category,
           geography: report.geography,
+          publishDate: report.publishDate || '',
           price: report.price,
+          discountedPrice: report.discountedPrice,
           accessType: report.accessType,
           status: report.status,
+          pageCount: report.pageCount,
+          formats: report.formats || [],
+          marketMetrics: report.marketMetrics || {},
+          authorIds: report.authorIds || [],
+          keyPlayers: report.keyPlayers || [],
           sections: report.sections,
+          faqs: report.faqs || [],
           metadata: report.metadata,
         }
       : {
           title: '',
           summary: '',
           category: REPORT_CATEGORIES[0],
-          geography: [],
-          price: 0,
+          geography: ['Global'],
+          publishDate: '',
+          price: 3490,
+          discountedPrice: 3090,
           accessType: 'free',
           status: 'draft',
+          pageCount: undefined,
+          formats: [],
+          marketMetrics: {
+            currentRevenue: '',
+            currentYear: new Date().getFullYear(),
+            forecastRevenue: '',
+            forecastYear: new Date().getFullYear() + 7,
+            cagr: '',
+            cagrStartYear: new Date().getFullYear(),
+            cagrEndYear: new Date().getFullYear() + 7,
+          },
+          authorIds: [],
+          keyPlayers: [],
           sections: {
             executiveSummary: '',
             marketOverview: '',
@@ -100,11 +170,25 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
             regional: '',
             trends: '',
             conclusion: '',
+            marketDetails: '',
+            keyFindings: '',
+            tableOfContents: '',
+            marketDrivers: '',
+            challenges: '',
           },
+          faqs: [],
           metadata: {
             metaTitle: '',
             metaDescription: '',
             keywords: [],
+            canonicalUrl: '',
+            ogTitle: '',
+            ogDescription: '',
+            ogImage: '',
+            ogType: 'article',
+            twitterCard: 'summary_large_image',
+            schemaJson: '',
+            robotsDirective: 'index, follow',
           },
         },
   });
@@ -182,7 +266,7 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Geography</FormLabel>
-                    <div className="space-y-2">
+                    <div className="grid grid-cols-2 space-y-2">
                       {GEOGRAPHIES.map(geo => (
                         <div key={geo} className="flex items-center space-x-2">
                           <Checkbox
@@ -204,6 +288,71 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
               />
             </div>
 
+            <div className="grid grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="publishDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Publish Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="pageCount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Page Count</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="145"
+                        {...field}
+                        value={field.value || ''}
+                        onChange={e =>
+                          field.onChange(e.target.value ? parseInt(e.target.value) : undefined)
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="formats"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Available Formats</FormLabel>
+                    <div className="grid grid-cols-2 gap-2 pt-2">
+                      {REPORT_FORMATS.map(format => (
+                        <div key={format} className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={field.value?.includes(format)}
+                            onCheckedChange={checked => {
+                              const updated = checked
+                                ? [...(field.value || []), format]
+                                : field.value?.filter(f => f !== format) || [];
+                              field.onChange(updated);
+                            }}
+                          />
+                          <label className="text-sm">{format}</label>
+                        </div>
+                      ))}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -214,7 +363,7 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
                     <FormControl>
                       <Input
                         type="number"
-                        placeholder="0"
+                        placeholder="3490"
                         {...field}
                         onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
                       />
@@ -226,26 +375,309 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
 
               <FormField
                 control={form.control}
-                name="accessType"
+                name="discountedPrice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Access Type</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="free">Free</SelectItem>
-                        <SelectItem value="paid">Paid</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <FormLabel>Discounted Price (USD)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="3090"
+                        {...field}
+                        onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Market Metrics */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Market Metrics</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="marketMetrics.currentRevenue"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Current Market Revenue</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., $87.4 billion" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="marketMetrics.currentYear"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Current Year</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="2024"
+                        {...field}
+                        value={field.value || ''}
+                        onChange={e =>
+                          field.onChange(e.target.value ? parseInt(e.target.value) : undefined)
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="marketMetrics.forecastRevenue"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Forecasted Revenue</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., $286.2 billion" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="marketMetrics.forecastYear"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Forecast Year</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="2032"
+                        {...field}
+                        value={field.value || ''}
+                        onChange={e =>
+                          field.onChange(e.target.value ? parseInt(e.target.value) : undefined)
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="marketMetrics.cagr"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CAGR (%)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., 16.8%" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="marketMetrics.cagrStartYear"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CAGR Start Year</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="2025"
+                        {...field}
+                        value={field.value || ''}
+                        onChange={e =>
+                          field.onChange(e.target.value ? parseInt(e.target.value) : undefined)
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="marketMetrics.cagrEndYear"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CAGR End Year</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="2032"
+                        {...field}
+                        value={field.value || ''}
+                        onChange={e =>
+                          field.onChange(e.target.value ? parseInt(e.target.value) : undefined)
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Research Team / Authors */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Research Team
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <FormField
+              control={form.control}
+              name="authorIds"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Author IDs</FormLabel>
+                  <FormDescription>
+                    Add author IDs who contributed to this report (comma-separated)
+                  </FormDescription>
+                  <FormControl>
+                    <Input
+                      placeholder="author-1, author-2, author-3"
+                      value={field.value?.join(', ') || ''}
+                      onChange={e => {
+                        const ids = e.target.value
+                          .split(',')
+                          .map(id => id.trim())
+                          .filter(id => id);
+                        field.onChange(ids);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Competitive Landscape */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              Key Players
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <FormField
+              control={form.control}
+              name="keyPlayers"
+              render={({ field }) => (
+                <FormItem>
+                  <FormDescription>Add key companies and their market share data</FormDescription>
+                  <div className="space-y-4">
+                    {field.value?.map((company, index) => (
+                      <Card key={index} className="p-4">
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between">
+                            <span className="text-sm font-medium text-muted-foreground">
+                              Company #{index + 1}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                const updated = field.value?.filter((_, i) => i !== index);
+                                field.onChange(updated);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                          <div className="grid grid-cols-3 gap-3">
+                            <Input
+                              placeholder="Company Name"
+                              value={company.name}
+                              onChange={e => {
+                                const updated = [...(field.value || [])];
+                                updated[index] = { ...updated[index], name: e.target.value };
+                                field.onChange(updated);
+                              }}
+                            />
+                            <Input
+                              placeholder="Market Share (e.g., 14.2%)"
+                              value={company.marketShare || ''}
+                              onChange={e => {
+                                const updated = [...(field.value || [])];
+                                updated[index] = { ...updated[index], marketShare: e.target.value };
+                                field.onChange(updated);
+                              }}
+                            />
+                            <Input
+                              type="number"
+                              placeholder="Rank (optional)"
+                              value={company.rank || ''}
+                              onChange={e => {
+                                const updated = [...(field.value || [])];
+                                updated[index] = {
+                                  ...updated[index],
+                                  rank: e.target.value ? parseInt(e.target.value) : undefined,
+                                };
+                                field.onChange(updated);
+                              }}
+                            />
+                          </div>
+                          <Textarea
+                            placeholder="Description (optional)"
+                            rows={2}
+                            value={company.description || ''}
+                            onChange={e => {
+                              const updated = [...(field.value || [])];
+                              updated[index] = { ...updated[index], description: e.target.value };
+                              field.onChange(updated);
+                            }}
+                          />
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      const updated = [
+                        ...(field.value || []),
+                        { name: '', marketShare: '', rank: undefined, description: '' },
+                      ];
+                      field.onChange(updated);
+                    }}
+                    className="w-full mt-2"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Company
+                  </Button>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </CardContent>
         </Card>
 
@@ -270,95 +702,328 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
           </CardContent>
         </Card>
 
+        {/* FAQs */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <HelpCircle className="h-5 w-5" />
+              Frequently Asked Questions
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <FormField
+              control={form.control}
+              name="faqs"
+              render={({ field }) => (
+                <FormItem>
+                  <FormDescription>
+                    Add questions and answers to help users understand this report better
+                  </FormDescription>
+                  <div className="space-y-4">
+                    {field.value?.map((faq, index) => (
+                      <Card key={index} className="p-4">
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between">
+                            <span className="text-sm font-medium text-muted-foreground">
+                              FAQ #{index + 1}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                const updated = field.value?.filter((_, i) => i !== index);
+                                field.onChange(updated);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                          <div className="space-y-2">
+                            <Input
+                              placeholder="Enter your question..."
+                              value={faq.question}
+                              onChange={e => {
+                                const updated = [...(field.value || [])];
+                                updated[index] = { ...updated[index], question: e.target.value };
+                                field.onChange(updated);
+                              }}
+                            />
+                            <Textarea
+                              placeholder="Enter the answer..."
+                              rows={3}
+                              value={faq.answer}
+                              onChange={e => {
+                                const updated = [...(field.value || [])];
+                                updated[index] = { ...updated[index], answer: e.target.value };
+                                field.onChange(updated);
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      const updated = [...(field.value || []), { question: '', answer: '' }];
+                      field.onChange(updated);
+                    }}
+                    className="w-full mt-2"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add FAQ
+                  </Button>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+        </Card>
+
         {/* SEO Metadata */}
         <Card>
           <CardHeader>
             <CardTitle>SEO Metadata</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="metadata.metaTitle"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Meta Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="SEO-friendly title (optional)" {...field} />
-                  </FormControl>
-                  <FormDescription>Leave empty to use report title</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold">Basic SEO</h3>
+              <FormField
+                control={form.control}
+                name="metadata.metaTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Meta Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="SEO-friendly title (optional)" {...field} />
+                    </FormControl>
+                    <FormDescription>Leave empty to use report title</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="metadata.metaDescription"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Meta Description</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="SEO description (120-160 characters)" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="metadata.metaDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Meta Description</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="SEO description (120-160 characters)" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="metadata.keywords"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Keywords</FormLabel>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Add keyword"
-                      value={keywordInput}
-                      onChange={e => setKeywordInput(e.target.value)}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
+              <FormField
+                control={form.control}
+                name="metadata.keywords"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Keywords</FormLabel>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Add keyword"
+                        value={keywordInput}
+                        onChange={e => setKeywordInput(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            if (keywordInput.trim()) {
+                              field.onChange([...(field.value || []), keywordInput.trim()]);
+                              setKeywordInput('');
+                            }
+                          }
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
                           if (keywordInput.trim()) {
                             field.onChange([...(field.value || []), keywordInput.trim()]);
                             setKeywordInput('');
                           }
-                        }
-                      }}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        if (keywordInput.trim()) {
-                          field.onChange([...(field.value || []), keywordInput.trim()]);
-                          setKeywordInput('');
-                        }
-                      }}
-                    >
-                      Add
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {field.value?.map((keyword, i) => (
-                      <Badge key={i} variant="secondary">
-                        {keyword}
-                        <button
-                          type="button"
-                          className="ml-2"
-                          onClick={() => {
-                            field.onChange(field.value?.filter((_, idx) => idx !== i));
-                          }}
-                        >
-                          ×
-                        </button>
-                      </Badge>
-                    ))}
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                        }}
+                      >
+                        Add
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {field.value?.map((keyword, i) => (
+                        <Badge key={i} variant="secondary">
+                          {keyword}
+                          <button
+                            type="button"
+                            className="ml-2"
+                            onClick={() => {
+                              field.onChange(field.value?.filter((_, idx) => idx !== i));
+                            }}
+                          >
+                            ×
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="metadata.canonicalUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Canonical URL</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://example.com/reports/..." {...field} />
+                    </FormControl>
+                    <FormDescription>Preferred URL for this page</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="metadata.robotsDirective"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Robots Directive</FormLabel>
+                    <FormControl>
+                      <Input placeholder="index, follow" {...field} />
+                    </FormControl>
+                    <FormDescription>e.g., `index, follow` or `noindex, nofollow`</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <Separator />
+
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold">Open Graph (Facebook, LinkedIn)</h3>
+              <FormField
+                control={form.control}
+                name="metadata.ogTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>OG Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Social media title" {...field} />
+                    </FormControl>
+                    <FormDescription>Leave empty to use meta title</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="metadata.ogDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>OG Description</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Social media description" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="metadata.ogImage"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>OG Image URL</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://example.com/images/..." {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Image shown when shared on social media (1200x630px recommended)
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="metadata.ogType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>OG Type</FormLabel>
+                    <FormControl>
+                      <Input placeholder="article" {...field} />
+                    </FormControl>
+                    <FormDescription>e.g., `article`, `website`</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <Separator />
+
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold">Twitter Card</h3>
+              <FormField
+                control={form.control}
+                name="metadata.twitterCard"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Twitter Card Type</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select card type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="summary">Summary</SelectItem>
+                        <SelectItem value="summary_large_image">
+                          Summary with Large Image
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <Separator />
+
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold">Schema.org JSON-LD</h3>
+              <FormField
+                control={form.control}
+                name="metadata.schemaJson"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Schema JSON-LD</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder='{"@context": "https://schema.org", "@type": "Report", ...}'
+                        rows={5}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>Structured data in JSON-LD format (optional)</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </CardContent>
         </Card>
 

@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/table';
 import { useChartGenerator } from '@/hooks/use-chart-generator';
 import { CHART_CONSTRAINTS } from '@/lib/config/chart-generator';
+import type { DataSource, DataSeries } from '@/lib/types/chart-generator';
 
 export function DataTableEditor() {
   const {
@@ -27,10 +28,11 @@ export function DataTableEditor() {
     updateSeriesValue,
   } = useChartGenerator();
 
-  const canAddRow = dataSource.labels.length < CHART_CONSTRAINTS.MAX_ROWS;
-  const canRemoveRow = dataSource.labels.length > CHART_CONSTRAINTS.MIN_ROWS;
-  const canAddSeries = dataSource.series.length < CHART_CONSTRAINTS.MAX_SERIES;
-  const canRemoveSeries = dataSource.series.length > CHART_CONSTRAINTS.MIN_SERIES;
+  const typedDataSource = dataSource as DataSource;
+  const canAddRow = typedDataSource.labels.length < CHART_CONSTRAINTS.MAX_ROWS;
+  const canRemoveRow = typedDataSource.labels.length > CHART_CONSTRAINTS.MIN_ROWS;
+  const canAddSeries = typedDataSource.series.length < CHART_CONSTRAINTS.MAX_SERIES;
+  const canRemoveSeries = typedDataSource.series.length > CHART_CONSTRAINTS.MIN_SERIES;
 
   return (
     <div className="space-y-4">
@@ -38,8 +40,8 @@ export function DataTableEditor() {
         <div>
           <h3 className="text-lg font-semibold">Data Table</h3>
           <p className="text-sm text-muted-foreground">
-            {dataSource.labels.length} / {CHART_CONSTRAINTS.MAX_ROWS} rows,{' '}
-            {dataSource.series.length} / {CHART_CONSTRAINTS.MAX_SERIES} series
+            {typedDataSource.labels.length} / {CHART_CONSTRAINTS.MAX_ROWS} rows,{' '}
+            {typedDataSource.series.length} / {CHART_CONSTRAINTS.MAX_SERIES} series
           </p>
         </div>
         <div className="flex gap-2">
@@ -59,7 +61,7 @@ export function DataTableEditor() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[150px] sticky left-0 bg-background z-10">Category</TableHead>
-              {dataSource.series.map(series => (
+              {typedDataSource.series.map((series: DataSeries) => (
                 <TableHead key={series.id} className="min-w-[150px]">
                   <div className="flex items-center gap-2">
                     <Input
@@ -84,7 +86,7 @@ export function DataTableEditor() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {dataSource.labels.map((label, rowIndex) => (
+            {typedDataSource.labels.map((label: string, rowIndex: number) => (
               <TableRow key={rowIndex}>
                 <TableCell className="sticky left-0 bg-background z-10">
                   <Input
@@ -94,7 +96,7 @@ export function DataTableEditor() {
                     className="h-9"
                   />
                 </TableCell>
-                {dataSource.series.map(series => (
+                {typedDataSource.series.map((series: DataSeries) => (
                   <TableCell key={series.id}>
                     <Input
                       type="number"

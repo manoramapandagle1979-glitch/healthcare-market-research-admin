@@ -16,7 +16,7 @@ interface SectionEditorProps {
 
 export function SectionEditor({ sections, onChange }: SectionEditorProps) {
   const [expandedSections, setExpandedSections] = useState<Set<ReportSectionKey>>(
-    new Set(['executiveSummary'])
+    new Set(REPORT_SECTIONS.map(section => section.key))
   );
 
   const toggleSection = (key: ReportSectionKey) => {

@@ -23,6 +23,16 @@ const SAMPLE_TRENDS = `<h2>Trends & Opportunities</h2><p>Key emerging trends sha
 
 const SAMPLE_CONCLUSION = `<h2>Conclusion</h2><p>The healthcare market presents significant growth opportunities driven by technological innovation, demographic shifts, and evolving patient expectations. Companies that invest in digital transformation, focus on patient outcomes, and adapt to regulatory changes will be well-positioned for success.</p><p><strong>Key Takeaways:</strong></p><ul><li>Market expected to grow at 8.5% CAGR through 2030</li><li>Digital health and AI are major growth catalysts</li><li>Asia Pacific offers highest growth potential</li><li>Strategic partnerships will be critical for market expansion</li></ul>`;
 
+const SAMPLE_MARKET_DETAILS = `<h2>Market Details</h2><p>The healthcare market is undergoing significant transformation driven by technological innovation, changing demographics, and evolving regulatory landscapes. This section provides detailed insights into market dynamics, stakeholder analysis, and key market characteristics.</p><ul><li>Market fragmentation and consolidation trends</li><li>Value chain analysis</li><li>Regulatory environment overview</li><li>Reimbursement landscape</li></ul>`;
+
+const SAMPLE_KEY_FINDINGS = `<h2>Key Findings</h2><p>Based on comprehensive market analysis, the following key findings have emerged:</p><ul><li><strong>Market Growth:</strong> The market is expected to grow at a robust CAGR of 8.5% through 2030</li><li><strong>Technology Impact:</strong> AI and digital health are primary growth drivers</li><li><strong>Regional Dynamics:</strong> Asia Pacific shows highest growth potential</li><li><strong>Competitive Landscape:</strong> Moderate concentration with top 5 players holding 45% market share</li><li><strong>Innovation Trends:</strong> Focus on personalized medicine and value-based care models</li></ul>`;
+
+const SAMPLE_TABLE_OF_CONTENTS = `<h2>Table of Contents</h2><ol><li>Executive Summary</li><li>Market Overview</li><li>Market Size & Forecast</li><li>Competitive Analysis</li><li>Key Market Players</li><li>Regional Analysis</li><li>Market Trends & Opportunities</li><li>Key Findings & Insights</li><li>Conclusion & Recommendations</li></ol>`;
+
+const SAMPLE_MARKET_DRIVERS = `<h2>Market Drivers</h2><p>Key factors driving market growth include:</p><ul><li><strong>Digital health technology adoption:</strong> Rapid adoption of digital health solutions accelerated by pandemic</li><li><strong>Healthcare infrastructure investment:</strong> Governments and private sector investing in modernization</li><li><strong>Regulatory support:</strong> Favorable policies and reimbursement frameworks emerging globally</li><li><strong>Rising healthcare spending:</strong> Increasing per capita healthcare expenditure in emerging markets</li><li><strong>Technological innovation:</strong> AI, IoT, and 5G enabling new healthcare delivery models</li></ul>`;
+
+const SAMPLE_CHALLENGES = `<h2>Challenges & Restraints</h2><p>The market faces several challenges that may impact growth:</p><ul><li><strong>Data privacy and security concerns:</strong> Increasing cyber threats and stringent data protection regulations</li><li><strong>High implementation costs:</strong> Significant upfront investment required for digital transformation</li><li><strong>Regulatory complexity:</strong> Varying compliance requirements across different markets</li><li><strong>Interoperability issues:</strong> Lack of standardization in healthcare IT systems</li><li><strong>Resistance to change:</strong> Traditional healthcare providers slow to adopt new technologies</li></ul>`;
+
 // Utility: Generate URL-friendly slug
 function generateSlug(title: string): string {
   return title
@@ -44,6 +54,26 @@ const mockReports: Report[] = [
     geography: ['Global', 'North America', 'Europe', 'Asia Pacific'],
     publishDate: new Date('2024-12-15').toISOString(),
     price: 4999,
+    discountedPrice: 3999,
+    pageCount: 145,
+    formats: ['PDF', 'Excel'],
+    marketMetrics: {
+      currentRevenue: '$87.4 billion',
+      currentYear: 2024,
+      forecastRevenue: '$286.2 billion',
+      forecastYear: 2032,
+      cagr: '16.8%',
+      cagrStartYear: 2025,
+      cagrEndYear: 2032,
+    },
+    authorIds: ['auth-001', 'auth-002'],
+    keyPlayers: [
+      { name: 'Teladoc Health, Inc.', marketShare: '14.2%', rank: 1 },
+      { name: 'Amwell (American Well)', marketShare: '8.7%', rank: 2 },
+      { name: 'Doctor on Demand', marketShare: '6.3%', rank: 3 },
+      { name: 'MDLIVE Inc.', marketShare: '5.9%', rank: 4 },
+      { name: 'Ping An Healthcare Technology', marketShare: '4.8%', rank: 5 },
+    ],
     accessType: 'paid',
     status: 'published',
     sections: {
@@ -55,6 +85,11 @@ const mockReports: Report[] = [
       regional: SAMPLE_REGIONAL,
       trends: SAMPLE_TRENDS,
       conclusion: SAMPLE_CONCLUSION,
+      marketDetails: SAMPLE_MARKET_DETAILS,
+      keyFindings: SAMPLE_KEY_FINDINGS,
+      tableOfContents: SAMPLE_TABLE_OF_CONTENTS,
+      marketDrivers: SAMPLE_MARKET_DRIVERS,
+      challenges: SAMPLE_CHALLENGES,
     },
     metadata: {
       metaTitle: 'Global Telemedicine Market Analysis 2024-2030 | Healthcare Insights',
@@ -78,6 +113,11 @@ const mockReports: Report[] = [
           regional: SAMPLE_REGIONAL,
           trends: SAMPLE_TRENDS,
           conclusion: SAMPLE_CONCLUSION,
+          marketDetails: SAMPLE_MARKET_DETAILS,
+          keyFindings: SAMPLE_KEY_FINDINGS,
+          tableOfContents: SAMPLE_TABLE_OF_CONTENTS,
+          marketDrivers: SAMPLE_MARKET_DRIVERS,
+          challenges: SAMPLE_CHALLENGES,
         },
         metadata: {
           metaTitle: 'Global Telemedicine Market Analysis 2024-2030 | Healthcare Insights',
@@ -101,6 +141,7 @@ const mockReports: Report[] = [
     geography: ['North America'],
     publishDate: new Date('2024-12-10').toISOString(),
     price: 3999,
+    discountedPrice: 3199,
     accessType: 'paid',
     status: 'published',
     sections: {
@@ -113,6 +154,11 @@ const mockReports: Report[] = [
         '<h2>North America Focus</h2><p>The North American medical devices market is the largest globally, driven by advanced healthcare infrastructure, high R&D spending, and strong regulatory frameworks from the FDA.</p>',
       trends: SAMPLE_TRENDS,
       conclusion: SAMPLE_CONCLUSION,
+      marketDetails: SAMPLE_MARKET_DETAILS,
+      keyFindings: SAMPLE_KEY_FINDINGS,
+      tableOfContents: SAMPLE_TABLE_OF_CONTENTS,
+      marketDrivers: SAMPLE_MARKET_DRIVERS,
+      challenges: SAMPLE_CHALLENGES,
     },
     metadata: {
       metaTitle: 'Medical Devices Market Report - North America | In-Depth Analysis',
@@ -135,6 +181,7 @@ const mockReports: Report[] = [
     geography: ['Global'],
     publishDate: new Date('2024-12-01').toISOString(),
     price: 5999,
+    discountedPrice: 5999,
     accessType: 'paid',
     status: 'published',
     sections: {
@@ -147,6 +194,11 @@ const mockReports: Report[] = [
       regional: SAMPLE_REGIONAL,
       trends: SAMPLE_TRENDS,
       conclusion: SAMPLE_CONCLUSION,
+      marketDetails: SAMPLE_MARKET_DETAILS,
+      keyFindings: SAMPLE_KEY_FINDINGS,
+      tableOfContents: SAMPLE_TABLE_OF_CONTENTS,
+      marketDrivers: SAMPLE_MARKET_DRIVERS,
+      challenges: SAMPLE_CHALLENGES,
     },
     metadata: {
       metaTitle: 'Pharmaceutical Industry Trends 2025 | Market Research Report',
@@ -169,6 +221,7 @@ const mockReports: Report[] = [
     geography: ['Global', 'North America', 'Europe'],
     publishDate: new Date('2024-11-28').toISOString(),
     price: 4499,
+    discountedPrice: 4499,
     accessType: 'paid',
     status: 'published',
     sections: {
@@ -180,6 +233,11 @@ const mockReports: Report[] = [
       regional: SAMPLE_REGIONAL,
       trends: SAMPLE_TRENDS,
       conclusion: SAMPLE_CONCLUSION,
+      marketDetails: SAMPLE_MARKET_DETAILS,
+      keyFindings: SAMPLE_KEY_FINDINGS,
+      tableOfContents: SAMPLE_TABLE_OF_CONTENTS,
+      marketDrivers: SAMPLE_MARKET_DRIVERS,
+      challenges: SAMPLE_CHALLENGES,
     },
     metadata: {
       metaTitle: 'Healthcare IT Market - Cloud Solutions and AI | 2024 Report',
@@ -202,6 +260,7 @@ const mockReports: Report[] = [
     geography: ['Global', 'North America'],
     publishDate: new Date('2024-11-20').toISOString(),
     price: 6999,
+    discountedPrice: 6999,
     accessType: 'paid',
     status: 'published',
     sections: {
@@ -214,6 +273,11 @@ const mockReports: Report[] = [
       trends:
         '<h2>Gene Therapy Trends</h2><p>Gene therapy is revolutionizing biotechnology with breakthroughs in CRISPR-Cas9 technology, CAR-T cell therapy, and mRNA vaccines. The market is expected to reach $10B by 2028.</p>',
       conclusion: SAMPLE_CONCLUSION,
+      marketDetails: SAMPLE_MARKET_DETAILS,
+      keyFindings: SAMPLE_KEY_FINDINGS,
+      tableOfContents: SAMPLE_TABLE_OF_CONTENTS,
+      marketDrivers: SAMPLE_MARKET_DRIVERS,
+      challenges: SAMPLE_CHALLENGES,
     },
     metadata: {
       metaTitle: 'Biotechnology Market Outlook - Gene Therapy Focus | 2024',
@@ -236,6 +300,7 @@ const mockReports: Report[] = [
     geography: ['Global'],
     publishDate: new Date('2024-11-15').toISOString(),
     price: 3499,
+    discountedPrice: 3499,
     accessType: 'paid',
     status: 'published',
     sections: {
@@ -247,6 +312,11 @@ const mockReports: Report[] = [
       regional: SAMPLE_REGIONAL,
       trends: SAMPLE_TRENDS,
       conclusion: SAMPLE_CONCLUSION,
+      marketDetails: SAMPLE_MARKET_DETAILS,
+      keyFindings: SAMPLE_KEY_FINDINGS,
+      tableOfContents: SAMPLE_TABLE_OF_CONTENTS,
+      marketDrivers: SAMPLE_MARKET_DRIVERS,
+      challenges: SAMPLE_CHALLENGES,
     },
     metadata: {
       metaTitle: 'Diagnostic Technologies - Point-of-Care Testing | Market Report',
@@ -269,6 +339,7 @@ const mockReports: Report[] = [
     geography: ['Global', 'North America', 'Europe', 'Asia Pacific'],
     publishDate: new Date('2024-11-08').toISOString(),
     price: 0,
+    discountedPrice: 0,
     accessType: 'free',
     status: 'published',
     sections: {
@@ -280,6 +351,11 @@ const mockReports: Report[] = [
       regional: SAMPLE_REGIONAL,
       trends: SAMPLE_TRENDS,
       conclusion: SAMPLE_CONCLUSION,
+      marketDetails: SAMPLE_MARKET_DETAILS,
+      keyFindings: SAMPLE_KEY_FINDINGS,
+      tableOfContents: SAMPLE_TABLE_OF_CONTENTS,
+      marketDrivers: SAMPLE_MARKET_DRIVERS,
+      challenges: SAMPLE_CHALLENGES,
     },
     metadata: {
       metaTitle: 'Digital Health Ecosystem - Consumer Trends | Free Report',
@@ -302,6 +378,7 @@ const mockReports: Report[] = [
     geography: ['Global'],
     publishDate: new Date('2024-10-25').toISOString(),
     price: 4999,
+    discountedPrice: 4999,
     accessType: 'paid',
     status: 'published',
     sections: {
@@ -313,6 +390,11 @@ const mockReports: Report[] = [
       regional: SAMPLE_REGIONAL,
       trends: SAMPLE_TRENDS,
       conclusion: SAMPLE_CONCLUSION,
+      marketDetails: SAMPLE_MARKET_DETAILS,
+      keyFindings: SAMPLE_KEY_FINDINGS,
+      tableOfContents: SAMPLE_TABLE_OF_CONTENTS,
+      marketDrivers: SAMPLE_MARKET_DRIVERS,
+      challenges: SAMPLE_CHALLENGES,
     },
     metadata: {
       metaTitle: 'Clinical Research Outsourcing Trends | CRO Market Report',
@@ -335,6 +417,7 @@ const mockReports: Report[] = [
     geography: ['Asia Pacific'],
     publishDate: new Date('2024-10-18').toISOString(),
     price: 3999,
+    discountedPrice: 3999,
     accessType: 'paid',
     status: 'published',
     sections: {
@@ -347,6 +430,11 @@ const mockReports: Report[] = [
         '<h2>Asia Pacific Regional Breakdown</h2><h3>China</h3><p>Largest market in the region, driven by government healthcare reforms and rising middle class.</p><h3>India</h3><p>Rapidly growing market with focus on affordable healthcare solutions.</p><h3>Japan</h3><p>Mature market with aging population driving demand for senior care.</p>',
       trends: SAMPLE_TRENDS,
       conclusion: SAMPLE_CONCLUSION,
+      marketDetails: SAMPLE_MARKET_DETAILS,
+      keyFindings: SAMPLE_KEY_FINDINGS,
+      tableOfContents: SAMPLE_TABLE_OF_CONTENTS,
+      marketDrivers: SAMPLE_MARKET_DRIVERS,
+      challenges: SAMPLE_CHALLENGES,
     },
     metadata: {
       metaTitle: 'Asia Pacific Healthcare Market Overview | Regional Analysis',
@@ -369,6 +457,7 @@ const mockReports: Report[] = [
     geography: ['Latin America', 'Middle East & Africa'],
     publishDate: new Date('2024-10-10').toISOString(),
     price: 0,
+    discountedPrice: 0,
     accessType: 'free',
     status: 'published',
     sections: {
@@ -380,6 +469,11 @@ const mockReports: Report[] = [
       regional: SAMPLE_REGIONAL,
       trends: SAMPLE_TRENDS,
       conclusion: SAMPLE_CONCLUSION,
+      marketDetails: SAMPLE_MARKET_DETAILS,
+      keyFindings: SAMPLE_KEY_FINDINGS,
+      tableOfContents: SAMPLE_TABLE_OF_CONTENTS,
+      marketDrivers: SAMPLE_MARKET_DRIVERS,
+      challenges: SAMPLE_CHALLENGES,
     },
     metadata: {
       metaTitle: 'Emerging Markets Healthcare Investment Guide | Free Report',
@@ -410,6 +504,7 @@ const mockReports: Report[] = [
     geography: ['Global', 'North America'],
     publishDate: new Date('2025-01-15').toISOString(),
     price: 4499,
+    discountedPrice: 4499,
     accessType: 'paid',
     status: 'draft',
     sections: {
@@ -421,6 +516,11 @@ const mockReports: Report[] = [
       regional: '',
       trends: '',
       conclusion: '<h2>Conclusion</h2><p>Draft - pending final analysis...</p>',
+      marketDetails: '',
+      keyFindings: '',
+      tableOfContents: '',
+      marketDrivers: '',
+      challenges: '',
     },
     metadata: {
       metaTitle: '',
@@ -442,6 +542,7 @@ const mockReports: Report[] = [
     geography: ['Global'],
     publishDate: new Date('2025-02-01').toISOString(),
     price: 3999,
+    discountedPrice: 3999,
     accessType: 'paid',
     status: 'draft',
     sections: {
@@ -453,6 +554,11 @@ const mockReports: Report[] = [
       regional: '',
       trends: '',
       conclusion: '',
+      marketDetails: '',
+      keyFindings: '',
+      tableOfContents: '',
+      marketDrivers: '',
+      challenges: '',
     },
     metadata: {
       metaTitle: '',
@@ -474,6 +580,7 @@ const mockReports: Report[] = [
     geography: ['Global'],
     publishDate: new Date('2025-02-15').toISOString(),
     price: 5499,
+    discountedPrice: 5499,
     accessType: 'paid',
     status: 'draft',
     sections: {
@@ -485,6 +592,11 @@ const mockReports: Report[] = [
       regional: '',
       trends: '',
       conclusion: '',
+      marketDetails: '',
+      keyFindings: '',
+      tableOfContents: '',
+      marketDrivers: '',
+      challenges: '',
     },
     metadata: {
       metaTitle: '',
@@ -506,6 +618,7 @@ const mockReports: Report[] = [
     geography: ['North America', 'Europe'],
     publishDate: new Date('2025-03-01').toISOString(),
     price: 6499,
+    discountedPrice: 6499,
     accessType: 'paid',
     status: 'draft',
     sections: {
@@ -518,6 +631,11 @@ const mockReports: Report[] = [
       regional: '',
       trends: '',
       conclusion: '',
+      marketDetails: '',
+      keyFindings: '',
+      tableOfContents: '',
+      marketDrivers: '',
+      challenges: '',
     },
     metadata: {
       metaTitle: '',
@@ -539,6 +657,7 @@ const mockReports: Report[] = [
     geography: ['Global'],
     publishDate: new Date('2025-03-15').toISOString(),
     price: 7999,
+    discountedPrice: 7999,
     accessType: 'paid',
     status: 'draft',
     sections: {
@@ -550,6 +669,11 @@ const mockReports: Report[] = [
       regional: '',
       trends: '',
       conclusion: '',
+      marketDetails: '',
+      keyFindings: '',
+      tableOfContents: '',
+      marketDrivers: '',
+      challenges: '',
     },
     metadata: {
       metaTitle: '',
