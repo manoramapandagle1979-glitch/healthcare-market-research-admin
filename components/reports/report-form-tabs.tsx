@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -58,8 +58,6 @@ const reportFormSchema = z.object({
     marketDetails: z.string().min(100, 'Market details is required (min 100 chars)'),
     keyFindings: z.string().min(100, 'Key findings is required (min 100 chars)'),
     tableOfContents: z.string().min(50, 'Table of contents is required (min 50 chars)'),
-    marketDrivers: z.string().min(50, 'Market drivers is required (min 50 chars)'),
-    challenges: z.string().min(50, 'Challenges & restraints is required (min 50 chars)'),
   }),
   faqs: z
     .array(
@@ -88,6 +86,7 @@ interface ReportFormTabsProps {
   report?: Report;
   onSubmit: (data: ReportFormData) => Promise<void>;
   onSaveTab?: (tabKey: string, data: Partial<ReportFormData>) => Promise<void>;
+  onAutoSave?: (data: Partial<ReportFormData>) => void;
   onPreview?: () => void;
   isSaving: boolean;
 }
@@ -96,10 +95,12 @@ export function ReportFormTabs({
   report,
   onSubmit,
   onSaveTab,
+  onAutoSave,
   onPreview,
   isSaving,
 }: ReportFormTabsProps) {
   const [activeTab, setActiveTab] = useState('details');
+  const isInitialMount = useRef(true);
 
   const form = useForm<ReportFormData>({
     resolver: zodResolver(reportFormSchema),
@@ -175,6 +176,23 @@ export function ReportFormTabs({
           },
         },
   });
+
+  // Auto-save functionality
+  useEffect(() => {
+    // Skip auto-save on initial mount
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    // Watch for form changes and trigger auto-save
+    if (onAutoSave) {
+      const subscription = form.watch(value => {
+        onAutoSave(value as Partial<ReportFormData>);
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, [form, onAutoSave]);
 
   return (
     <Form {...form}>

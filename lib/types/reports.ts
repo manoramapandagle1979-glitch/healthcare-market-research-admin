@@ -60,8 +60,6 @@ export interface ReportSections {
   marketDetails: string;
   keyFindings: string;
   tableOfContents: string;
-  marketDrivers: string;
-  challenges: string;
 }
 
 // Market Metrics

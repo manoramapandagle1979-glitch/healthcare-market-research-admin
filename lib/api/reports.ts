@@ -55,8 +55,6 @@ function convertApiReportToLegacy(apiReport: ApiReport): Report {
       marketDetails: apiReport.sections?.marketDetails || '',
       keyFindings: apiReport.sections?.keyFindings || '',
       tableOfContents: apiReport.sections?.tableOfContents || '',
-      marketDrivers: '', // Legacy field not in API
-      challenges: '', // Legacy field not in API
     },
     faqs: apiReport.faqs,
     metadata: apiReport.metadata || {},
