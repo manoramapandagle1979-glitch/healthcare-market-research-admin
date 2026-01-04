@@ -1,10 +1,5 @@
 import { apiClient } from './client';
-import type {
-  ReportAuthor,
-  AuthorFormData,
-  AuthorsResponse,
-  AuthorResponse,
-} from '@/lib/types/reports';
+import type { AuthorFormData, AuthorsResponse, AuthorResponse } from '@/lib/types/reports';
 
 /**
  * Fetches all authors
