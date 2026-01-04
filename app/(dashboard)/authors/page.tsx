@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Search, Pencil, Trash2, User } from 'lucide-react';
-import { fetchAuthorsMock, deleteAuthorMock } from '@/lib/api/authors.mock';
+import { fetchAuthors, deleteAuthor } from '@/lib/api/authors';
 import type { ReportAuthor } from '@/lib/types/reports';
 import {
   AlertDialog,
@@ -57,7 +57,7 @@ export default function AuthorsPage() {
   const loadAuthors = async () => {
     try {
       setIsLoading(true);
-      const response = await fetchAuthorsMock();
+      const response = await fetchAuthors();
       setAuthors(response.authors);
       setFilteredAuthors(response.authors);
     } catch (error) {
@@ -71,7 +71,7 @@ export default function AuthorsPage() {
     if (!deleteId) return;
 
     try {
-      await deleteAuthorMock(deleteId);
+      await deleteAuthor(deleteId);
       await loadAuthors();
       setDeleteId(null);
     } catch (error) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ReportFormTabs } from '@/components/reports/report-form-tabs';
 import { VersionHistory } from '@/components/reports/version-history';
@@ -19,8 +19,6 @@ export default function EditReportPage() {
   const { report, isLoading, error, fetchReport, saveReport, isSaving } = useReport();
   const reportId = params.id as string;
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const autoSaveTimerRef = useRef<NodeJS.Timeout>();
-  const formDataRef = useRef<Partial<ReportFormData>>({});
 
   useEffect(() => {
     if (reportId) {
@@ -34,59 +32,21 @@ export default function EditReportPage() {
     }
   }, [user, router]);
 
-  // Cleanup auto-save timer on unmount
-  useEffect(() => {
-    return () => {
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current);
-      }
-    };
-  }, []);
-
-  const performSave = useCallback(
-    async (data: Partial<ReportFormData>, showToast = false) => {
+  const handleSaveTab = useCallback(
+    async (tabKey: string, data: Partial<ReportFormData>) => {
       try {
-        // Merge with existing form data
-        const mergedData = { ...formDataRef.current, ...data };
-
         // For existing reports, we can do partial updates
         // The API should handle merging the partial data with the existing report
-        await saveReport(reportId, mergedData as ReportFormData);
+        await saveReport(reportId, data as ReportFormData);
 
         setLastSaved(new Date());
-        formDataRef.current = mergedData;
-
-        if (showToast) {
-          toast.success('Draft saved successfully');
-        }
+        toast.success('Draft saved successfully');
       } catch (error) {
         console.error('Error saving draft:', error);
-        if (showToast) {
-          toast.error('Failed to save draft');
-        }
+        toast.error('Failed to save draft');
       }
     },
     [saveReport, reportId]
-  );
-
-  const handleSaveTab = async (tabKey: string, data: Partial<ReportFormData>) => {
-    // Manual save when user clicks "Save Draft" button
-    await performSave(data, true);
-  };
-
-  const scheduleAutoSave = useCallback(
-    (data: Partial<ReportFormData>) => {
-      // Clear existing timer
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current);
-      }
-
-      // Schedule auto-save after 3 seconds of inactivity
-      autoSaveTimerRef.current = setTimeout(() => {
-        performSave(data, false);
-      }, 3000);
-    },
-    [performSave]
   );
 
   if (isLoading) {
@@ -133,11 +93,9 @@ export default function EditReportPage() {
             report={report}
             onSubmit={async data => {
               // Final submit - save with form data
-              const finalData = { ...formDataRef.current, ...data };
-              await saveReport(reportId, finalData as ReportFormData);
+              await saveReport(reportId, data);
             }}
             onSaveTab={handleSaveTab}
-            onAutoSave={scheduleAutoSave}
             onPreview={() => router.push(`/reports/${reportId}/preview`)}
             isSaving={isSaving}
           />

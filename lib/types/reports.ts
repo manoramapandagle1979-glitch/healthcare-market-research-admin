@@ -58,6 +58,8 @@ export interface ReportSections {
   trends: string;
   conclusion: string;
   marketDetails: string;
+  marketDrivers: string;
+  challenges: string;
   keyFindings: string;
   tableOfContents: string;
 }
@@ -181,6 +183,7 @@ export interface ReportResponse {
 // Form data (for create/update)
 export interface ReportFormData {
   title: string;
+  slug: string;
   summary: string;
   category: string;
   geography: string[];

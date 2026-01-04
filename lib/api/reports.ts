@@ -12,17 +12,25 @@ import type {
   Report,
   ReportFormat,
 } from '@/lib/types/reports';
-import {
-  fetchReportsMock,
-  fetchReportByIdMock,
-  createReportMock,
-  updateReportMock,
-  deleteReportMock,
-} from './reports.mock';
 import * as reportsApi from './reports.api';
 import type { ApiReport, ApiReportFilters } from '@/lib/types/api-types';
 
-const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true';
+// ============ Helper Functions ============
+
+/**
+ * Converts a date string from "YYYY-MM-DD" format to RFC3339 format expected by the backend
+ * @param dateString Date string in "YYYY-MM-DD" format
+ * @returns Date string in RFC3339 format "YYYY-MM-DDTHH:MM:SSZ" or undefined if input is invalid
+ */
+function convertDateToRFC3339(dateString: string | undefined): string | undefined {
+  if (!dateString) return undefined;
+
+  // If already in RFC3339 format, return as is
+  if (dateString.includes('T')) return dateString;
+
+  // Convert "YYYY-MM-DD" to "YYYY-MM-DDT00:00:00Z"
+  return `${dateString}T00:00:00Z`;
+}
 
 // ============ Helper: Convert API types to Legacy types ============
 function convertApiReportToLegacy(apiReport: ApiReport): Report {
@@ -82,10 +90,6 @@ function convertLegacyFiltersToApi(filters?: ReportFilters): ApiReportFilters {
 // ============ Public API Functions (Legacy Compatible) ============
 
 export async function fetchReports(filters?: ReportFilters): Promise<ReportsResponse> {
-  if (USE_MOCK_DATA) {
-    return fetchReportsMock(filters);
-  }
-
   const apiFilters = convertLegacyFiltersToApi(filters);
   const response = await reportsApi.fetchReports(apiFilters);
 
@@ -103,10 +107,6 @@ export async function fetchReports(filters?: ReportFilters): Promise<ReportsResp
 }
 
 export async function fetchReportById(id: string): Promise<ReportResponse> {
-  if (USE_MOCK_DATA) {
-    return fetchReportByIdMock(id);
-  }
-
   // Treat id as slug for now (API uses slugs)
   const response = await reportsApi.fetchReportBySlug(id);
 
@@ -120,17 +120,14 @@ export async function fetchReportById(id: string): Promise<ReportResponse> {
 }
 
 export async function createReport(data: ReportFormData): Promise<ReportResponse> {
-  if (USE_MOCK_DATA) {
-    return createReportMock(data);
-  }
-
   // Convert form data to API format
   const apiData: Partial<ApiReport> = {
     title: data.title,
+    slug: data.slug,
     summary: data.summary,
     category_id: Number(data.category),
     geography: data.geography,
-    publish_date: data.publishDate,
+    publish_date: convertDateToRFC3339(data.publishDate),
     price: data.price,
     discounted_price: data.discountedPrice,
     access_type: data.accessType,
@@ -160,17 +157,14 @@ export async function updateReport(
   id: string,
   data: Partial<ReportFormData>
 ): Promise<ReportResponse> {
-  if (USE_MOCK_DATA) {
-    return updateReportMock(id, data);
-  }
-
   // Convert form data to API format
   const apiData: Partial<ApiReport> = {};
   if (data.title) apiData.title = data.title;
+  if (data.slug) apiData.slug = data.slug;
   if (data.summary) apiData.summary = data.summary;
   if (data.category) apiData.category_id = Number(data.category);
   if (data.geography) apiData.geography = data.geography;
-  if (data.publishDate !== undefined) apiData.publish_date = data.publishDate;
+  if (data.publishDate !== undefined) apiData.publish_date = convertDateToRFC3339(data.publishDate);
   if (data.price !== undefined) apiData.price = data.price;
   if (data.discountedPrice !== undefined) apiData.discounted_price = data.discountedPrice;
   if (data.accessType) apiData.access_type = data.accessType;
@@ -196,10 +190,6 @@ export async function updateReport(
 }
 
 export async function deleteReport(id: string): Promise<void> {
-  if (USE_MOCK_DATA) {
-    return deleteReportMock(id);
-  }
-
   const response = await reportsApi.deleteReport(Number(id));
 
   if (!response.success) {

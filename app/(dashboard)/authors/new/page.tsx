@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthorForm } from '@/components/authors/author-form';
-import { createAuthorMock } from '@/lib/api/authors.mock';
+import { createAuthor } from '@/lib/api/authors';
 import type { AuthorFormData } from '@/lib/types/reports';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,7 @@ export default function NewAuthorPage() {
   const handleSubmit = async (data: AuthorFormData) => {
     try {
       setIsSaving(true);
-      await createAuthorMock(data);
+      await createAuthor(data);
       router.push('/authors');
     } catch (error) {
       console.error('Failed to create author:', error);

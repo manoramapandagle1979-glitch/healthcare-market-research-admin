@@ -9,10 +9,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { REPORT_CATEGORIES, GEOGRAPHIES } from '@/lib/config/reports';
+import { GEOGRAPHIES } from '@/lib/config/reports';
+import { fetchCategories, type Category } from '@/lib/api/categories';
 import type { ReportFilters, ReportStatus, AccessType } from '@/lib/types/reports';
 import { Search, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface ReportFiltersProps {
   filters: ReportFilters;
@@ -21,6 +22,24 @@ interface ReportFiltersProps {
 
 export function ReportFiltersComponent({ filters, onFiltersChange }: ReportFiltersProps) {
   const [searchInput, setSearchInput] = useState(filters.search || '');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    try {
+      setIsLoadingCategories(true);
+      const response = await fetchCategories({ limit: 100 }); // Fetch all categories
+      setCategories(response.categories.filter(cat => cat.isActive));
+    } catch (error) {
+      console.error('Failed to load categories:', error);
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,15 +102,16 @@ export function ReportFiltersComponent({ filters, onFiltersChange }: ReportFilte
               page: 1,
             })
           }
+          disabled={isLoadingCategories}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Category" />
+            <SelectValue placeholder={isLoadingCategories ? "Loading..." : "Category"} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            {REPORT_CATEGORIES.map(cat => (
-              <SelectItem key={cat} value={cat}>
-                {cat}
+            {categories.map(cat => (
+              <SelectItem key={cat.id} value={String(cat.id)}>
+                {cat.name}
               </SelectItem>
             ))}
           </SelectContent>

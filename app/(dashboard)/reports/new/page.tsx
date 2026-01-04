@@ -1,12 +1,13 @@
 'use client';
 
-import { ReportFormTabs } from '@/components/reports/report-form-tabs';
+import { ReportFormTabs, type ReportFormTabsRef } from '@/components/reports/report-form-tabs';
 import { useReport } from '@/hooks/use-report';
 import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import type { ReportFormData } from '@/lib/types/reports';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 export default function CreateReportPage() {
   const { user } = useAuth();
@@ -14,8 +15,7 @@ export default function CreateReportPage() {
   const { saveReport, isSaving } = useReport();
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [createdReportId, setCreatedReportId] = useState<string | null>(null);
-  const autoSaveTimerRef = useRef<NodeJS.Timeout>();
-  const formDataRef = useRef<Partial<ReportFormData>>({});
+  const formRef = useRef<ReportFormTabsRef>(null);
 
   // Role check
   useEffect(() => {
@@ -24,38 +24,27 @@ export default function CreateReportPage() {
     }
   }, [user, router]);
 
-  // Cleanup auto-save timer on unmount
-  useEffect(() => {
-    return () => {
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current);
-      }
-    };
-  }, []);
-
-  const performSave = useCallback(
-    async (data: Partial<ReportFormData>, showToast = false) => {
+  const handleSaveTab = useCallback(
+    async (tabKey: string, data: Partial<ReportFormData>) => {
       try {
-        // Merge with existing form data
-        const mergedData = { ...formDataRef.current, ...data };
-
         // For new reports, we need to ensure we have minimum required fields
         // If this is the first save, create as draft with minimal data
         const saveData: ReportFormData = {
-          title: mergedData.title || 'Untitled Report (Draft)',
-          summary: mergedData.summary || 'Draft in progress',
-          category: mergedData.category || 'Pharmaceuticals',
-          geography: mergedData.geography || ['Global'],
-          price: mergedData.price || 0,
-          discountedPrice: mergedData.discountedPrice || 0,
-          accessType: mergedData.accessType || 'free',
+          title: data.title || 'Untitled Report (Draft)',
+          slug: data.slug || 'untitled-report-draft',
+          summary: data.summary || 'Draft in progress',
+          category: data.category || '', // Category will be selected by user
+          geography: data.geography || ['Global'],
+          price: data.price || 0,
+          discountedPrice: data.discountedPrice || 0,
+          accessType: data.accessType || 'free',
           status: 'draft', // Always save as draft
-          pageCount: mergedData.pageCount,
-          formats: mergedData.formats || [],
-          marketMetrics: mergedData.marketMetrics,
-          authorIds: mergedData.authorIds || [],
-          keyPlayers: mergedData.keyPlayers || [],
-          sections: mergedData.sections || {
+          pageCount: data.pageCount,
+          formats: data.formats || [],
+          marketMetrics: data.marketMetrics,
+          authorIds: data.authorIds || [],
+          keyPlayers: data.keyPlayers || [],
+          sections: data.sections || {
             executiveSummary: '',
             marketOverview: '',
             marketSize: '',
@@ -68,8 +57,8 @@ export default function CreateReportPage() {
             keyFindings: '',
             tableOfContents: '',
           },
-          faqs: mergedData.faqs || [],
-          metadata: mergedData.metadata || {
+          faqs: data.faqs || [],
+          metadata: data.metadata || {
             metaTitle: '',
             metaDescription: '',
             keywords: [],
@@ -82,7 +71,7 @@ export default function CreateReportPage() {
             schemaJson: '',
             robotsDirective: 'index, follow',
           },
-          publishDate: mergedData.publishDate,
+          publishDate: data.publishDate,
         };
 
         const result = await saveReport(createdReportId, saveData);
@@ -94,50 +83,37 @@ export default function CreateReportPage() {
           }
 
           setLastSaved(new Date());
-          formDataRef.current = mergedData;
-
-          if (showToast) {
-            toast.success('Draft saved successfully');
-          }
+          toast.success('Draft saved successfully');
         }
       } catch (error) {
         console.error('Error saving draft:', error);
-        if (showToast) {
-          toast.error('Failed to save draft');
-        }
+        toast.error('Failed to save draft');
       }
     },
     [saveReport, createdReportId]
   );
 
-  const handleSaveTab = async (tabKey: string, data: Partial<ReportFormData>) => {
-    // Manual save when user clicks "Save Draft" button
-    await performSave(data, true);
-  };
-
-  const scheduleAutoSave = useCallback(
-    (data: Partial<ReportFormData>) => {
-      // Clear existing timer
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current);
-      }
-
-      // Schedule auto-save after 3 seconds of inactivity
-      autoSaveTimerRef.current = setTimeout(() => {
-        performSave(data, false);
-      }, 3000);
-    },
-    [performSave]
-  );
-
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Create New Report</h1>
-          <p className="text-muted-foreground mt-2">
-            Fill in the details below to create a new market research report
-          </p>
+        <div className="flex items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">Create New Report</h1>
+            <p className="text-muted-foreground mt-2">
+              Fill in the details below to create a new market research report
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              formRef.current?.fillWithSampleData();
+              toast.success('Form filled with sample data');
+            }}
+            className="shrink-0"
+          >
+            Fill Sample Data
+          </Button>
         </div>
         <div className="text-sm">
           {isSaving ? (
@@ -151,13 +127,12 @@ export default function CreateReportPage() {
       </div>
 
       <ReportFormTabs
+        ref={formRef}
         onSubmit={async data => {
           // Final submit - save as published or draft based on form data
-          const finalData = { ...formDataRef.current, ...data };
-          await saveReport(createdReportId, finalData as ReportFormData);
+          await saveReport(createdReportId, data);
         }}
         onSaveTab={handleSaveTab}
-        onAutoSave={scheduleAutoSave}
         isSaving={isSaving}
       />
     </div>

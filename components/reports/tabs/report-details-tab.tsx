@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,7 +15,8 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Save, TrendingUp } from 'lucide-react';
-import { REPORT_CATEGORIES, GEOGRAPHIES, REPORT_FORMATS } from '@/lib/config/reports';
+import { GEOGRAPHIES, REPORT_FORMATS } from '@/lib/config/reports';
+import { fetchCategories, type Category } from '@/lib/api/categories';
 import type { UseFormReturn } from 'react-hook-form';
 import type { ReportFormData } from '@/lib/types/reports';
 
@@ -25,11 +27,31 @@ interface ReportDetailsTabProps {
 }
 
 export function ReportDetailsTab({ form, onSaveTab, isSaving }: ReportDetailsTabProps) {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    try {
+      setIsLoadingCategories(true);
+      const response = await fetchCategories({ limit: 100 }); // Fetch all categories
+      setCategories(response.categories.filter(cat => cat.isActive));
+    } catch (error) {
+      console.error('Failed to load categories:', error);
+      // Optionally show a toast notification here
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  };
   const handleSaveTab = async () => {
     const values = form.getValues();
     if (onSaveTab) {
       await onSaveTab('details', {
         title: values.title,
+        slug: values.slug,
         summary: values.summary,
         category: values.category,
         geography: values.geography,
@@ -67,6 +89,43 @@ export function ReportDetailsTab({ form, onSaveTab, isSaving }: ReportDetailsTab
 
           <FormField
             control={form.control}
+            name="slug"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>URL Slug</FormLabel>
+                <div className="flex gap-2">
+                  <FormControl>
+                    <Input placeholder="e.g., global-healthcare-market-analysis-2024" {...field} />
+                  </FormControl>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      const title = form.getValues('title');
+                      if (title) {
+                        const slug = title
+                          .toLowerCase()
+                          .trim()
+                          .replace(/[^\w\s-]/g, '')
+                          .replace(/\s+/g, '-')
+                          .replace(/-+/g, '-');
+                        form.setValue('slug', slug);
+                      }
+                    }}
+                  >
+                    Generate
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  URL-friendly identifier for the report (lowercase, hyphens instead of spaces)
+                </p>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="summary"
             render={({ field }) => (
               <FormItem>
@@ -90,16 +149,20 @@ export function ReportDetailsTab({ form, onSaveTab, isSaving }: ReportDetailsTab
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    disabled={isLoadingCategories}
+                  >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue placeholder={isLoadingCategories ? "Loading categories..." : "Select category"} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {REPORT_CATEGORIES.map(cat => (
-                        <SelectItem key={cat} value={cat}>
-                          {cat}
+                      {categories.map(cat => (
+                        <SelectItem key={cat.id} value={String(cat.id)}>
+                          {cat.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

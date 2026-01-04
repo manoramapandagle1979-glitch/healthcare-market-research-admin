@@ -15,7 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Save, Eye, User } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { fetchAuthorsMock } from '@/lib/api/authors.mock';
+import { fetchAuthors } from '@/lib/api/authors';
 import type { UseFormReturn } from 'react-hook-form';
 import type { ReportFormData, ReportAuthor } from '@/lib/types/reports';
 
@@ -42,7 +42,7 @@ export function PublishSettingsTab({
   const loadAuthors = async () => {
     try {
       setIsLoadingAuthors(true);
-      const response = await fetchAuthorsMock();
+      const response = await fetchAuthors();
       setAuthors(response.authors);
     } catch (error) {
       console.error('Failed to load authors:', error);
