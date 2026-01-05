@@ -14,13 +14,13 @@ import { formatCurrency } from '@/lib/utils/format';
 export default function PreviewReportPage() {
   const params = useParams();
   const { report, isLoading, error, fetchReport } = useReport();
-  const reportId = params.id as string;
+  const reportSlug = params.id as string;
 
   useEffect(() => {
-    if (reportId) {
-      fetchReport(reportId);
+    if (reportSlug) {
+      fetchReport(reportSlug);
     }
-  }, [reportId, fetchReport]);
+  }, [reportSlug, fetchReport]);
 
   if (isLoading) {
     return (
@@ -46,7 +46,7 @@ export default function PreviewReportPage() {
           </Link>
         </Button>
         <Button asChild>
-          <Link href={`/reports/${reportId}`}>
+          <Link href={`/reports/${report.slug}`}>
             <Edit className="mr-2 h-4 w-4" />
             Edit Report
           </Link>
@@ -60,9 +60,6 @@ export default function PreviewReportPage() {
             <div className="flex items-center gap-2">
               <Badge variant={report.status === 'published' ? 'default' : 'secondary'}>
                 {report.status}
-              </Badge>
-              <Badge variant={report.accessType === 'paid' ? 'default' : 'outline'}>
-                {report.accessType}
               </Badge>
             </div>
             <CardTitle className="text-3xl">{report.title}</CardTitle>

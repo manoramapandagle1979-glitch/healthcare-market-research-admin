@@ -36,13 +36,19 @@ import { Badge } from '@/components/ui/badge';
 // Validation schema
 const reportFormSchema = z.object({
   title: z.string().min(10, 'Title must be at least 10 characters'),
+  slug: z
+    .string()
+    .min(1, 'Slug is required')
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      'Slug must be lowercase letters, numbers, and hyphens only'
+    ),
   summary: z.string().min(50, 'Summary must be at least 50 characters'),
   category: z.string().min(1, 'Category is required'),
   geography: z.array(z.string()).min(1, 'Select at least one geography'),
   publishDate: z.string().optional(),
   price: z.number().min(0, 'Price must be positive'),
   discountedPrice: z.number().min(0, 'Discounted price must be positive'),
-  accessType: z.enum(['free', 'paid']),
   status: z.enum(['draft', 'published']),
   pageCount: z.number().min(1, 'Page count must be at least 1').optional(),
   formats: z.array(z.enum(['PDF', 'Excel', 'Word', 'PowerPoint'])).optional(),
@@ -80,8 +86,6 @@ const reportFormSchema = z.object({
     marketDetails: z.string().min(100, 'Market details is required (min 100 chars)'),
     keyFindings: z.string().min(100, 'Key findings is required (min 100 chars)'),
     tableOfContents: z.string().min(50, 'Table of contents is required (min 50 chars)'),
-    marketDrivers: z.string().min(50, 'Market drivers is required (min 50 chars)'),
-    challenges: z.string().min(50, 'Challenges & restraints is required (min 50 chars)'),
   }),
   faqs: z
     .array(
@@ -121,13 +125,13 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
     defaultValues: report
       ? {
           title: report.title,
+          slug: report.slug,
           summary: report.summary,
           category: report.category,
           geography: report.geography,
           publishDate: report.publishDate || '',
           price: report.price,
           discountedPrice: report.discountedPrice,
-          accessType: report.accessType,
           status: report.status,
           pageCount: report.pageCount,
           formats: report.formats || [],
@@ -140,13 +144,13 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
         }
       : {
           title: '',
+          slug: '',
           summary: '',
           category: REPORT_CATEGORIES[0],
           geography: ['Global'],
           publishDate: '',
           price: 3490,
           discountedPrice: 3090,
-          accessType: 'free',
           status: 'draft',
           pageCount: undefined,
           formats: [],
@@ -173,8 +177,6 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
             marketDetails: '',
             keyFindings: '',
             tableOfContents: '',
-            marketDrivers: '',
-            challenges: '',
           },
           faqs: [],
           metadata: {

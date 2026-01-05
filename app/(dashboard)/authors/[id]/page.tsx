@@ -1,43 +1,22 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthorForm } from '@/components/authors/author-form';
-import { fetchAuthorById, updateAuthor } from '@/lib/api/authors';
-import type { ReportAuthor, AuthorFormData } from '@/lib/types/reports';
+import { useAuthor } from '@/hooks/use-author';
+import type { AuthorFormData } from '@/lib/types/reports';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { use } from 'react';
 
-export default function EditAuthorPage({ params }: { params: { id: string } }) {
+export default function EditAuthorPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
-  const [author, setAuthor] = useState<ReportAuthor | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const loadAuthor = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetchAuthorById(params.id);
-      setAuthor(response.author);
-    } catch (error) {
-      console.error('Failed to load author:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [params.id]);
-
-  useEffect(() => {
-    loadAuthor();
-  }, [loadAuthor]);
+  const { id } = use(params);
+  const { author, isLoading, isSaving, error, handleUpdate } = useAuthor(id);
 
   const handleSubmit = async (data: AuthorFormData) => {
-    try {
-      setIsSaving(true);
-      await updateAuthor(params.id, data);
+    const updatedAuthor = await handleUpdate(id, data);
+    if (updatedAuthor) {
       router.push('/authors');
-    } catch (error) {
-      console.error('Failed to update author:', error);
-      setIsSaving(false);
     }
   };
 
@@ -45,8 +24,28 @@ export default function EditAuthorPage({ params }: { params: { id: string } }) {
     return <div className="text-center py-8">Loading author...</div>;
   }
 
+  if (error) {
+    return (
+      <div className="text-center py-8 space-y-4">
+        <p className="text-destructive">Error loading author: {error}</p>
+        <Button variant="outline" onClick={() => router.push('/authors')}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Authors
+        </Button>
+      </div>
+    );
+  }
+
   if (!author) {
-    return <div className="text-center py-8">Author not found</div>;
+    return (
+      <div className="text-center py-8 space-y-4">
+        <p>Author not found</p>
+        <Button variant="outline" onClick={() => router.push('/authors')}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Authors
+        </Button>
+      </div>
+    );
   }
 
   return (

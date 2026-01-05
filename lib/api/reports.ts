@@ -44,7 +44,6 @@ function convertApiReportToLegacy(apiReport: ApiReport): Report {
     publishDate: apiReport.publish_date,
     price: apiReport.price || 0,
     discountedPrice: apiReport.discounted_price || 0,
-    accessType: apiReport.access_type || 'paid',
     status: apiReport.status,
     pageCount: apiReport.page_count,
     formats: apiReport.formats as ReportFormat[],
@@ -66,7 +65,6 @@ function convertApiReportToLegacy(apiReport: ApiReport): Report {
     },
     faqs: apiReport.faqs,
     metadata: apiReport.metadata || {},
-    versions: [],
     createdAt: apiReport.created_at,
     updatedAt: apiReport.updated_at,
     author: { id: '', email: '', name: '' },
@@ -82,7 +80,6 @@ function convertLegacyFiltersToApi(filters?: ReportFilters): ApiReportFilters {
     status: filters.status,
     category: filters.category,
     geography: filters.geography,
-    accessType: filters.accessType,
     search: filters.search,
   };
 }
@@ -93,12 +90,15 @@ export async function fetchReports(filters?: ReportFilters): Promise<ReportsResp
   const apiFilters = convertLegacyFiltersToApi(filters);
   const response = await reportsApi.fetchReports(apiFilters);
 
-  if (!response.success || !response.data) {
+  if (!response.success) {
     throw new Error(response.error || 'Failed to fetch reports');
   }
 
+  // Handle null data as empty array
+  const reports = response.data ? response.data.map(convertApiReportToLegacy) : [];
+
   return {
-    reports: response.data.map(convertApiReportToLegacy),
+    reports,
     total: response.meta?.total || 0,
     page: response.meta?.page || 1,
     limit: response.meta?.limit || 10,
@@ -106,12 +106,15 @@ export async function fetchReports(filters?: ReportFilters): Promise<ReportsResp
   };
 }
 
-export async function fetchReportById(id: string): Promise<ReportResponse> {
-  // Treat id as slug for now (API uses slugs)
-  const response = await reportsApi.fetchReportBySlug(id);
+export async function fetchReportBySlug(slug: string): Promise<ReportResponse> {
+  const response = await reportsApi.fetchReportBySlug(slug);
 
-  if (!response.success || !response.data) {
+  if (!response.success) {
     throw new Error(response.error || 'Failed to fetch report');
+  }
+
+  if (!response.data) {
+    throw new Error('Report not found');
   }
 
   return {
@@ -130,7 +133,6 @@ export async function createReport(data: ReportFormData): Promise<ReportResponse
     publish_date: convertDateToRFC3339(data.publishDate),
     price: data.price,
     discounted_price: data.discountedPrice,
-    access_type: data.accessType,
     status: data.status,
     page_count: data.pageCount,
     formats: data.formats,
@@ -144,8 +146,12 @@ export async function createReport(data: ReportFormData): Promise<ReportResponse
 
   const response = await reportsApi.createReport(apiData);
 
-  if (!response.success || !response.data) {
+  if (!response.success) {
     throw new Error(response.error || 'Failed to create report');
+  }
+
+  if (!response.data) {
+    throw new Error('No report data returned from server');
   }
 
   return {
@@ -167,7 +173,6 @@ export async function updateReport(
   if (data.publishDate !== undefined) apiData.publish_date = convertDateToRFC3339(data.publishDate);
   if (data.price !== undefined) apiData.price = data.price;
   if (data.discountedPrice !== undefined) apiData.discounted_price = data.discountedPrice;
-  if (data.accessType) apiData.access_type = data.accessType;
   if (data.status) apiData.status = data.status;
   if (data.pageCount !== undefined) apiData.page_count = data.pageCount;
   if (data.formats) apiData.formats = data.formats;
@@ -180,8 +185,12 @@ export async function updateReport(
 
   const response = await reportsApi.updateReport(Number(id), apiData);
 
-  if (!response.success || !response.data) {
+  if (!response.success) {
     throw new Error(response.error || 'Failed to update report');
+  }
+
+  if (!response.data) {
+    throw new Error('No report data returned from server');
   }
 
   return {

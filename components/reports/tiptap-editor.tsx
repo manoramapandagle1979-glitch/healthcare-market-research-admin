@@ -1,6 +1,7 @@
 'use client';
 
 import { useEditor, EditorContent } from '@tiptap/react';
+import { useEffect } from 'react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import { Table } from '@tiptap/extension-table';
@@ -102,6 +103,20 @@ export function TiptapEditor({
       },
     },
   });
+
+  // Sync editor content when the content prop changes from outside
+  useEffect(() => {
+    if (!editor) return;
+
+    // Get current editor content as HTML
+    const currentContent = editor.getHTML();
+
+    // Only update if the content is different to avoid unnecessary updates
+    // and prevent cursor jumping while typing
+    if (content !== currentContent) {
+      editor.commands.setContent(content);
+    }
+  }, [editor, content]);
 
   if (!editor) {
     return null;

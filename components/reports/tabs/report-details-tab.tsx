@@ -49,19 +49,8 @@ export function ReportDetailsTab({ form, onSaveTab, isSaving }: ReportDetailsTab
   const handleSaveTab = async () => {
     const values = form.getValues();
     if (onSaveTab) {
-      await onSaveTab('details', {
-        title: values.title,
-        slug: values.slug,
-        summary: values.summary,
-        category: values.category,
-        geography: values.geography,
-        publishDate: values.publishDate,
-        price: values.price,
-        discountedPrice: values.discountedPrice,
-        pageCount: values.pageCount,
-        formats: values.formats,
-        marketMetrics: values.marketMetrics,
-      });
+      // Send all form values, not just fields from this tab
+      await onSaveTab('details', values);
     }
   };
 
@@ -156,7 +145,11 @@ export function ReportDetailsTab({ form, onSaveTab, isSaving }: ReportDetailsTab
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder={isLoadingCategories ? "Loading categories..." : "Select category"} />
+                        <SelectValue
+                          placeholder={
+                            isLoadingCategories ? 'Loading categories...' : 'Select category'
+                          }
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>

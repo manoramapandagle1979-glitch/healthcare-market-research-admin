@@ -34,7 +34,7 @@ export function ReportList({ reports, isLoading, onDelete }: ReportListProps) {
     );
   }
 
-  if (reports.length === 0) {
+  if (!reports || reports.length === 0) {
     return (
       <div className="text-center py-12 border rounded-lg">
         <p className="text-muted-foreground">No reports found</p>
@@ -49,7 +49,6 @@ export function ReportList({ reports, isLoading, onDelete }: ReportListProps) {
           <TableHead>Title</TableHead>
           <TableHead>Category</TableHead>
           <TableHead>Status</TableHead>
-          <TableHead>Access</TableHead>
           <TableHead>Price</TableHead>
           <TableHead>Updated</TableHead>
           <TableHead className="text-right">Actions</TableHead>
@@ -65,11 +64,6 @@ export function ReportList({ reports, isLoading, onDelete }: ReportListProps) {
                 {report.status}
               </Badge>
             </TableCell>
-            <TableCell>
-              <Badge variant={report.accessType === 'paid' ? 'default' : 'outline'}>
-                {report.accessType}
-              </Badge>
-            </TableCell>
             <TableCell>{formatCurrency(report.price)}</TableCell>
             <TableCell className="text-sm text-muted-foreground">
               {formatRelativeTime(report.updatedAt)}
@@ -77,12 +71,12 @@ export function ReportList({ reports, isLoading, onDelete }: ReportListProps) {
             <TableCell className="text-right">
               <div className="flex justify-end gap-2">
                 <Button variant="ghost" size="sm" asChild>
-                  <Link href={`/reports/${report.id}/preview`}>
+                  <Link href={`/reports/${report.slug}/preview`}>
                     <Eye className="h-4 w-4" />
                   </Link>
                 </Button>
                 <Button variant="ghost" size="sm" asChild>
-                  <Link href={`/reports/${report.id}`}>
+                  <Link href={`/reports/${report.slug}`}>
                     <Edit className="h-4 w-4" />
                   </Link>
                 </Button>

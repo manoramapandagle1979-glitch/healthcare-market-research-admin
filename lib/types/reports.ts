@@ -23,7 +23,6 @@ export interface UserReference {
 
 // Report status enum
 export type ReportStatus = 'draft' | 'published';
-export type AccessType = 'free' | 'paid';
 
 // Predefined section keys
 export type ReportSectionKey =
@@ -58,8 +57,6 @@ export interface ReportSections {
   trends: string;
   conclusion: string;
   marketDetails: string;
-  marketDrivers: string;
-  challenges: string;
   keyFindings: string;
   tableOfContents: string;
 }
@@ -75,12 +72,11 @@ export interface MarketMetrics {
   cagrEndYear?: number;
 }
 
-// Report Author (Legacy - kept as string for backward compatibility)
+// Report Author
 export interface ReportAuthor {
-  id: string;
+  id: number;
   name: string;
   role?: string;
-  credentials?: string;
   bio?: string;
   createdAt: string;
   updatedAt: string;
@@ -118,17 +114,6 @@ export interface ReportMetadata {
   robotsDirective?: string;
 }
 
-// Version history item
-export interface ReportVersion {
-  id: string;
-  versionNumber: number;
-  summary: string;
-  createdAt: string;
-  author: UserReference;
-  sections: ReportSections;
-  metadata: ReportMetadata;
-}
-
 // Main Report interface
 export interface Report {
   id: string;
@@ -140,7 +125,6 @@ export interface Report {
   publishDate?: string; // Custom publish date
   price: number;
   discountedPrice: number;
-  accessType: AccessType;
   status: ReportStatus;
   pageCount?: number;
   formats?: ReportFormat[];
@@ -150,7 +134,6 @@ export interface Report {
   sections: ReportSections;
   faqs?: FAQ[];
   metadata: ReportMetadata;
-  versions?: ReportVersion[];
   createdAt: string;
   updatedAt: string;
   author: UserReference; // System author (who created in admin)
@@ -162,7 +145,6 @@ export interface ReportFilters {
   category?: string;
   geography?: string;
   search?: string;
-  accessType?: AccessType;
   page?: number;
   limit?: number;
 }
@@ -190,7 +172,6 @@ export interface ReportFormData {
   publishDate?: string;
   price: number;
   discountedPrice: number;
-  accessType: AccessType;
   status: ReportStatus;
   pageCount?: number;
   formats?: ReportFormat[];
@@ -206,16 +187,15 @@ export interface ReportFormData {
 export interface AuthorFormData {
   name: string;
   role?: string;
-  credentials?: string;
   bio?: string;
 }
 
 // Authors API Response
-export interface AuthorsResponse {
-  authors: ReportAuthor[];
-  total: number;
+export interface AuthorsResponse extends ApiResponse<ReportAuthor[]> {
+  data: ReportAuthor[];
+  meta: ApiMeta;
 }
 
-export interface AuthorResponse {
-  author: ReportAuthor;
+export interface AuthorResponse extends ApiResponse<ReportAuthor> {
+  data: ReportAuthor;
 }

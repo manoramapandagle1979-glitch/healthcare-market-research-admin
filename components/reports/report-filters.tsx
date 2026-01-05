@@ -9,9 +9,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { GEOGRAPHIES } from '@/lib/config/reports';
 import { fetchCategories, type Category } from '@/lib/api/categories';
-import type { ReportFilters, ReportStatus, AccessType } from '@/lib/types/reports';
+import type { ReportFilters, ReportStatus } from '@/lib/types/reports';
 import { Search, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -51,8 +50,7 @@ export function ReportFiltersComponent({ filters, onFiltersChange }: ReportFilte
     onFiltersChange({ page: 1 });
   };
 
-  const hasActiveFilters =
-    filters.status || filters.category || filters.geography || filters.accessType || filters.search;
+  const hasActiveFilters = filters.status || filters.category || filters.search;
 
   return (
     <div className="space-y-4">
@@ -72,7 +70,7 @@ export function ReportFiltersComponent({ filters, onFiltersChange }: ReportFilte
       </form>
 
       {/* Filter dropdowns */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="flex gap-4">
         <Select
           value={filters.status || 'all'}
           onValueChange={value =>
@@ -105,7 +103,7 @@ export function ReportFiltersComponent({ filters, onFiltersChange }: ReportFilte
           disabled={isLoadingCategories}
         >
           <SelectTrigger>
-            <SelectValue placeholder={isLoadingCategories ? "Loading..." : "Category"} />
+            <SelectValue placeholder={isLoadingCategories ? 'Loading...' : 'Category'} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
@@ -114,49 +112,6 @@ export function ReportFiltersComponent({ filters, onFiltersChange }: ReportFilte
                 {cat.name}
               </SelectItem>
             ))}
-          </SelectContent>
-        </Select>
-
-        <Select
-          value={filters.geography || 'all'}
-          onValueChange={value =>
-            onFiltersChange({
-              ...filters,
-              geography: value === 'all' ? undefined : value,
-              page: 1,
-            })
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Geography" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Geographies</SelectItem>
-            {GEOGRAPHIES.map(geo => (
-              <SelectItem key={geo} value={geo}>
-                {geo}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select
-          value={filters.accessType || 'all'}
-          onValueChange={value =>
-            onFiltersChange({
-              ...filters,
-              accessType: value === 'all' ? undefined : (value as AccessType),
-              page: 1,
-            })
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Access Type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="free">Free</SelectItem>
-            <SelectItem value="paid">Paid</SelectItem>
           </SelectContent>
         </Select>
       </div>

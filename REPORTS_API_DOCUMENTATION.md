@@ -53,7 +53,6 @@ GET /api/v1/reports
   status?: "draft" | "published";
   category?: string;      // Category name
   geography?: string;     // Geography filter
-  accessType?: "free" | "paid";
   search?: string;        // Search query
 }
 ```

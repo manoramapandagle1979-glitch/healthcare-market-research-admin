@@ -22,7 +22,6 @@ import type { ReportAuthor, AuthorFormData } from '@/lib/types/reports';
 const authorFormSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   role: z.string().optional(),
-  credentials: z.string().optional(),
   bio: z.string().optional(),
 });
 
@@ -39,13 +38,11 @@ export function AuthorForm({ author, onSubmit, isSaving }: AuthorFormProps) {
       ? {
           name: author.name,
           role: author.role || '',
-          credentials: author.credentials || '',
           bio: author.bio || '',
         }
       : {
           name: '',
           role: '',
-          credentials: '',
           bio: '',
         },
   });
@@ -82,27 +79,6 @@ export function AuthorForm({ author, onSubmit, isSaving }: AuthorFormProps) {
                     <Input placeholder="e.g., Lead Analyst, Principal Consultant" {...field} />
                   </FormControl>
                   <FormDescription>Job title or role in research team</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="credentials"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Credentials</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="e.g., 15+ years of experience in healthcare market research..."
-                      rows={2}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Brief summary of expertise, experience, or qualifications
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

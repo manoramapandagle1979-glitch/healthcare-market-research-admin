@@ -27,21 +27,20 @@ export default function CreateReportPage() {
   const handleSaveTab = useCallback(
     async (tabKey: string, data: Partial<ReportFormData>) => {
       try {
-        // For new reports, we need to ensure we have minimum required fields
-        // If this is the first save, create as draft with minimal data
+        // Data now contains all form values from the tab
+        // Ensure we have all required fields with defaults if needed
         const saveData: ReportFormData = {
           title: data.title || 'Untitled Report (Draft)',
           slug: data.slug || 'untitled-report-draft',
           summary: data.summary || 'Draft in progress',
-          category: data.category || '', // Category will be selected by user
+          category: data.category || '',
           geography: data.geography || ['Global'],
-          price: data.price || 0,
-          discountedPrice: data.discountedPrice || 0,
-          accessType: data.accessType || 'free',
-          status: 'draft', // Always save as draft
+          price: data.price !== undefined ? data.price : 0,
+          discountedPrice: data.discountedPrice !== undefined ? data.discountedPrice : 0,
+          status: 'draft', // Always save as draft when using Save Draft button
           pageCount: data.pageCount,
           formats: data.formats || [],
-          marketMetrics: data.marketMetrics,
+          marketMetrics: data.marketMetrics || {},
           authorIds: data.authorIds || [],
           keyPlayers: data.keyPlayers || [],
           sections: data.sections || {

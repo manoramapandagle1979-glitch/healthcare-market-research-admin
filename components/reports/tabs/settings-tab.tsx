@@ -49,7 +49,7 @@ export function SettingsTab({ form, onSubmit, onPreview, isSaving }: SettingsTab
     try {
       setIsLoadingAuthors(true);
       const response = await fetchAuthors();
-      setAuthors(response.authors);
+      setAuthors(response.data || []);
     } catch (error) {
       console.error('Failed to load authors:', error);
     } finally {
@@ -91,11 +91,11 @@ export function SettingsTab({ form, onSubmit, onPreview, isSaving }: SettingsTab
                         className="flex items-start space-x-3 border rounded-lg p-3"
                       >
                         <Checkbox
-                          checked={field.value?.includes(author.id)}
+                          checked={field.value?.includes(String(author.id))}
                           onCheckedChange={checked => {
                             const updated = checked
-                              ? [...(field.value || []), author.id]
-                              : field.value?.filter(id => id !== author.id) || [];
+                              ? [...(field.value || []), String(author.id)]
+                              : field.value?.filter(id => id !== String(author.id)) || [];
                             field.onChange(updated);
                           }}
                         />
@@ -104,10 +104,8 @@ export function SettingsTab({ form, onSubmit, onPreview, isSaving }: SettingsTab
                           {author.role && (
                             <div className="text-sm text-muted-foreground">{author.role}</div>
                           )}
-                          {author.credentials && (
-                            <div className="text-xs text-muted-foreground mt-1">
-                              {author.credentials}
-                            </div>
+                          {author.bio && (
+                            <div className="text-xs text-muted-foreground mt-1">{author.bio}</div>
                           )}
                         </div>
                       </div>

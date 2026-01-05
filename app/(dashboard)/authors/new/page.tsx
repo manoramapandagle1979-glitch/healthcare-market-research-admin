@@ -1,25 +1,20 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthorForm } from '@/components/authors/author-form';
-import { createAuthor } from '@/lib/api/authors';
+import { useAuthor } from '@/hooks/use-author';
 import type { AuthorFormData } from '@/lib/types/reports';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function NewAuthorPage() {
   const router = useRouter();
-  const [isSaving, setIsSaving] = useState(false);
+  const { isSaving, handleCreate } = useAuthor();
 
   const handleSubmit = async (data: AuthorFormData) => {
-    try {
-      setIsSaving(true);
-      await createAuthor(data);
+    const author = await handleCreate(data);
+    if (author) {
       router.push('/authors');
-    } catch (error) {
-      console.error('Failed to create author:', error);
-      setIsSaving(false);
     }
   };
 

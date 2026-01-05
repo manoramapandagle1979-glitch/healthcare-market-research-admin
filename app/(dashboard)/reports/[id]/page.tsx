@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ReportFormTabs } from '@/components/reports/report-form-tabs';
-import { VersionHistory } from '@/components/reports/version-history';
 import { useReport } from '@/hooks/use-report';
 import { useAuth } from '@/contexts/auth-context';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -17,14 +16,14 @@ export default function EditReportPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { report, isLoading, error, fetchReport, saveReport, isSaving } = useReport();
-  const reportId = params.id as string;
+  const reportSlug = params.id as string;
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
   useEffect(() => {
-    if (reportId) {
-      fetchReport(reportId);
+    if (reportSlug) {
+      fetchReport(reportSlug);
     }
-  }, [reportId, fetchReport]);
+  }, [reportSlug, fetchReport]);
 
   useEffect(() => {
     if (user && user.role !== 'admin' && user.role !== 'editor') {
@@ -34,10 +33,12 @@ export default function EditReportPage() {
 
   const handleSaveTab = useCallback(
     async (tabKey: string, data: Partial<ReportFormData>) => {
+      if (!report?.id) return;
+
       try {
         // For existing reports, we can do partial updates
         // The API should handle merging the partial data with the existing report
-        await saveReport(reportId, data as ReportFormData);
+        await saveReport(report.id, data as ReportFormData);
 
         setLastSaved(new Date());
         toast.success('Draft saved successfully');
@@ -46,7 +47,7 @@ export default function EditReportPage() {
         toast.error('Failed to save draft');
       }
     },
-    [saveReport, reportId]
+    [saveReport, report]
   );
 
   if (isLoading) {
@@ -64,7 +65,7 @@ export default function EditReportPage() {
         <AlertCircle className="h-12 w-12 text-destructive mb-4" />
         <p className="text-lg font-semibold mb-2">Failed to load report</p>
         <p className="text-sm text-muted-foreground mb-4">{error}</p>
-        <Button onClick={() => fetchReport(reportId)}>Retry</Button>
+        <Button onClick={() => fetchReport(reportSlug)}>Retry</Button>
       </div>
     );
   }
@@ -87,24 +88,18 @@ export default function EditReportPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <ReportFormTabs
-            report={report}
-            onSubmit={async data => {
-              // Final submit - save with form data
-              await saveReport(reportId, data);
-            }}
-            onSaveTab={handleSaveTab}
-            onPreview={() => router.push(`/reports/${reportId}/preview`)}
-            isSaving={isSaving}
-          />
-        </div>
-
-        <div>
-          <VersionHistory versions={report.versions || []} />
-        </div>
-      </div>
+      <ReportFormTabs
+        report={report}
+        onSubmit={async data => {
+          // Final submit - save with form data
+          if (report?.id) {
+            await saveReport(report.id, data);
+          }
+        }}
+        onSaveTab={handleSaveTab}
+        onPreview={() => router.push(`/reports/${report.slug}/preview`)}
+        isSaving={isSaving}
+      />
     </div>
   );
 }

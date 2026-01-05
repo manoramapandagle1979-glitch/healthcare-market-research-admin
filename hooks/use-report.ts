@@ -4,14 +4,14 @@ import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { Report, ReportFormData } from '@/lib/types/reports';
-import { fetchReportById, createReport, updateReport, deleteReport } from '@/lib/api/reports';
+import { fetchReportBySlug, createReport, updateReport, deleteReport } from '@/lib/api/reports';
 
 interface UseReportReturn {
   report: Report | null;
   isLoading: boolean;
   isSaving: boolean;
   error: string | null;
-  fetchReport: (id: string) => Promise<void>;
+  fetchReport: (slug: string) => Promise<void>;
   saveReport: (id: string | null, data: ReportFormData) => Promise<Report | null>;
   removeReport: (id: string) => Promise<void>;
 }
@@ -23,11 +23,11 @@ export function useReport(): UseReportReturn {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const fetchReport = useCallback(async (id: string) => {
+  const fetchReport = useCallback(async (slug: string) => {
     try {
       setIsLoading(true);
       setError(null);
-      const { report } = await fetchReportById(id);
+      const { report } = await fetchReportBySlug(slug);
       setReport(report);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load report';
@@ -51,7 +51,7 @@ export function useReport(): UseReportReturn {
 
         // Navigate to edit page for new reports
         if (!id) {
-          router.push(`/reports/${response.report.id}`);
+          router.push(`/reports/${response.report.slug}`);
         }
 
         return response.report;

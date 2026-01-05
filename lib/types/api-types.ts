@@ -106,6 +106,8 @@ export interface ApiReportSections {
   marketDetails?: string;
   keyFindings?: string;
   tableOfContents?: string;
+  marketDrivers?: string;
+  challenges?: string;
 }
 
 export interface ApiMarketMetrics {
@@ -158,18 +160,6 @@ export interface ApiChartMetadata {
   report?: ApiReport;
 }
 
-export interface ApiReportVersion {
-  id: number;
-  report_id: number;
-  version_number: number;
-  published_at?: string;
-  published_by?: number;
-  sections?: ApiReportSections;
-  metadata?: ApiReportMetadata;
-  created_at: string;
-  report?: ApiReport;
-}
-
 export interface ApiReport {
   id: number;
   title: string;
@@ -185,7 +175,6 @@ export interface ApiReport {
   discounted_price?: number;
   currency?: string;
   status: 'draft' | 'published';
-  access_type?: 'free' | 'paid';
   page_count?: number;
   formats?: string[];
   market_metrics?: ApiMarketMetrics;
@@ -211,7 +200,6 @@ export interface ApiReportWithRelations extends ApiReport {
   market_segment_name?: string;
   author?: ApiUserReference;
   charts?: ApiChartMetadata[];
-  versions?: ApiReportVersion[];
 }
 
 // ============ Request/Response Types ============
@@ -221,7 +209,6 @@ export interface ApiReportFilters {
   status?: 'draft' | 'published';
   category?: string;
   geography?: string;
-  accessType?: 'free' | 'paid';
   search?: string;
 }
 

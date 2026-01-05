@@ -24,13 +24,20 @@ interface ContentTabProps {
 
 export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
   const handleSaveTab = async () => {
-    const values = form.getValues();
     if (onSaveTab) {
-      await onSaveTab('content', {
-        sections: values.sections,
-        keyPlayers: values.keyPlayers,
-        faqs: values.faqs,
+      // Wait for React to complete any pending state updates from the TiptapEditor
+      // This ensures we capture the latest editor content before saving
+      await new Promise<void>(resolve => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            resolve();
+          });
+        });
       });
+
+      const values = form.getValues();
+      // Send all form values, not just fields from this tab
+      await onSaveTab('content', values);
     }
   };
 
