@@ -69,7 +69,6 @@ const reportFormSchema = z.object({
       z.object({
         name: z.string().min(2, 'Company name must be at least 2 characters'),
         marketShare: z.string().optional(),
-        rank: z.number().optional(),
         description: z.string().optional(),
       })
     )
@@ -148,7 +147,7 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
           summary: '',
           category: REPORT_CATEGORIES[0],
           geography: ['Global'],
-          publishDate: '',
+          publishDate: new Date().toISOString().split('T')[0],
           price: 3490,
           discountedPrice: 3090,
           status: 'draft',
@@ -614,7 +613,7 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
                           </div>
-                          <div className="grid grid-cols-3 gap-3">
+                          <div className="grid grid-cols-2 gap-3">
                             <Input
                               placeholder="Company Name"
                               value={company.name}
@@ -630,19 +629,6 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
                               onChange={e => {
                                 const updated = [...(field.value || [])];
                                 updated[index] = { ...updated[index], marketShare: e.target.value };
-                                field.onChange(updated);
-                              }}
-                            />
-                            <Input
-                              type="number"
-                              placeholder="Rank (optional)"
-                              value={company.rank || ''}
-                              onChange={e => {
-                                const updated = [...(field.value || [])];
-                                updated[index] = {
-                                  ...updated[index],
-                                  rank: e.target.value ? parseInt(e.target.value) : undefined,
-                                };
                                 field.onChange(updated);
                               }}
                             />
@@ -667,7 +653,7 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
                     onClick={() => {
                       const updated = [
                         ...(field.value || []),
-                        { name: '', marketShare: '', rank: undefined, description: '' },
+                        { name: '', marketShare: '', description: '' },
                       ];
                       field.onChange(updated);
                     }}

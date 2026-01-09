@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, PenSquare, BarChart3, Users } from 'lucide-react';
+import { LayoutDashboard, FileText, PenSquare, BarChart3, Users, UserCog } from 'lucide-react';
 
 export type UserRole = 'admin' | 'editor' | 'viewer';
 
@@ -93,12 +93,12 @@ export const navigationItems: NavigationItem[] = [
   //   icon: DollarSign,
   //   roles: ['admin'],
   // },
-  // {
-  //   title: 'Users',
-  //   href: '/users',
-  //   icon: Users,
-  //   roles: ['admin'],
-  // },
+  {
+    title: 'User Management',
+    href: '/users',
+    icon: UserCog,
+    roles: ['admin'],
+  },
   // {
   //   title: 'Settings',
   //   href: '/settings',

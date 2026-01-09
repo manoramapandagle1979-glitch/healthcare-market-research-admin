@@ -124,19 +124,6 @@ export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
                             }}
                           />
                         </div>
-                        <Input
-                          type="number"
-                          placeholder="Rank (optional)"
-                          value={player.rank || ''}
-                          onChange={e => {
-                            const updated = [...(field.value || [])];
-                            updated[index] = {
-                              ...updated[index],
-                              rank: e.target.value ? parseInt(e.target.value) : undefined,
-                            };
-                            field.onChange(updated);
-                          }}
-                        />
                       </div>
                     </Card>
                   ))}

@@ -47,7 +47,6 @@ const reportFormSchema = z.object({
       z.object({
         name: z.string().min(2, 'Company name must be at least 2 characters'),
         marketShare: z.string().optional(),
-        rank: z.number().optional(),
       })
     )
     .optional(),
@@ -123,11 +122,11 @@ const getSampleData = (): ReportFormData => ({
   },
   authorIds: [],
   keyPlayers: [
-    { name: 'Teladoc Health', marketShare: '15.3%', rank: 1 },
-    { name: 'American Well (Amwell)', marketShare: '12.7%', rank: 2 },
-    { name: 'MDLive', marketShare: '9.2%', rank: 3 },
-    { name: 'Doctor on Demand', marketShare: '7.8%', rank: 4 },
-    { name: 'Grand Rounds', marketShare: '5.4%', rank: 5 },
+    { name: 'Teladoc Health', marketShare: '15.3%' },
+    { name: 'American Well (Amwell)', marketShare: '12.7%' },
+    { name: 'MDLive', marketShare: '9.2%' },
+    { name: 'Doctor on Demand', marketShare: '7.8%' },
+    { name: 'Grand Rounds', marketShare: '5.4%' },
   ],
   sections: {
     executiveSummary:
@@ -232,7 +231,7 @@ export const ReportFormTabs = forwardRef<ReportFormTabsRef, ReportFormTabsProps>
             summary: '',
             category: '', // Will be set when categories are loaded
             geography: ['Global'],
-            publishDate: '',
+            publishDate: new Date().toISOString().split('T')[0],
             price: 3490,
             discountedPrice: 3090,
             status: 'draft',

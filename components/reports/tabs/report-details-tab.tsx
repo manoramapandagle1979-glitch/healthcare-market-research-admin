@@ -92,12 +92,18 @@ export function ReportDetailsTab({ form, onSaveTab, isSaving }: ReportDetailsTab
                     onClick={() => {
                       const title = form.getValues('title');
                       if (title) {
-                        const slug = title
+                        let slug = title
                           .toLowerCase()
                           .trim()
                           .replace(/[^\w\s-]/g, '')
                           .replace(/\s+/g, '-')
                           .replace(/-+/g, '-');
+
+                        // Ensure slug always ends with '-market-size'
+                        if (!slug.endsWith('-market-size')) {
+                          slug = slug + '-market-size';
+                        }
+
                         form.setValue('slug', slug);
                       }
                     }}

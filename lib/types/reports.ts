@@ -86,7 +86,6 @@ export interface ReportAuthor {
 export interface KeyPlayer {
   name: string;
   marketShare?: string;
-  rank?: number;
   description?: string;
 }
 

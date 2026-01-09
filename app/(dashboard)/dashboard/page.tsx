@@ -61,26 +61,50 @@ export default function DashboardPage() {
     action.roles.includes(user?.role || 'viewer')
   );
 
-  // Error state
+  // Error state - show in progress template
   if (error && !stats) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground mt-2">
-            Welcome back, {user?.email}! Here&apos;s an overview of your admin panel.
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Dashboard</h1>
+            <p className="text-muted-foreground mt-2">
+              Welcome back, {user?.email}! Here&apos;s an overview of your admin panel.
+            </p>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Refresh
+          </Button>
+        </div>
+
+        <div className="flex flex-col items-center justify-center p-12 border rounded-lg bg-muted/30">
+          <RefreshCw className="h-12 w-12 text-muted-foreground mb-4 animate-spin" />
+          <p className="text-lg font-semibold mb-2">Dashboard is syncing</p>
+          <p className="text-sm text-muted-foreground">
+            Your dashboard data is being updated. Please wait...
           </p>
         </div>
 
-        <div className="flex flex-col items-center justify-center p-12 border rounded-lg">
-          <AlertCircle className="h-12 w-12 text-destructive mb-4" />
-          <p className="text-lg font-semibold mb-2">Failed to load dashboard</p>
-          <p className="text-sm text-muted-foreground mb-4">{error}</p>
-          <Button onClick={refetch}>
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Retry
-          </Button>
-        </div>
+        {/* Quick Actions still visible during sync */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {visibleActions.map(action => (
+                <QuickActionButton
+                  key={action.href}
+                  title={action.title}
+                  description={action.description}
+                  icon={action.icon}
+                  href={action.href}
+                />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }

@@ -60,18 +60,16 @@ export function KeyPlayersTab({ form, onSaveTab, isSaving }: KeyPlayersTabProps)
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </div>
-                        <div className="grid grid-cols-3 gap-3">
-                          <div className="col-span-2">
-                            <Input
-                              placeholder="Company Name"
-                              value={player.name}
-                              onChange={e => {
-                                const updated = [...(field.value || [])];
-                                updated[index] = { ...updated[index], name: e.target.value };
-                                field.onChange(updated);
-                              }}
-                            />
-                          </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <Input
+                            placeholder="Company Name"
+                            value={player.name}
+                            onChange={e => {
+                              const updated = [...(field.value || [])];
+                              updated[index] = { ...updated[index], name: e.target.value };
+                              field.onChange(updated);
+                            }}
+                          />
                           <Input
                             placeholder="Market Share (e.g., 14.2%)"
                             value={player.marketShare || ''}
@@ -82,19 +80,6 @@ export function KeyPlayersTab({ form, onSaveTab, isSaving }: KeyPlayersTabProps)
                             }}
                           />
                         </div>
-                        <Input
-                          type="number"
-                          placeholder="Rank (optional)"
-                          value={player.rank || ''}
-                          onChange={e => {
-                            const updated = [...(field.value || [])];
-                            updated[index] = {
-                              ...updated[index],
-                              rank: e.target.value ? parseInt(e.target.value) : undefined,
-                            };
-                            field.onChange(updated);
-                          }}
-                        />
                       </div>
                     </Card>
                   ))}
@@ -105,7 +90,7 @@ export function KeyPlayersTab({ form, onSaveTab, isSaving }: KeyPlayersTabProps)
                   onClick={() => {
                     const updated = [
                       ...(field.value || []),
-                      { name: '', marketShare: '', rank: undefined },
+                      { name: '', marketShare: '' },
                     ];
                     field.onChange(updated);
                   }}

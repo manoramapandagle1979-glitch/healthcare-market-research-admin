@@ -123,7 +123,6 @@ export interface ApiMarketMetrics {
 export interface ApiKeyPlayer {
   name: string;
   marketShare?: string;
-  rank?: number;
   description?: string;
 }
 
