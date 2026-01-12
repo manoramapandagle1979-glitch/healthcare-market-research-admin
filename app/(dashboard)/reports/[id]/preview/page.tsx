@@ -76,6 +76,8 @@ export default function PreviewReportPage() {
         <CardContent className="prose max-w-none">
           {/* Render each section */}
           {Object.entries(report.sections).map(([key, content]) => {
+            // Skip non-string values (like keyFindings array)
+            if (typeof content !== 'string') return null;
             if (!content?.trim()) return null;
             return (
               <div key={key} className="mb-8">

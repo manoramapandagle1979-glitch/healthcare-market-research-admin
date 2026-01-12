@@ -42,7 +42,15 @@ export function SectionEditor({ sections, onChange }: SectionEditorProps) {
     <div className="space-y-4">
       {REPORT_SECTIONS.map(section => {
         const isExpanded = expandedSections.has(section.key);
-        const hasContent = sections[section.key]?.trim().length > 0;
+        const sectionValue = sections[section.key];
+        const hasContent =
+          typeof sectionValue === 'string'
+            ? sectionValue.trim().length > 0
+            : Array.isArray(sectionValue)
+              ? sectionValue.length > 0
+              : sectionValue && typeof sectionValue === 'object' && 'chapters' in sectionValue
+                ? sectionValue.chapters.length > 0
+                : false;
 
         return (
           <Card key={section.key}>
@@ -65,7 +73,7 @@ export function SectionEditor({ sections, onChange }: SectionEditorProps) {
             {isExpanded && (
               <CardContent>
                 <TiptapEditor
-                  content={sections[section.key] || ''}
+                  content={(sections[section.key] as string) || ''}
                   onChange={content => handleSectionChange(section.key, content)}
                   placeholder={section.placeholder}
                 />

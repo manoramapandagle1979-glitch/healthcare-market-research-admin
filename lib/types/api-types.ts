@@ -106,8 +106,8 @@ export interface ApiReportSections {
   marketDetails?: string;
   keyFindings?: string;
   tableOfContents?: string;
-  marketDrivers?: string;
-  challenges?: string;
+  marketDrivers?: string; // Market drivers section
+  challenges?: string; // Market challenges section
 }
 
 export interface ApiMarketMetrics {
@@ -160,37 +160,60 @@ export interface ApiChartMetadata {
 }
 
 export interface ApiReport {
+  // Auto-managed fields (read-only)
   id: number;
-  title: string;
-  slug: string;
-  summary?: string;
-  description?: string;
-  category_id?: number;
-  sub_category_id?: number;
-  market_segment_id?: number;
-  geography?: string[];
-  publish_date?: string;
-  price?: number;
-  discounted_price?: number;
-  currency?: string;
-  status: 'draft' | 'published';
-  page_count?: number;
-  formats?: string[];
-  market_metrics?: ApiMarketMetrics;
-  author_ids?: number[];
-  key_players?: ApiKeyPlayer[];
-  sections?: ApiReportSections;
-  faqs?: ApiFAQ[];
-  metadata?: ApiReportMetadata;
-  meta_title?: string; // Legacy
-  meta_description?: string; // Legacy
-  meta_keywords?: string; // Legacy
-  thumbnail_url?: string;
-  is_featured?: boolean;
-  view_count?: number;
-  download_count?: number;
   created_at: string;
   updated_at: string;
+  view_count?: number; // Auto-managed
+  download_count?: number; // Auto-managed
+  publish_date?: string; // Auto-set when status changes to published
+
+  // Mandatory fields for creation
+  title: string; // Min 10 characters
+  slug: string; // Unique identifier
+  summary?: string; // Min 50 characters (required in validation)
+  category_id?: number; // Required, must reference valid category
+  category_name?: string; // Category name (returned by backend)
+  geography?: string[]; // At least one required
+  sections?: ApiReportSections; // Required with all content
+
+  // Optional basic info
+  description?: string;
+  thumbnail_url?: string;
+
+  // Pricing (optional, defaults applied by backend)
+  price?: number; // Defaults to 0
+  discounted_price?: number; // Defaults to 0
+  currency?: string; // Defaults to "USD"
+
+  // Report details (optional)
+  page_count?: number; // Defaults to 0
+  formats?: string[]; // e.g., ["PDF", "Excel"]
+
+  // Status & publishing (optional)
+  status: 'draft' | 'published'; // Defaults to "draft"
+  is_featured?: boolean; // Defaults to false
+
+  // Authors & contributors (optional)
+  author_ids?: number[]; // Array of user IDs
+
+  // Market data (optional)
+  market_metrics?: ApiMarketMetrics;
+  key_players?: ApiKeyPlayer[];
+
+  // FAQs & metadata (optional)
+  faqs?: ApiFAQ[];
+  metadata?: ApiReportMetadata;
+
+  // Legacy fields (optional)
+  meta_title?: string;
+  meta_description?: string;
+  meta_keywords?: string;
+
+  // Additional optional fields
+  sub_category_id?: number;
+  market_segment_id?: number;
+  internal_notes?: string; // Admin-only notes
 }
 
 export interface ApiReportWithRelations extends ApiReport {
@@ -245,4 +268,110 @@ export function hasApiData<T>(
   response: ApiResponse<T>
 ): response is Required<Pick<ApiResponse<T>, 'data'>> & ApiResponse<T> {
   return response && response.success === true && response.data !== undefined;
+}
+
+// ============ Form Submission Types ============
+export type FormCategory = 'contact' | 'request-sample';
+export type FormStatus = 'pending' | 'processed' | 'archived';
+
+export interface ContactFormData {
+  fullName: string;
+  email: string;
+  company: string;
+  phone?: string;
+  subject: string;
+  message: string;
+}
+
+export interface RequestSampleFormData {
+  fullName: string;
+  email: string;
+  company: string;
+  jobTitle: string;
+  phone?: string;
+  reportTitle: string;
+  additionalInfo?: string;
+}
+
+export interface FormSubmissionMetadata {
+  submittedAt: string;
+  ipAddress?: string;
+  userAgent?: string;
+  referrer?: string;
+}
+
+export interface ApiFormSubmission {
+  id: string;
+  category: FormCategory;
+  status: FormStatus;
+  data: ContactFormData | RequestSampleFormData;
+  metadata: FormSubmissionMetadata;
+  processedAt?: string;
+  processedBy?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateFormSubmissionRequest {
+  category: FormCategory;
+  data: ContactFormData | RequestSampleFormData;
+  metadata: FormSubmissionMetadata;
+}
+
+export interface FormSubmissionFilters {
+  category?: FormCategory;
+  status?: FormStatus;
+  dateFrom?: string;
+  dateTo?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: 'createdAt' | 'company' | 'name';
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface FormSubmissionsListResponse extends ApiResponse<ApiFormSubmission[]> {
+  data: ApiFormSubmission[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export interface FormSubmissionDetailResponse extends ApiResponse<ApiFormSubmission> {
+  data: ApiFormSubmission;
+}
+
+export interface FormSubmissionStats {
+  total: number;
+  byCategory: {
+    contact: number;
+    'request-sample': number;
+  };
+  byStatus: {
+    pending: number;
+    processed: number;
+    archived: number;
+  };
+  recent: {
+    today: number;
+    thisWeek: number;
+    thisMonth: number;
+  };
+}
+
+export interface FormSubmissionStatsResponse extends ApiResponse<FormSubmissionStats> {
+  data: FormSubmissionStats;
+}
+
+export interface BulkDeleteRequest {
+  ids: string[];
+}
+
+export interface BulkDeleteResponse extends ApiResponse {
+  deletedCount: number;
+  deletedIds: string[];
 }

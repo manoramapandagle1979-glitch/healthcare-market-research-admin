@@ -1,4 +1,12 @@
-import { LayoutDashboard, FileText, PenSquare, BarChart3, Users, UserCog } from 'lucide-react';
+import {
+  LayoutDashboard,
+  FileText,
+  PenSquare,
+  BarChart3,
+  Users,
+  UserCog,
+  MessageSquare,
+} from 'lucide-react';
 
 export type UserRole = 'admin' | 'editor' | 'viewer';
 
@@ -38,12 +46,6 @@ export const navigationItems: NavigationItem[] = [
     ],
   },
   {
-    title: 'Research Team',
-    href: '/authors',
-    icon: Users,
-    roles: ['admin', 'editor'],
-  },
-  {
     title: 'Blog',
     href: '/blog',
     icon: PenSquare,
@@ -69,24 +71,18 @@ export const navigationItems: NavigationItem[] = [
   //   icon: BarChart3,
   //   roles: ['admin', 'editor'],
   // },
-  {
-    title: 'Chart Generator',
-    href: '/chart-generator',
-    icon: BarChart3,
-    roles: ['admin', 'editor'],
-  },
   // {
   //   title: 'Media',
   //   href: '/media',
   //   icon: Image,
   //   roles: ['admin', 'editor'],
   // },
-  // {
-  //   title: 'Leads',
-  //   href: '/leads',
-  //   icon: MessageSquare,
-  //   roles: ['admin', 'editor'],
-  // },
+  {
+    title: 'Leads',
+    href: '/leads',
+    icon: MessageSquare,
+    roles: ['admin', 'editor'],
+  },
   // {
   //   title: 'Pricing',
   //   href: '/pricing',
@@ -98,6 +94,18 @@ export const navigationItems: NavigationItem[] = [
     href: '/users',
     icon: UserCog,
     roles: ['admin'],
+  },
+  {
+    title: 'Research Team',
+    href: '/authors',
+    icon: Users,
+    roles: ['admin', 'editor'],
+  },
+  {
+    title: 'Chart Generator POC',
+    href: '/chart-generator',
+    icon: BarChart3,
+    roles: ['admin', 'editor'],
   },
   // {
   //   title: 'Settings',

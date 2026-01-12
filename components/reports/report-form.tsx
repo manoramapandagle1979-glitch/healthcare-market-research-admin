@@ -1,9 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -25,89 +23,18 @@ import {
   FormDescription,
 } from '@/components/ui/form';
 import { SectionEditor } from './section-editor';
-import { REPORT_CATEGORIES, GEOGRAPHIES, REPORT_FORMATS } from '@/lib/config/reports';
+import { GEOGRAPHIES, REPORT_FORMATS } from '@/lib/config/reports';
+import { fetchCategories, type Category } from '@/lib/api/categories';
 import type { ReportFormData, Report } from '@/lib/types/reports';
+import {
+  reportFormSchema as importedReportFormSchema,
+  type ReportFormSchemaType,
+} from '@/lib/validation/report-schema';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Save, Eye, Plus, Trash2, HelpCircle, User, Building2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-
-// Validation schema
-const reportFormSchema = z.object({
-  title: z.string().min(10, 'Title must be at least 10 characters'),
-  slug: z
-    .string()
-    .min(1, 'Slug is required')
-    .regex(
-      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-      'Slug must be lowercase letters, numbers, and hyphens only'
-    ),
-  summary: z.string().min(50, 'Summary must be at least 50 characters'),
-  category: z.string().min(1, 'Category is required'),
-  geography: z.array(z.string()).min(1, 'Select at least one geography'),
-  publishDate: z.string().optional(),
-  price: z.number().min(0, 'Price must be positive'),
-  discountedPrice: z.number().min(0, 'Discounted price must be positive'),
-  status: z.enum(['draft', 'published']),
-  pageCount: z.number().min(1, 'Page count must be at least 1').optional(),
-  formats: z.array(z.enum(['PDF', 'Excel', 'Word', 'PowerPoint'])).optional(),
-  marketMetrics: z
-    .object({
-      currentRevenue: z.string().optional(),
-      currentYear: z.number().optional(),
-      forecastRevenue: z.string().optional(),
-      forecastYear: z.number().optional(),
-      cagr: z.string().optional(),
-      cagrStartYear: z.number().optional(),
-      cagrEndYear: z.number().optional(),
-    })
-    .optional(),
-  authorIds: z.array(z.string()).optional(),
-  keyPlayers: z
-    .array(
-      z.object({
-        name: z.string().min(2, 'Company name must be at least 2 characters'),
-        marketShare: z.string().optional(),
-        description: z.string().optional(),
-      })
-    )
-    .optional(),
-  sections: z.object({
-    executiveSummary: z.string().min(100, 'Executive summary is required (min 100 chars)'),
-    marketOverview: z.string().min(100, 'Market overview is required (min 100 chars)'),
-    marketSize: z.string().min(100, 'Market size is required (min 100 chars)'),
-    competitive: z.string().min(100, 'Competitive analysis is required (min 100 chars)'),
-    keyPlayers: z.string(),
-    regional: z.string(),
-    trends: z.string(),
-    conclusion: z.string().min(50, 'Conclusion is required (min 50 chars)'),
-    marketDetails: z.string().min(100, 'Market details is required (min 100 chars)'),
-    keyFindings: z.string().min(100, 'Key findings is required (min 100 chars)'),
-    tableOfContents: z.string().min(50, 'Table of contents is required (min 50 chars)'),
-  }),
-  faqs: z
-    .array(
-      z.object({
-        question: z.string().min(5, 'Question must be at least 5 characters'),
-        answer: z.string().min(10, 'Answer must be at least 10 characters'),
-      })
-    )
-    .optional(),
-  metadata: z.object({
-    metaTitle: z.string().optional(),
-    metaDescription: z.string().optional(),
-    keywords: z.array(z.string()).optional(),
-    canonicalUrl: z.string().url().optional().or(z.literal('')),
-    ogTitle: z.string().optional(),
-    ogDescription: z.string().optional(),
-    ogImage: z.string().url().optional().or(z.literal('')),
-    ogType: z.string().optional(),
-    twitterCard: z.string().optional(),
-    schemaJson: z.string().optional(),
-    robotsDirective: z.string().optional(),
-  }),
-});
 
 interface ReportFormProps {
   report?: Report;
@@ -118,17 +45,35 @@ interface ReportFormProps {
 
 export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportFormProps) {
   const [keywordInput, setKeywordInput] = useState('');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
-  const form = useForm<ReportFormData>({
-    resolver: zodResolver(reportFormSchema),
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    try {
+      setIsLoadingCategories(true);
+      const response = await fetchCategories({ limit: 100 });
+      setCategories(response.categories.filter(cat => cat.isActive));
+    } catch (error) {
+      console.error('Failed to load categories:', error);
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  };
+
+  const form = useForm<ReportFormSchemaType>({
+    resolver: zodResolver(importedReportFormSchema),
     defaultValues: report
       ? {
           title: report.title,
           slug: report.slug,
           summary: report.summary,
-          category: report.category,
+          category_id: report.categoryId || 0,
           geography: report.geography,
-          publishDate: report.publishDate || '',
+          publishDate: report.publishDate ? report.publishDate.split('T')[0] : '',
           price: report.price,
           discountedPrice: report.discountedPrice,
           status: report.status,
@@ -145,7 +90,7 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
           title: '',
           slug: '',
           summary: '',
-          category: REPORT_CATEGORIES[0],
+          category_id: 0,
           geography: ['Global'],
           publishDate: new Date().toISOString().split('T')[0],
           price: 3490,
@@ -174,8 +119,8 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
             trends: '',
             conclusion: '',
             marketDetails: '',
-            keyFindings: '',
-            tableOfContents: '',
+            keyFindings: [],
+            tableOfContents: { chapters: [] },
           },
           faqs: [],
           metadata: {
@@ -238,20 +183,28 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="category"
+                name="category_id"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Category</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      onValueChange={value => field.onChange(Number(value))}
+                      value={field.value ? String(field.value) : undefined}
+                      disabled={isLoadingCategories}
+                    >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
+                          <SelectValue
+                            placeholder={
+                              isLoadingCategories ? 'Loading categories...' : 'Select category'
+                            }
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {REPORT_CATEGORIES.map(cat => (
-                          <SelectItem key={cat} value={cat}>
-                            {cat}
+                        {categories.map(cat => (
+                          <SelectItem key={cat.id} value={String(cat.id)}>
+                            {cat.name}
                           </SelectItem>
                         ))}
                       </SelectContent>

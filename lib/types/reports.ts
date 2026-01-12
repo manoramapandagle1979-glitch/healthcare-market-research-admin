@@ -36,7 +36,9 @@ export type ReportSectionKey =
   | 'conclusion'
   | 'marketDetails'
   | 'keyFindings'
-  | 'tableOfContents';
+  | 'tableOfContents'
+  | 'marketDrivers'
+  | 'challenges';
 
 // Section metadata for UI rendering
 export interface ReportSectionMeta {
@@ -57,8 +59,10 @@ export interface ReportSections {
   trends: string;
   conclusion: string;
   marketDetails: string;
-  keyFindings: string;
-  tableOfContents: string;
+  keyFindings: string[]; // Array of key finding entries
+  tableOfContents: TableOfContentsStructure; // Structured TOC
+  marketDrivers?: string; // Optional market drivers
+  challenges?: string; // Optional challenges
 }
 
 // Market Metrics
@@ -98,6 +102,64 @@ export interface FAQ {
   answer: string;
 }
 
+// Chart types for reports (simplified from chart-generator)
+export type ReportChartType = 'bar' | 'stacked-bar' | 'pie' | 'donut' | 'world-map';
+
+export interface ReportChartData {
+  labels: string[];
+  series: Array<{
+    id: string;
+    name: string;
+    color: string;
+    values: number[];
+  }>;
+}
+
+export interface ReportChart {
+  id: string; // Temporary ID (UUID for new charts, server ID for existing)
+  name: string; // User-friendly name for the chart
+  chartType: ReportChartType;
+  orientation?: 'vertical' | 'horizontal';
+  title: string;
+  subtitle?: string;
+  xAxisLabel?: string;
+  yAxisLabel?: string;
+  unitSuffix?: string;
+  decimalPrecision: 0 | 1 | 2;
+  showLegend: boolean;
+  showGridlines: boolean;
+  data: ReportChartData;
+  imageUrl?: string; // URL of generated image (after upload to server)
+  imageData?: string; // Base64 image data (temporary, before upload)
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// Table of Contents structure
+export interface TOCSubsection {
+  id: string;
+  title: string;
+  pageNumber?: string;
+}
+
+export interface TOCSection {
+  id: string;
+  title: string;
+  pageNumber?: string;
+  subsections: TOCSubsection[];
+}
+
+export interface TOCChapter {
+  id: string;
+  title: string;
+  pageNumber?: string;
+  sections: TOCSection[];
+}
+
+export interface TableOfContentsStructure {
+  chapters: TOCChapter[];
+}
+
 // SEO metadata
 export interface ReportMetadata {
   metaTitle?: string;
@@ -119,11 +181,14 @@ export interface Report {
   title: string;
   slug: string;
   summary: string;
-  category: string;
+  description?: string; // Optional description
+  category: string; // Category name (for display)
+  categoryId?: number; // Category ID (for editing/API)
   geography: string[];
-  publishDate?: string; // Custom publish date
+  publishDate?: string; // Auto-set when status changes to published
   price: number;
   discountedPrice: number;
+  currency?: string; // Defaults to "USD"
   status: ReportStatus;
   pageCount?: number;
   formats?: ReportFormat[];
@@ -133,6 +198,9 @@ export interface Report {
   sections: ReportSections;
   faqs?: FAQ[];
   metadata: ReportMetadata;
+  thumbnailUrl?: string; // Optional thumbnail
+  isFeatured?: boolean; // Defaults to false
+  internalNotes?: string; // Admin-only notes
   createdAt: string;
   updatedAt: string;
   author: UserReference; // System author (who created in admin)
@@ -163,23 +231,41 @@ export interface ReportResponse {
 
 // Form data (for create/update)
 export interface ReportFormData {
-  title: string;
-  slug: string;
-  summary: string;
-  category: string;
-  geography: string[];
-  publishDate?: string;
-  price: number;
-  discountedPrice: number;
-  status: ReportStatus;
+  // Mandatory fields
+  title: string; // Min 10 characters
+  slug: string; // Required, unique
+  summary: string; // Min 50 characters
+  category_id: number; // Required - Category ID for API
+  geography: string[]; // At least one required
+  sections: ReportSections; // Required
+
+  // Optional fields
+  description?: string;
+  thumbnailUrl?: string;
+  price?: number; // Defaults to 0
+  discountedPrice?: number; // Defaults to 0
+  currency?: string; // Defaults to "USD"
+  status?: ReportStatus; // Defaults to "draft"
+  publishDate?: string; // Optional - can be manually set or auto-set when status changes to "published"
   pageCount?: number;
   formats?: ReportFormat[];
   marketMetrics?: MarketMetrics;
   authorIds?: string[];
   keyPlayers?: KeyPlayer[];
-  sections: ReportSections;
   faqs?: FAQ[];
   metadata: ReportMetadata;
+  isFeatured?: boolean;
+  internalNotes?: string;
+  charts?: ReportChart[]; // Charts associated with this report
+
+  // Note: These fields are auto-managed and should NOT be in form data:
+  // - id (auto-generated)
+  // - created_by (auto-set from authenticated user)
+  // - updated_by (auto-set from authenticated user)
+  // - created_at (auto-managed)
+  // - updated_at (auto-managed)
+  // - view_count (managed by view tracking)
+  // - download_count (managed by download tracking)
 }
 
 // Author Form Data

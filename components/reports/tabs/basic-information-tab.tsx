@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,7 +15,8 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Save } from 'lucide-react';
-import { REPORT_CATEGORIES, GEOGRAPHIES, REPORT_FORMATS } from '@/lib/config/reports';
+import { GEOGRAPHIES, REPORT_FORMATS } from '@/lib/config/reports';
+import { fetchCategories, type Category } from '@/lib/api/categories';
 import type { UseFormReturn } from 'react-hook-form';
 import type { ReportFormData } from '@/lib/types/reports';
 
@@ -25,13 +27,32 @@ interface BasicInformationTabProps {
 }
 
 export function BasicInformationTab({ form, onSaveTab, isSaving }: BasicInformationTabProps) {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    try {
+      setIsLoadingCategories(true);
+      const response = await fetchCategories({ limit: 100 });
+      setCategories(response.categories.filter(cat => cat.isActive));
+    } catch (error) {
+      console.error('Failed to load categories:', error);
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  };
+
   const handleSaveTab = async () => {
     const values = form.getValues();
     if (onSaveTab) {
       await onSaveTab('basic', {
         title: values.title,
         summary: values.summary,
-        category: values.category,
+        category_id: values.category_id,
         geography: values.geography,
         publishDate: values.publishDate,
         price: values.price,
@@ -84,20 +105,28 @@ export function BasicInformationTab({ form, onSaveTab, isSaving }: BasicInformat
           <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="category"
+              name="category_id"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select
+                    onValueChange={value => field.onChange(Number(value))}
+                    value={field.value ? String(field.value) : undefined}
+                    disabled={isLoadingCategories}
+                  >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue
+                          placeholder={
+                            isLoadingCategories ? 'Loading categories...' : 'Select category'
+                          }
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {REPORT_CATEGORIES.map(cat => (
-                        <SelectItem key={cat} value={cat}>
-                          {cat}
+                      {categories.map(cat => (
+                        <SelectItem key={cat.id} value={String(cat.id)}>
+                          {cat.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

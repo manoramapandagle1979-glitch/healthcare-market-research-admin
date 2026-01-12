@@ -11,8 +11,9 @@ import {
   FormDescription,
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Trash2, Save, FileText, Building2, HelpCircle } from 'lucide-react';
+import { Plus, Trash2, Save, FileText, Building2, HelpCircle, Lightbulb, List } from 'lucide-react';
 import { SectionEditor } from '../section-editor';
+import { TOCEditor } from '../toc-editor';
 import type { UseFormReturn } from 'react-hook-form';
 import type { ReportFormData } from '@/lib/types/reports';
 
@@ -60,6 +61,98 @@ export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
                 <FormControl>
                   <SectionEditor sections={field.value} onChange={field.onChange} />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Table of Contents */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <List className="h-5 w-5" />
+            Table of Contents
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <FormField
+            control={form.control}
+            name="sections.tableOfContents"
+            render={({ field }) => (
+              <FormItem>
+                <FormDescription>
+                  Build a hierarchical table of contents with chapters, sections, and subsections
+                </FormDescription>
+                <FormControl>
+                  <TOCEditor value={field.value} onChange={field.onChange} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Key Findings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Lightbulb className="h-5 w-5" />
+            Key Findings
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <FormField
+            control={form.control}
+            name="sections.keyFindings"
+            render={({ field }) => (
+              <FormItem>
+                <FormDescription>
+                  Add key research findings and insights (one per entry)
+                </FormDescription>
+                <div className="space-y-3">
+                  {field.value?.map((finding, index) => (
+                    <div key={index} className="flex gap-2">
+                      <div className="flex-1">
+                        <Textarea
+                          placeholder={`Key finding #${index + 1}...`}
+                          rows={2}
+                          value={finding}
+                          onChange={e => {
+                            const updated = [...(field.value || [])];
+                            updated[index] = e.target.value;
+                            field.onChange(updated);
+                          }}
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const updated = field.value?.filter((_, i) => i !== index);
+                          field.onChange(updated);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    const updated = [...(field.value || []), ''];
+                    field.onChange(updated);
+                  }}
+                  className="w-full mt-2"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Key Finding
+                </Button>
                 <FormMessage />
               </FormItem>
             )}

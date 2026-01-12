@@ -8,18 +8,6 @@ export const REPORT_SECTIONS: ReportSectionMeta[] = [
     placeholder: 'Describe the overall market landscape...',
     required: true,
   },
-  {
-    key: 'keyFindings',
-    label: 'Key Findings',
-    placeholder: 'Highlight the most important insights and discoveries...',
-    required: true,
-  },
-  {
-    key: 'tableOfContents',
-    label: 'Table of Contents',
-    placeholder: 'Outline the main sections and topics covered in the report...',
-    required: true,
-  },
 ];
 
 // Categories (expand as needed)

@@ -140,13 +140,13 @@ export function ReportDetailsTab({ form, onSaveTab, isSaving }: ReportDetailsTab
           <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="category"
+              name="category_id"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
+                    onValueChange={value => field.onChange(Number(value))}
+                    value={field.value ? String(field.value) : undefined}
                     disabled={isLoadingCategories}
                   >
                     <FormControl>
