@@ -16,7 +16,7 @@ export async function fetchFormSubmissions(
   filters?: FormSubmissionFilters
 ): Promise<FormSubmissionsListResponse> {
   return apiClient.get<FormSubmissionsListResponse>('/v1/forms/submissions', {
-    params: filters,
+    params: filters as Record<string, unknown>,
   });
 }
 
@@ -35,7 +35,7 @@ export async function fetchFormSubmissionsByCategory(
   filters?: Omit<FormSubmissionFilters, 'category'>
 ): Promise<FormSubmissionsListResponse> {
   return apiClient.get<FormSubmissionsListResponse>(`/v1/forms/submissions/category/${category}`, {
-    params: filters,
+    params: filters as Record<string, unknown>,
   });
 }
 
