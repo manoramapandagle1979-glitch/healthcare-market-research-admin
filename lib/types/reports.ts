@@ -26,19 +26,9 @@ export type ReportStatus = 'draft' | 'published';
 
 // Predefined section keys
 export type ReportSectionKey =
-  | 'executiveSummary'
-  | 'marketOverview'
-  | 'marketSize'
-  | 'competitive'
-  | 'keyPlayers'
-  | 'regional'
-  | 'trends'
-  | 'conclusion'
   | 'marketDetails'
-  | 'keyFindings'
   | 'tableOfContents'
-  | 'marketDrivers'
-  | 'challenges';
+  | 'keyPlayers';
 
 // Section metadata for UI rendering
 export interface ReportSectionMeta {
@@ -50,19 +40,9 @@ export interface ReportSectionMeta {
 
 // Report sections (HTML content)
 export interface ReportSections {
-  executiveSummary: string;
-  marketOverview: string;
-  marketSize: string;
-  competitive: string;
-  keyPlayers: string;
-  regional: string;
-  trends: string;
-  conclusion: string;
   marketDetails: string;
-  keyFindings: string[]; // Array of key finding entries
   tableOfContents: TableOfContentsStructure; // Structured TOC
-  marketDrivers?: string; // Optional market drivers
-  challenges?: string; // Optional challenges
+  keyPlayers: KeyPlayer[]; // Array of key market players
 }
 
 // Market Metrics
@@ -76,12 +56,14 @@ export interface MarketMetrics {
   cagrEndYear?: number;
 }
 
-// Report Author
+// Report Author (unified with BlogAuthor for consistency)
 export interface ReportAuthor {
   id: number;
   name: string;
   role?: string;
   bio?: string;
+  imageUrl?: string;
+  linkedinUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -129,6 +111,10 @@ export interface ReportChart {
   showLegend: boolean;
   showGridlines: boolean;
   data: ReportChartData;
+  source?: string; // Source attribution (e.g., "Towards Healthcare")
+  logoUrl?: string; // URL of logo image (base64 data URL or uploaded URL)
+  logoPosition?: 'top-left' | 'top-right' | 'bottom-right';
+  logoOpacity?: number; // 0-100
   imageUrl?: string; // URL of generated image (after upload to server)
   imageData?: string; // Base64 image data (temporary, before upload)
   createdAt?: string;
@@ -194,7 +180,6 @@ export interface Report {
   formats?: ReportFormat[];
   marketMetrics?: MarketMetrics;
   authorIds?: string[]; // References to authors
-  keyPlayers?: KeyPlayer[]; // Structured key players with market share
   sections: ReportSections;
   faqs?: FAQ[];
   metadata: ReportMetadata;
@@ -251,12 +236,10 @@ export interface ReportFormData {
   formats?: ReportFormat[];
   marketMetrics?: MarketMetrics;
   authorIds?: string[];
-  keyPlayers?: KeyPlayer[];
   faqs?: FAQ[];
   metadata: ReportMetadata;
   isFeatured?: boolean;
   internalNotes?: string;
-  charts?: ReportChart[]; // Charts associated with this report
 
   // Note: These fields are auto-managed and should NOT be in form data:
   // - id (auto-generated)
@@ -268,11 +251,35 @@ export interface ReportFormData {
   // - download_count (managed by download tracking)
 }
 
+// Report Image (from report-images API)
+export interface ReportImage {
+  id: number;
+  reportId: number;
+  title?: string;
+  imageUrl: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Report Image Upload Request
+export interface ReportImageUploadRequest {
+  title?: string;
+}
+
+// Report Image Metadata Update Request
+export interface ReportImageMetadataUpdate {
+  title?: string;
+  isActive?: boolean;
+}
+
 // Author Form Data
 export interface AuthorFormData {
   name: string;
   role?: string;
   bio?: string;
+  imageUrl?: string;
+  linkedinUrl?: string;
 }
 
 // Authors API Response

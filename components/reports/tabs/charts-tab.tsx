@@ -1,113 +1,54 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { SimpleChartBuilder } from '../charts/simple-chart-builder';
-import { ChartList } from '../charts/chart-list';
-import type { ReportFormData, ReportChart } from '@/lib/types/reports';
-import { Plus, ArrowLeft } from 'lucide-react';
-import { toast } from 'sonner';
+import { ReportImagesManager } from '../report-images-manager';
+import type { ReportFormData } from '@/lib/types/reports';
+import { AlertCircle, Image } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface ChartsTabProps {
-  form: UseFormReturn<ReportFormData>;
+  form: UseFormReturn<any>;
+  reportId?: string | number;
   onSaveTab?: (tabKey: string, data: Partial<ReportFormData>) => Promise<void>;
   isSaving: boolean;
 }
 
-export function ChartsTab({ form, onSaveTab, isSaving: _isSaving }: ChartsTabProps) {
-  const [isCreating, setIsCreating] = useState(false);
-  const [editingChart, setEditingChart] = useState<ReportChart | null>(null);
-
-  const charts = form.watch('charts') || [];
-
-  const handleCreateClick = () => {
-    setEditingChart(null);
-    setIsCreating(true);
-  };
-
-  const handleEditClick = (chart: ReportChart) => {
-    setEditingChart(chart);
-    setIsCreating(true);
-  };
-
-  const handleSaveChart = async (chart: ReportChart) => {
-    const existingCharts = form.getValues('charts') || [];
-    let updatedCharts: ReportChart[];
-
-    if (editingChart) {
-      // Update existing chart
-      updatedCharts = existingCharts.map(c => (c.id === chart.id ? chart : c));
-    } else {
-      // Add new chart
-      updatedCharts = [...existingCharts, chart];
-    }
-
-    form.setValue('charts', updatedCharts, { shouldDirty: true });
-
-    // Auto-save if handler provided
-    if (onSaveTab) {
-      try {
-        await onSaveTab('charts', { charts: updatedCharts });
-      } catch (error) {
-        console.error('Failed to auto-save charts:', error);
-      }
-    }
-
-    setIsCreating(false);
-    setEditingChart(null);
-  };
-
-  const handleCancel = () => {
-    setIsCreating(false);
-    setEditingChart(null);
-  };
-
-  const handleDeleteChart = async (chartId: string) => {
-    const existingCharts = form.getValues('charts') || [];
-    const updatedCharts = existingCharts.filter(c => c.id !== chartId);
-
-    form.setValue('charts', updatedCharts, { shouldDirty: true });
-
-    // Auto-save if handler provided
-    if (onSaveTab) {
-      try {
-        await onSaveTab('charts', { charts: updatedCharts });
-      } catch (error) {
-        console.error('Failed to auto-save charts:', error);
-      }
-    }
-
-    toast.success('Chart deleted successfully');
-  };
-
-  if (isCreating) {
+export function ChartsTab({ form, reportId, onSaveTab: _onSaveTab, isSaving }: ChartsTabProps) {
+  // If no reportId, show message to save report first
+  if (!reportId) {
     return (
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={handleCancel} className="h-8 w-8">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div>
-              <CardTitle>{editingChart ? 'Edit Chart' : 'Create New Chart'}</CardTitle>
-              <CardDescription>
-                {editingChart
-                  ? 'Update the chart configuration and data'
-                  : 'Configure and generate a chart for this report'}
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <SimpleChartBuilder
-            chart={editingChart || undefined}
-            onSave={handleSaveChart}
-            onCancel={handleCancel}
-          />
-        </CardContent>
-      </Card>
+      <div className="space-y-6">
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Save Report First</AlertTitle>
+          <AlertDescription>
+            Please save the report first before adding charts and images. Use the "Save Draft" button in the Settings tab or any other tab to create the report, then return here to add charts and images.
+          </AlertDescription>
+        </Alert>
+
+        <Card className="bg-muted/50">
+          <CardHeader>
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Image className="h-4 w-4" />
+              About Charts & Images
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm text-muted-foreground">
+            <p><strong>Once you save the report, you'll be able to:</strong></p>
+            <ul className="list-disc list-inside space-y-1 ml-2">
+              <li>Create custom charts from your market research data</li>
+              <li>Upload custom images (JPG, PNG, WebP, GIF - Max 10MB)</li>
+              <li>Edit image titles and manage visibility</li>
+              <li>Reference images in the report content using their URLs</li>
+            </ul>
+            <p className="pt-2 text-xs italic">
+              All images are uploaded to Cloudflare for fast, reliable delivery.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
@@ -115,35 +56,51 @@ export function ChartsTab({ form, onSaveTab, isSaving: _isSaving }: ChartsTabPro
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Report Charts</CardTitle>
-              <CardDescription>
-                Create and manage charts for this report. Generated charts can be referenced in the
-                report content.
-              </CardDescription>
-            </div>
-            <Button onClick={handleCreateClick}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Chart
-            </Button>
-          </div>
+          <CardTitle className="flex items-center gap-2">
+            <Image className="h-5 w-5" />
+            Charts & Images
+          </CardTitle>
+          <CardDescription>
+            Create custom charts or upload images for your report. All images are stored on Cloudflare and can be referenced in the report content.
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <ChartList charts={charts} onDelete={handleDeleteChart} onEdit={handleEditClick} />
+          <ReportImagesManager
+            reportId={reportId}
+            disabled={isSaving}
+            reportData={form.getValues()}
+          />
         </CardContent>
       </Card>
 
       <Card className="bg-muted/50">
         <CardHeader>
-          <CardTitle className="text-sm">How to use charts in your report</CardTitle>
+          <CardTitle className="text-sm">How to use charts and images in your report</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>1. Create charts with your market research data</p>
-          <p>2. Charts will be automatically saved when the report is saved</p>
-          <p>3. Reference chart images in the rich text editor when editing report sections</p>
+          <p><strong>Creating Charts:</strong></p>
+          <ul className="list-disc list-inside space-y-1 ml-2">
+            <li>Click "Add Chart" to create a custom chart from your data</li>
+            <li>Choose from bar charts, pie charts, donut charts, or world maps</li>
+            <li>Charts are automatically converted to images and uploaded</li>
+          </ul>
+
+          <p className="pt-3"><strong>Uploading Images:</strong></p>
+          <ul className="list-disc list-inside space-y-1 ml-2">
+            <li>Click "Upload Image" to add custom images</li>
+            <li>Supported formats: JPG, PNG, WebP, GIF (Max 10MB)</li>
+            <li>Add titles to your images for easy identification</li>
+          </ul>
+
+          <p className="pt-3"><strong>Using Images in Content:</strong></p>
+          <ul className="list-disc list-inside space-y-1 ml-2">
+            <li>Click on any image to preview it and copy its URL</li>
+            <li>Use the image URL in the rich text editor when editing report sections</li>
+            <li>Toggle image visibility with the Show/Hide button</li>
+          </ul>
+
           <p className="text-xs italic pt-2">
-            Note: Chart images will be uploaded to the server when you publish or save the report.
+            Images can be deactivated without deleting them. Inactive images won't appear in the report but remain accessible in the admin panel.
           </p>
         </CardContent>
       </Card>

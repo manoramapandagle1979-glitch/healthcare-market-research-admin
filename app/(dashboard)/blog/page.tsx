@@ -25,13 +25,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { deleteBlog, fetchAuthors } from '@/lib/api/blogs';
-import type { BlogAuthor } from '@/lib/types/blogs';
+import { deleteBlog } from '@/lib/api/blogs';
+import { fetchAuthors } from '@/lib/api/authors';
+import type { ReportAuthor } from '@/lib/types/reports';
 
 export default function BlogPage() {
   const { user } = useAuth();
   const [filters, setFilters] = useState({});
-  const [authors, setAuthors] = useState<BlogAuthor[]>([]);
+  const [authors, setAuthors] = useState<ReportAuthor[]>([]);
   const {
     blogs,
     total,
@@ -51,8 +52,8 @@ export default function BlogPage() {
 
   const loadAuthors = async () => {
     try {
-      const { authors } = await fetchAuthors();
-      setAuthors(authors);
+      const response = await fetchAuthors();
+      setAuthors(response.data || []);
     } catch {
       // Error is logged by the API client
     }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,14 +16,14 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Save, Eye, Search, User } from 'lucide-react';
-import { fetchAuthors } from '@/lib/api/authors';
+import { Save, Eye, Search, User, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { MultiSelectAuthorDropdown } from '../multi-select-author-dropdown';
 import type { UseFormReturn } from 'react-hook-form';
-import type { ReportFormData, ReportAuthor } from '@/lib/types/reports';
+import type { ReportFormData } from '@/lib/types/reports';
 
 interface SettingsTabProps {
-  form: UseFormReturn<ReportFormData>;
+  form: UseFormReturn<any>;
   onSubmit: (data: ReportFormData) => Promise<void>;
   onPreview?: () => void;
   isSaving: boolean;
@@ -31,27 +31,35 @@ interface SettingsTabProps {
 
 export function SettingsTab({ form, onSubmit, onPreview, isSaving }: SettingsTabProps) {
   const [keywordInput, setKeywordInput] = useState('');
-  const [authors, setAuthors] = useState<ReportAuthor[]>([]);
-  const [isLoadingAuthors, setIsLoadingAuthors] = useState(true);
+  const [showValidationError, setShowValidationError] = useState(false);
 
-  useEffect(() => {
-    loadAuthors();
-  }, []);
+  const handleSubmit = async () => {
+    const isValid = await form.trigger();
 
-  const loadAuthors = async () => {
-    try {
-      setIsLoadingAuthors(true);
-      const response = await fetchAuthors();
-      setAuthors(response.data || []);
-    } catch (error) {
-      console.error('Failed to load authors:', error);
-    } finally {
-      setIsLoadingAuthors(false);
+    if (!isValid) {
+      setShowValidationError(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
     }
+
+    setShowValidationError(false);
+    const values = form.getValues();
+    await onSubmit(values as ReportFormData);
   };
 
   return (
     <div className="space-y-6">
+      {/* Validation Error Alert */}
+      {showValidationError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Validation Error</AlertTitle>
+          <AlertDescription>
+            Please fix the validation errors before saving. Required fields are marked with an asterisk (*) in the Report Details tab.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Research Team Selection */}
       <Card>
         <CardHeader>
@@ -70,41 +78,12 @@ export function SettingsTab({ form, onSubmit, onPreview, isSaving }: SettingsTab
                 <FormDescription>
                   Choose the researchers and analysts who contributed to this report
                 </FormDescription>
-                {isLoadingAuthors ? (
-                  <div className="text-sm text-muted-foreground py-4">Loading authors...</div>
-                ) : authors.length === 0 ? (
-                  <div className="text-sm text-muted-foreground py-4">
-                    No authors available. Please add authors first.
-                  </div>
-                ) : (
-                  <div className="space-y-3 pt-2">
-                    {authors.map(author => (
-                      <div
-                        key={author.id}
-                        className="flex items-start space-x-3 border rounded-lg p-3"
-                      >
-                        <Checkbox
-                          checked={field.value?.includes(String(author.id))}
-                          onCheckedChange={checked => {
-                            const updated = checked
-                              ? [...(field.value || []), String(author.id)]
-                              : field.value?.filter(id => id !== String(author.id)) || [];
-                            field.onChange(updated);
-                          }}
-                        />
-                        <div className="flex-1">
-                          <div className="font-medium">{author.name}</div>
-                          {author.role && (
-                            <div className="text-sm text-muted-foreground">{author.role}</div>
-                          )}
-                          {author.bio && (
-                            <div className="text-xs text-muted-foreground mt-1">{author.bio}</div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <FormControl>
+                  <MultiSelectAuthorDropdown
+                    value={field.value || []}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -187,14 +166,14 @@ export function SettingsTab({ form, onSubmit, onPreview, isSaving }: SettingsTab
                     </Button>
                   </div>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {field.value?.map((keyword, i) => (
+                    {field.value?.map((keyword: string, i: number) => (
                       <Badge key={i} variant="secondary">
                         {keyword}
                         <button
                           type="button"
                           className="ml-2"
                           onClick={() => {
-                            field.onChange(field.value?.filter((_, idx) => idx !== i));
+                            field.onChange(field.value?.filter((_: any, idx: number) => idx !== i));
                           }}
                         >
                           ×
@@ -245,7 +224,7 @@ export function SettingsTab({ form, onSubmit, onPreview, isSaving }: SettingsTab
             <div className="flex gap-2">
               <Button
                 type="button"
-                onClick={() => form.handleSubmit(onSubmit)()}
+                onClick={handleSubmit}
                 disabled={isSaving}
               >
                 <Save className="h-4 w-4 mr-2" />

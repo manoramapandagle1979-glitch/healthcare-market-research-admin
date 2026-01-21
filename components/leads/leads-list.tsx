@@ -114,6 +114,7 @@ export function LeadsList({ submissions, onDelete, onStatusUpdate }: LeadsListPr
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>ID</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Company</TableHead>
@@ -126,6 +127,7 @@ export function LeadsList({ submissions, onDelete, onStatusUpdate }: LeadsListPr
         <TableBody>
           {submissions.map(submission => (
             <TableRow key={submission.id}>
+              <TableCell className="text-muted-foreground">{submission.id}</TableCell>
               <TableCell className="font-medium">{getSubmissionName(submission)}</TableCell>
               <TableCell>{getSubmissionEmail(submission)}</TableCell>
               <TableCell>{getSubmissionCompany(submission)}</TableCell>

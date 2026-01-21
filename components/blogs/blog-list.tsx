@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { TableSkeleton } from '@/components/ui/skeletons/table-skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import type { Blog, BlogStatus } from '@/lib/types/blogs';
 import { formatRelativeTime } from '@/lib/utils/date';
@@ -50,13 +50,7 @@ function getAuthorInitials(name?: string): string {
 
 export function BlogList({ blogs, isLoading, onDelete }: BlogListProps) {
   if (isLoading) {
-    return (
-      <div className="space-y-2">
-        {[...Array(5)].map((_, i) => (
-          <Skeleton key={i} className="h-16 w-full" />
-        ))}
-      </div>
-    );
+    return <TableSkeleton rows={5} columns={6} showHeader={true} showActions={true} />;
   }
 
   if (blogs.length === 0) {
@@ -68,12 +62,14 @@ export function BlogList({ blogs, isLoading, onDelete }: BlogListProps) {
   }
 
   return (
-    <Table>
+    <div className="fade-in">
+      <Table>
       <TableHeader>
         <TableRow>
           <TableHead>Title</TableHead>
           <TableHead>Author</TableHead>
           <TableHead>Category</TableHead>
+          <TableHead>Location</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Read Time</TableHead>
           <TableHead>Updated</TableHead>
@@ -86,14 +82,14 @@ export function BlogList({ blogs, isLoading, onDelete }: BlogListProps) {
             <TableCell className="font-medium max-w-xs">
               <div className="truncate">{blog.title}</div>
               <div className="flex gap-1 mt-1">
-                {blog.tags.slice(0, 2).map(tag => (
-                  <Badge key={tag.id} variant="outline" className="text-xs">
-                    {tag.name}
+                {blog.tags && blog.tags.split(',').slice(0, 2).map((tag, idx) => (
+                  <Badge key={idx} variant="outline" className="text-xs">
+                    {tag.trim()}
                   </Badge>
                 ))}
-                {blog.tags.length > 2 && (
+                {blog.tags && blog.tags.split(',').length > 2 && (
                   <Badge variant="outline" className="text-xs">
-                    +{blog.tags.length - 2}
+                    +{blog.tags.split(',').length - 2}
                   </Badge>
                 )}
               </div>
@@ -108,7 +104,10 @@ export function BlogList({ blogs, isLoading, onDelete }: BlogListProps) {
                 <span className="text-sm truncate max-w-[100px]">{blog.author.name}</span>
               </div>
             </TableCell>
-            <TableCell>{blog.category}</TableCell>
+            <TableCell>{blog.categoryName || 'Uncategorized'}</TableCell>
+            <TableCell className="text-sm text-muted-foreground">
+              {blog.location || '-'}
+            </TableCell>
             <TableCell>
               <Badge variant={getStatusBadgeVariant(blog.status)}>
                 {BLOG_STATUS_CONFIG[blog.status].label}
@@ -146,5 +145,6 @@ export function BlogList({ blogs, isLoading, onDelete }: BlogListProps) {
         ))}
       </TableBody>
     </Table>
+    </div>
   );
 }

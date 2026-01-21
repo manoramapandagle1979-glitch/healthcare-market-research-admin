@@ -1,9 +1,10 @@
 'use client';
 
 import { useEditor, EditorContent } from '@tiptap/react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
+import Image from '@tiptap/extension-image';
 import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableCell } from '@tiptap/extension-table-cell';
@@ -13,6 +14,13 @@ import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Bold,
   Italic,
@@ -24,6 +32,7 @@ import {
   Heading3,
   Link as LinkIcon,
   Table as TableIcon,
+  Image as ImageIcon,
   AlignLeft,
   AlignCenter,
   AlignRight,
@@ -36,12 +45,17 @@ import {
   Plus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ImagePickerDialog } from './image-picker-dialog';
+import { ReportImage } from '@/lib/types/reports';
+import { uploadReportImage } from '@/lib/api/report-images';
+import { toast } from 'sonner';
 
 interface TiptapEditorProps {
   content: string;
   onChange: (html: string) => void;
   placeholder?: string;
   className?: string;
+  reportId?: number | string;
 }
 
 export function TiptapEditor({
@@ -49,7 +63,9 @@ export function TiptapEditor({
   onChange,
   placeholder = 'Start writing...',
   className,
+  reportId,
 }: TiptapEditorProps) {
+  const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -62,6 +78,13 @@ export function TiptapEditor({
         openOnClick: false,
         HTMLAttributes: {
           class: 'text-primary underline',
+        },
+      }),
+      Image.configure({
+        inline: false,
+        allowBase64: false,
+        HTMLAttributes: {
+          class: 'tiptap-image',
         },
       }),
       Table.configure({
@@ -101,6 +124,57 @@ export function TiptapEditor({
       attributes: {
         class: 'focus:outline-none min-h-[300px] p-4',
       },
+      handlePaste: (view, event) => {
+        // Only handle paste if we have a reportId (needed for uploads)
+        if (!reportId) {
+          return false; // Let TipTap handle it normally
+        }
+
+        const items = event.clipboardData?.items;
+        if (!items) {
+          return false;
+        }
+
+        // Look for image items in the clipboard
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+
+          if (item.type.indexOf('image') === 0) {
+            event.preventDefault();
+
+            const file = item.getAsFile();
+            if (!file) continue;
+
+            // Upload the pasted image
+            toast.promise(
+              uploadReportImage(reportId, file).then((uploadedImage) => {
+                // Insert the uploaded image into the editor
+                const { state } = view;
+                const { selection } = state;
+                const node = state.schema.nodes.image.create({
+                  src: uploadedImage.imageUrl,
+                  alt: uploadedImage.title || 'Pasted image',
+                  title: uploadedImage.title || undefined,
+                });
+
+                const transaction = state.tr.replaceSelectionWith(node);
+                view.dispatch(transaction);
+
+                return uploadedImage;
+              }),
+              {
+                loading: 'Uploading pasted image...',
+                success: 'Image uploaded and inserted!',
+                error: 'Failed to upload pasted image',
+              }
+            );
+
+            return true; // Prevent default paste behavior
+          }
+        }
+
+        return false; // Let TipTap handle non-image pastes normally
+      },
     },
   });
 
@@ -131,6 +205,58 @@ export function TiptapEditor({
 
   const insertTable = () => {
     editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+  };
+
+  const insertImage = (image: ReportImage) => {
+    editor
+      .chain()
+      .focus()
+      .setImage({
+        src: image.imageUrl,
+        alt: image.title || 'Report image',
+        title: image.title || undefined,
+      })
+      .run();
+  };
+
+  const alignImageLeft = () => {
+    editor.chain().focus().updateAttributes('image', {
+      class: 'tiptap-image tiptap-image-left'
+    }).run();
+  };
+
+  const alignImageCenter = () => {
+    editor.chain().focus().updateAttributes('image', {
+      class: 'tiptap-image tiptap-image-center'
+    }).run();
+  };
+
+  const alignImageRight = () => {
+    editor.chain().focus().updateAttributes('image', {
+      class: 'tiptap-image tiptap-image-right'
+    }).run();
+  };
+
+  const setImageWidth = (width: string) => {
+    const currentAttrs = editor.getAttributes('image');
+    const currentClass = currentAttrs.class || 'tiptap-image';
+
+    // Remove any existing width style
+    let style = currentAttrs.style || '';
+    style = style.replace(/max-width:\s*\d+%;?/g, '').trim();
+
+    // Add new width
+    if (width === '100') {
+      // Full width, no max-width needed
+      style = style || undefined;
+    } else {
+      style = `${style} max-width: ${width}%;`.trim();
+    }
+
+    editor.chain().focus().updateAttributes('image', {
+      class: currentClass,
+      style: style || undefined,
+    }).run();
   };
 
   return (
@@ -274,6 +400,17 @@ export function TiptapEditor({
           <TableIcon className="h-4 w-4" />
         </Button>
 
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsImagePickerOpen(true)}
+          disabled={!reportId}
+          title={!reportId ? 'Save report to add images' : 'Insert image'}
+        >
+          <ImageIcon className="h-4 w-4" />
+        </Button>
+
         {/* Table manipulation controls - only show when inside a table */}
         {editor.isActive('table') && (
           <>
@@ -406,6 +543,55 @@ export function TiptapEditor({
           </>
         )}
 
+        {/* Image alignment controls - only show when an image is selected */}
+        {editor.isActive('image') && (
+          <>
+            <Separator orientation="vertical" className="h-8" />
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={alignImageLeft}
+              title="Align image left"
+            >
+              <AlignLeft className="h-4 w-4" />
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={alignImageCenter}
+              title="Align image center"
+            >
+              <AlignCenter className="h-4 w-4" />
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={alignImageRight}
+              title="Align image right"
+            >
+              <AlignRight className="h-4 w-4" />
+            </Button>
+
+            <Select onValueChange={setImageWidth} defaultValue="100">
+              <SelectTrigger className="w-24 h-8">
+                <SelectValue placeholder="Width" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="25">25%</SelectItem>
+                <SelectItem value="50">50%</SelectItem>
+                <SelectItem value="75">75%</SelectItem>
+                <SelectItem value="100">100%</SelectItem>
+              </SelectContent>
+            </Select>
+          </>
+        )}
+
         <Separator orientation="vertical" className="h-8" />
 
         {/* Undo/Redo */}
@@ -432,6 +618,16 @@ export function TiptapEditor({
 
       {/* Editor content */}
       <EditorContent editor={editor} />
+
+      {/* Image Picker Dialog */}
+      {reportId && (
+        <ImagePickerDialog
+          reportId={reportId}
+          open={isImagePickerOpen}
+          onClose={() => setIsImagePickerOpen(false)}
+          onSelect={insertImage}
+        />
+      )}
     </div>
   );
 }

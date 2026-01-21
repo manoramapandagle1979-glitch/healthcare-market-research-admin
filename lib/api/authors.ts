@@ -38,3 +38,22 @@ export async function updateAuthor(
 export async function deleteAuthor(id: number | string): Promise<void> {
   return apiClient.delete(`/v1/authors/${id}`);
 }
+
+/**
+ * Uploads an author profile image
+ */
+export async function uploadAuthorImage(
+  id: number | string,
+  file: File
+): Promise<AuthorResponse> {
+  const formData = new FormData();
+  formData.append('image', file);
+  return apiClient.upload<AuthorResponse>(`/v1/authors/${id}/image`, formData);
+}
+
+/**
+ * Deletes an author profile image
+ */
+export async function deleteAuthorImage(id: number | string): Promise<void> {
+  return apiClient.delete(`/v1/authors/${id}/image`);
+}

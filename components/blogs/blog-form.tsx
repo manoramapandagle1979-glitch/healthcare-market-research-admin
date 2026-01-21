@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import Image from 'next/image';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -26,10 +25,8 @@ import {
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TiptapEditor } from '@/components/reports/tiptap-editor';
-import { TagInput } from './tag-input';
 import { AuthorSelector } from './author-selector';
 import {
-  BLOG_CATEGORIES,
   TITLE_MIN_LENGTH,
   TITLE_MAX_LENGTH,
   EXCERPT_MIN_LENGTH,
@@ -37,8 +34,9 @@ import {
   CONTENT_MIN_LENGTH,
 } from '@/lib/config/blogs';
 import type { BlogFormData, Blog } from '@/lib/types/blogs';
-import { Save, Eye, Image as ImageIcon } from 'lucide-react';
+import { Save, Eye, Wand2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { fetchCategories, type Category } from '@/lib/api/categories';
 
 // Validation schema
 const blogFormSchema = z.object({
@@ -46,6 +44,13 @@ const blogFormSchema = z.object({
     .string()
     .min(TITLE_MIN_LENGTH, `Title must be at least ${TITLE_MIN_LENGTH} characters`)
     .max(TITLE_MAX_LENGTH, `Title must be at most ${TITLE_MAX_LENGTH} characters`),
+  slug: z
+    .string()
+    .min(1, 'Slug is required')
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      'Slug must be lowercase letters, numbers, and hyphens only'
+    ),
   excerpt: z
     .string()
     .min(EXCERPT_MIN_LENGTH, `Excerpt must be at least ${EXCERPT_MIN_LENGTH} characters`)
@@ -53,26 +58,20 @@ const blogFormSchema = z.object({
   content: z
     .string()
     .min(CONTENT_MIN_LENGTH, `Content must be at least ${CONTENT_MIN_LENGTH} characters`),
-  featuredImage: z.string().url().optional().or(z.literal('')),
-  category: z.string().min(1, 'Category is required'),
-  tags: z.array(
-    z.object({
-      id: z.string(),
-      name: z.string(),
-      slug: z.string(),
-    })
-  ),
+  categoryId: z.number().min(1, 'Category is required'),
+  tags: z.string().default(''),
   authorId: z.string().min(1, 'Author is required'),
   status: z.enum(['draft', 'review', 'published']),
   publishDate: z.string(),
+  location: z.string().default(''),
   metadata: z.object({
     metaTitle: z.string().optional(),
     metaDescription: z.string().optional(),
     keywords: z.array(z.string()).optional(),
-    canonicalUrl: z.string().url().optional().or(z.literal('')),
-    ogImage: z.string().url().optional().or(z.literal('')),
   }),
 });
+
+type BlogFormSchema = z.infer<typeof blogFormSchema>;
 
 interface BlogFormProps {
   blog?: Blog;
@@ -83,50 +82,88 @@ interface BlogFormProps {
 
 export function BlogForm({ blog, onSubmit, onPreview, isSaving }: BlogFormProps) {
   const [keywordInput, setKeywordInput] = useState('');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
-  const form = useForm<BlogFormData>({
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    try {
+      setIsLoadingCategories(true);
+      const response = await fetchCategories({ limit: 100 });
+      setCategories(response.categories.filter(cat => cat.isActive));
+    } catch (error) {
+      console.error('Failed to load categories:', error);
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  };
+
+  const form = useForm({
     resolver: zodResolver(blogFormSchema),
     defaultValues: blog
       ? {
           title: blog.title,
+          slug: blog.slug,
           excerpt: blog.excerpt,
           content: blog.content,
-          featuredImage: blog.featuredImage || '',
-          category: blog.category,
-          tags: blog.tags,
-          authorId: blog.author.id,
+          categoryId: blog.categoryId || 0,
+          tags: blog.tags || '',
+          authorId: String(blog.authorId),
           status: blog.status,
           publishDate: blog.publishDate,
+          location: blog.location || '',
           metadata: {
             metaTitle: blog.metadata.metaTitle || '',
             metaDescription: blog.metadata.metaDescription || '',
             keywords: blog.metadata.keywords || [],
-            canonicalUrl: blog.metadata.canonicalUrl || '',
-            ogImage: blog.metadata.ogImage || '',
           },
         }
       : {
           title: '',
+          slug: '',
           excerpt: '',
           content: '',
-          featuredImage: '',
-          category: BLOG_CATEGORIES[0],
-          tags: [],
+          categoryId: 0,
+          tags: '',
           authorId: '',
           status: 'draft',
           publishDate: new Date().toISOString(),
+          location: '',
           metadata: {
             metaTitle: '',
             metaDescription: '',
             keywords: [],
-            canonicalUrl: '',
-            ogImage: '',
           },
         },
   });
 
-  const handleFormSubmit = async (data: BlogFormData) => {
-    await onSubmit(data);
+  const handleFormSubmit = async (data: BlogFormSchema) => {
+    await onSubmit(data as BlogFormData);
+  };
+
+  const fillSampleData = () => {
+    const sampleData: Partial<BlogFormSchema> = {
+      title: 'AI-Powered Diagnostics Revolution in Healthcare Market',
+      slug: 'ai-powered-diagnostics-revolution-healthcare-market',
+      excerpt: 'The healthcare diagnostics market is experiencing a transformative shift with artificial intelligence integration. This comprehensive analysis explores the latest trends, market dynamics, and future projections for AI-powered diagnostic solutions.',
+      content: '<h2>Introduction</h2><p>The integration of artificial intelligence in healthcare diagnostics is revolutionizing the medical industry. Recent studies show a significant increase in accuracy and efficiency of diagnostic procedures powered by AI algorithms.</p><h2>Market Overview</h2><p>The global AI diagnostics market is projected to reach $15.6 billion by 2028, growing at a CAGR of 31.8% from 2023 to 2028. Key factors driving this growth include:</p><ul><li>Increasing demand for early and accurate disease detection</li><li>Growing adoption of precision medicine</li><li>Rising healthcare costs and need for efficiency</li><li>Advances in machine learning and deep learning technologies</li></ul><h2>Key Market Segments</h2><p>The market can be segmented based on application areas including radiology, pathology, cardiology, and oncology. Radiology currently holds the largest market share due to widespread adoption of AI-powered imaging solutions.</p><h2>Conclusion</h2><p>AI-powered diagnostics represent a significant opportunity for healthcare providers and technology companies alike. As the technology matures and regulatory frameworks evolve, we can expect continued growth and innovation in this space.</p>',
+      categoryId: categories.length > 0 ? categories[0].id : 1,
+      tags: 'AI in healthcare, diagnostics, market research',
+      location: 'San Francisco, USA',
+      metadata: {
+        metaTitle: 'AI-Powered Diagnostics Market Analysis 2024 | Healthcare Innovation',
+        metaDescription: 'Comprehensive analysis of the AI-powered diagnostics market, including trends, growth projections, and key market segments. Explore the future of healthcare diagnostics.',
+        keywords: ['AI diagnostics', 'healthcare technology', 'medical AI', 'diagnostic imaging', 'precision medicine'],
+      },
+    };
+
+    // Fill the form with sample data
+    Object.entries(sampleData).forEach(([key, value]) => {
+      form.setValue(key as keyof BlogFormSchema, value as any);
+    });
   };
 
   return (
@@ -135,7 +172,18 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving }: BlogFormProps)
         {/* Basic Information */}
         <Card>
           <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Basic Information</CardTitle>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={fillSampleData}
+              >
+                <Wand2 className="h-4 w-4 mr-2" />
+                Fill Sample Data
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <FormField
@@ -152,6 +200,26 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving }: BlogFormProps)
                   </FormControl>
                   <FormDescription>
                     {field.value.length}/{TITLE_MAX_LENGTH} characters
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="slug"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Slug</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="url-friendly-slug-for-blog"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    URL-friendly identifier (lowercase, hyphens only)
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -179,46 +247,42 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving }: BlogFormProps)
               )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {BLOG_CATEGORIES.map(cat => (
-                          <SelectItem key={cat} value={cat}>
-                            {cat}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="authorId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Author</FormLabel>
+            <FormField
+              control={form.control}
+              name="categoryId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-1">
+                    Category
+                    <span className="text-destructive">*</span>
+                  </FormLabel>
+                  <Select
+                    onValueChange={value => field.onChange(Number(value))}
+                    value={field.value ? String(field.value) : undefined}
+                    disabled={isLoadingCategories}
+                  >
                     <FormControl>
-                      <AuthorSelector value={field.value} onChange={field.onChange} />
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={
+                            isLoadingCategories ? 'Loading categories...' : 'Select category'
+                          }
+                        />
+                      </SelectTrigger>
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                    <SelectContent>
+                      {categories.map(cat => (
+                        <SelectItem key={cat.id} value={String(cat.id)}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>Select the category for this blog post</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
@@ -227,55 +291,45 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving }: BlogFormProps)
                 <FormItem>
                   <FormLabel>Tags</FormLabel>
                   <FormControl>
-                    <TagInput
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="Add relevant tags..."
+                    <Input
+                      placeholder="Enter tags (comma-separated, e.g., AI in healthcare, diagnostics)"
+                      {...field}
                     />
                   </FormControl>
-                  <FormDescription>Add tags to help readers discover your content</FormDescription>
+                  <FormDescription>Enter comma-separated tags to help readers discover your content</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </CardContent>
-        </Card>
 
-        {/* Featured Image */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ImageIcon className="h-5 w-5" />
-              Featured Image
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
             <FormField
               control={form.control}
-              name="featuredImage"
+              name="authorId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Image URL</FormLabel>
+                  <FormLabel>Author</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://example.com/image.jpg" {...field} />
+                    <AuthorSelector value={field.value} onChange={field.onChange} />
                   </FormControl>
-                  <FormDescription>
-                    Enter the URL of your featured image (recommended: 1200x630px)
-                  </FormDescription>
                   <FormMessage />
-                  {field.value && (
-                    <div className="mt-2 border rounded-lg overflow-hidden relative h-48">
-                      <Image
-                        src={field.value}
-                        alt="Featured preview"
-                        fill
-                        className="w-full h-48 object-cover"
-                        onError={e => {
-                          (e.target as HTMLImageElement).style.display = 'none';
-                        }}
-                      />
-                    </div>
-                  )}
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Location</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter location (e.g., New York, USA)"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>Optional location field for the blog post</FormDescription>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -396,37 +450,6 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving }: BlogFormProps)
                 </FormItem>
               )}
             />
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="metadata.canonicalUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Canonical URL</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="metadata.ogImage"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>OG Image URL</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://..." {...field} />
-                    </FormControl>
-                    <FormDescription>For social media sharing</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
           </CardContent>
         </Card>
 

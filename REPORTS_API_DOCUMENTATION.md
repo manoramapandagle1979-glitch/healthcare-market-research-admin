@@ -293,7 +293,6 @@ Content-Type: application/json
     "trends": "<p>Market trends...</p>",
     "conclusion": "<p>Conclusion...</p>",
     "marketDetails": "<p>Detailed market info...</p>",
-    "keyFindings": "<p>Key findings...</p>",
     "tableOfContents": "<p>Table of contents...</p>"
   },
   "faqs": [
@@ -340,7 +339,6 @@ Content-Type: application/json
     "trends": "",
     "conclusion": "",
     "marketDetails": "",
-    "keyFindings": "",
     "tableOfContents": ""
   },
   "metadata": {}
@@ -596,7 +594,6 @@ All sections support HTML content:
 - `trends` - Optional
 - `conclusion` - Min 50 chars when publishing
 - `marketDetails` - Min 100 chars when publishing
-- `keyFindings` - Min 100 chars when publishing
 - `tableOfContents` - Min 50 chars when publishing
 
 ### Market Metrics

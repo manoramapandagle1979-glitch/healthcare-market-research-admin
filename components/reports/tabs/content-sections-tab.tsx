@@ -9,7 +9,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import type { ReportFormData } from '@/lib/types/reports';
 
 interface ContentSectionsTabProps {
-  form: UseFormReturn<ReportFormData>;
+  form: UseFormReturn<any>;
   onSaveTab?: (tabKey: string, data: Partial<ReportFormData>) => Promise<void>;
   isSaving: boolean;
 }

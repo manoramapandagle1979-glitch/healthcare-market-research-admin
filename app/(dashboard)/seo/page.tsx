@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { SitemapManager } from './components/sitemap-manager';
 import { RobotsTxtEditor } from './components/robots-txt-editor';
 import { useSEO } from '@/hooks/use-seo';
-import { Skeleton } from '@/components/ui/skeleton';
+import { StatsCardsSkeleton } from '@/components/ui/skeletons/stats-cards-skeleton';
 import { Search, FileText, Image, Code } from 'lucide-react';
 
 export default function SEOManagementPage() {
@@ -25,86 +25,72 @@ export default function SEOManagementPage() {
       </div>
 
       {/* SEO Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {isLoading && !stats ? (
-          <>
-            {[...Array(4)].map((_, i) => (
-              <Card key={i}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-4 w-4" />
-                </CardHeader>
-                <CardContent>
-                  <Skeleton className="h-8 w-16" />
-                </CardContent>
-              </Card>
-            ))}
-          </>
-        ) : (
-          <>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Pages</CardTitle>
-                <Search className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats?.totalIndexedPages || 0}</div>
-                <p className="text-xs text-muted-foreground">Indexed pages</p>
-              </CardContent>
-            </Card>
+      {isLoading && !stats ? (
+        <StatsCardsSkeleton count={4} columns={4} />
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 fade-in">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Pages</CardTitle>
+              <Search className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats?.totalIndexedPages || 0}</div>
+              <p className="text-xs text-muted-foreground">Indexed pages</p>
+            </CardContent>
+          </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Meta Descriptions</CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats?.pagesWithMetaDescription || 0}</div>
-                <p className="text-xs text-muted-foreground">
-                  {stats?.totalIndexedPages
-                    ? Math.round(
-                        ((stats?.pagesWithMetaDescription || 0) / stats.totalIndexedPages) * 100
-                      )
-                    : 0}
-                  % coverage
-                </p>
-              </CardContent>
-            </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Meta Descriptions</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats?.pagesWithMetaDescription || 0}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats?.totalIndexedPages
+                  ? Math.round(
+                      ((stats?.pagesWithMetaDescription || 0) / stats.totalIndexedPages) * 100
+                    )
+                  : 0}
+                % coverage
+              </p>
+            </CardContent>
+          </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">OG Images</CardTitle>
-                <Image className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats?.pagesWithOGImage || 0}</div>
-                <p className="text-xs text-muted-foreground">
-                  {stats?.totalIndexedPages
-                    ? Math.round(((stats?.pagesWithOGImage || 0) / stats.totalIndexedPages) * 100)
-                    : 0}
-                  % coverage
-                </p>
-              </CardContent>
-            </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">OG Images</CardTitle>
+              <Image className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats?.pagesWithOGImage || 0}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats?.totalIndexedPages
+                  ? Math.round(((stats?.pagesWithOGImage || 0) / stats.totalIndexedPages) * 100)
+                  : 0}
+                % coverage
+              </p>
+            </CardContent>
+          </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Structured Data</CardTitle>
-                <Code className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats?.pagesWithSchema || 0}</div>
-                <p className="text-xs text-muted-foreground">
-                  {stats?.totalIndexedPages
-                    ? Math.round(((stats?.pagesWithSchema || 0) / stats.totalIndexedPages) * 100)
-                    : 0}
-                  % coverage
-                </p>
-              </CardContent>
-            </Card>
-          </>
-        )}
-      </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Structured Data</CardTitle>
+              <Code className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats?.pagesWithSchema || 0}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats?.totalIndexedPages
+                  ? Math.round(((stats?.pagesWithSchema || 0) / stats.totalIndexedPages) * 100)
+                  : 0}
+                % coverage
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* SEO Quality Metrics */}
       {stats && (

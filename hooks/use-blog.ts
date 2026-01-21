@@ -12,6 +12,8 @@ import {
   submitForReview,
   publishBlog,
   unpublishBlog,
+  formDataToCreateRequest,
+  formDataToUpdateRequest,
 } from '@/lib/api/blogs';
 
 interface UseBlogReturn {
@@ -55,7 +57,9 @@ export function useBlog(): UseBlogReturn {
         setIsSaving(true);
         setError(null);
 
-        const response = id ? await updateBlog(id, data) : await createBlog(data);
+        const response = id
+          ? await updateBlog(id, formDataToUpdateRequest(data))
+          : await createBlog(formDataToCreateRequest(data));
 
         setBlog(response.blog);
         toast.success(id ? 'Blog post updated successfully' : 'Blog post created successfully');

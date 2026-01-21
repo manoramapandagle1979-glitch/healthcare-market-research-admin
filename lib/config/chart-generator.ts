@@ -138,6 +138,7 @@ export const DEFAULT_METADATA: ChartMetadata = {
   showLegend: true,
   showGridlines: true,
   mapColorScheme: 'blue',
+  source: 'Healthcare Foresights',
 };
 
 // Default chart configuration

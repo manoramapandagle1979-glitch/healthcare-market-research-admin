@@ -9,19 +9,38 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { BLOG_CATEGORIES } from '@/lib/config/blogs';
-import type { BlogFilters, BlogAuthor } from '@/lib/types/blogs';
+import type { BlogFilters } from '@/lib/types/blogs';
+import type { ReportAuthor } from '@/lib/types/reports';
 import { Search, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { fetchCategories, type Category } from '@/lib/api/categories';
 
 interface BlogFiltersProps {
   filters: BlogFilters;
   onFiltersChange: (filters: BlogFilters) => void;
-  authors?: BlogAuthor[];
+  authors?: ReportAuthor[];
 }
 
 export function BlogFiltersComponent({ filters, onFiltersChange, authors = [] }: BlogFiltersProps) {
   const [searchInput, setSearchInput] = useState(filters.search || '');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    try {
+      setIsLoadingCategories(true);
+      const response = await fetchCategories({ limit: 100 });
+      setCategories(response.categories.filter(cat => cat.isActive));
+    } catch (error) {
+      console.error('Failed to load categories:', error);
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +53,7 @@ export function BlogFiltersComponent({ filters, onFiltersChange, authors = [] }:
   };
 
   const hasActiveFilters =
-    filters.status || filters.category || filters.authorId || filters.tag || filters.search;
+    filters.status || filters.categoryId || filters.authorId || filters.tags || filters.search;
 
   return (
     <div className="space-y-4">
@@ -53,8 +72,8 @@ export function BlogFiltersComponent({ filters, onFiltersChange, authors = [] }:
         <Button type="submit">Search</Button>
       </form>
 
-      {/* Filter dropdowns */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Filter dropdowns and inputs */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Select
           value={filters.status || 'all'}
           onValueChange={value =>
@@ -77,11 +96,11 @@ export function BlogFiltersComponent({ filters, onFiltersChange, authors = [] }:
         </Select>
 
         <Select
-          value={filters.category || 'all'}
+          value={filters.categoryId ? String(filters.categoryId) : 'all'}
           onValueChange={value =>
             onFiltersChange({
               ...filters,
-              category: value === 'all' ? undefined : value,
+              categoryId: value === 'all' ? undefined : parseInt(value, 10),
               page: 1,
             })
           }
@@ -91,20 +110,29 @@ export function BlogFiltersComponent({ filters, onFiltersChange, authors = [] }:
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            {BLOG_CATEGORIES.map(cat => (
-              <SelectItem key={cat} value={cat}>
-                {cat}
+            {categories.map(cat => (
+              <SelectItem key={cat.id} value={String(cat.id)}>
+                {cat.name}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
 
+        <Input
+          type="text"
+          placeholder="Filter by tag..."
+          value={filters.tags || ''}
+          onChange={e => {
+            onFiltersChange({ ...filters, tags: e.target.value || undefined, page: 1 });
+          }}
+        />
+
         <Select
-          value={filters.authorId || 'all'}
+          value={filters.authorId ? String(filters.authorId) : 'all'}
           onValueChange={value =>
             onFiltersChange({
               ...filters,
-              authorId: value === 'all' ? undefined : value,
+              authorId: value === 'all' ? undefined : parseInt(value, 10),
               page: 1,
             })
           }
@@ -115,7 +143,7 @@ export function BlogFiltersComponent({ filters, onFiltersChange, authors = [] }:
           <SelectContent>
             <SelectItem value="all">All Authors</SelectItem>
             {authors.map(author => (
-              <SelectItem key={author.id} value={author.id}>
+              <SelectItem key={author.id} value={String(author.id)}>
                 {author.name}
               </SelectItem>
             ))}

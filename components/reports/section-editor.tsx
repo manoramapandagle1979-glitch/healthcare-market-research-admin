@@ -10,11 +10,12 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface SectionEditorProps {
-  sections: ReportSections;
-  onChange: (sections: ReportSections) => void;
+  sections: any;
+  onChange: (sections: any) => void;
+  reportId?: number | string;
 }
 
-export function SectionEditor({ sections, onChange }: SectionEditorProps) {
+export function SectionEditor({ sections, onChange, reportId }: SectionEditorProps) {
   const [expandedSections, setExpandedSections] = useState<Set<ReportSectionKey>>(
     new Set(REPORT_SECTIONS.map(section => section.key))
   );
@@ -76,6 +77,7 @@ export function SectionEditor({ sections, onChange }: SectionEditorProps) {
                   content={(sections[section.key] as string) || ''}
                   onChange={content => handleSectionChange(section.key, content)}
                   placeholder={section.placeholder}
+                  reportId={reportId}
                 />
               </CardContent>
             )}

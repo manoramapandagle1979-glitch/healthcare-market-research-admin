@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { useBlog } from '@/hooks/use-blog';
 import { Button } from '@/components/ui/button';
@@ -86,20 +85,8 @@ export default function PreviewBlogPage() {
             >
               {BLOG_STATUS_CONFIG[blog.status].label}
             </Badge>
-            <Badge variant="outline">{blog.category}</Badge>
+            <Badge variant="outline">{blog.categoryName}</Badge>
           </div>
-
-          {/* Featured Image */}
-          {blog.featuredImage && (
-            <div className="w-full h-64 rounded-lg overflow-hidden relative">
-              <Image
-                src={blog.featuredImage}
-                alt={blog.title}
-                fill
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
 
           {/* Title */}
           <h1 className="text-3xl font-bold">{blog.title}</h1>
@@ -147,9 +134,9 @@ export default function PreviewBlogPage() {
 
           {/* Tags */}
           <div className="flex flex-wrap gap-2">
-            {blog.tags.map(tag => (
-              <Badge key={tag.id} variant="secondary">
-                {tag.name}
+            {blog.tags && blog.tags.split(',').map((tag, idx) => (
+              <Badge key={idx} variant="secondary">
+                {tag.trim()}
               </Badge>
             ))}
           </div>

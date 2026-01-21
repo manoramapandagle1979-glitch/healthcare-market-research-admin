@@ -9,6 +9,8 @@ import { useLeads } from '@/hooks/use-leads';
 import { LeadsList } from '@/components/leads/leads-list';
 import { LeadsStats } from '@/components/leads/leads-stats';
 import { LeadsFilters } from '@/components/leads/leads-filters';
+import { TableSkeleton } from '@/components/ui/skeletons/table-skeleton';
+import { StatsCardsSkeleton } from '@/components/ui/skeletons/stats-cards-skeleton';
 import type { ApiFormSubmission } from '@/lib/types/api-types';
 
 export default function LeadsPage() {
@@ -79,7 +81,13 @@ export default function LeadsPage() {
         </div>
       </div>
 
-      <LeadsStats stats={stats} />
+      {isLoading ? (
+        <StatsCardsSkeleton count={5} columns={4} />
+      ) : (
+        <div className="fade-in">
+          <LeadsStats stats={stats} />
+        </div>
+      )}
 
       <Card>
         <CardHeader>
@@ -104,7 +112,7 @@ export default function LeadsPage() {
             </div>
 
             {isLoading ? (
-              <div className="text-center py-8 text-muted-foreground">Loading submissions...</div>
+              <TableSkeleton rows={8} columns={7} showHeader={true} showActions={true} />
             ) : filteredSubmissions.length === 0 ? (
               <div className="text-center py-8">
                 <Mail className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
@@ -113,7 +121,7 @@ export default function LeadsPage() {
                 </p>
               </div>
             ) : (
-              <>
+              <div className="fade-in">
                 <LeadsList
                   submissions={filteredSubmissions}
                   onDelete={handleDelete}
@@ -145,7 +153,7 @@ export default function LeadsPage() {
                     </div>
                   </div>
                 )}
-              </>
+              </div>
             )}
           </div>
         </CardContent>

@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { ReportFormTabs } from '@/components/reports/report-form-tabs';
 import { useReport } from '@/hooks/use-report';
 import { useAuth } from '@/contexts/auth-context';
-import { Skeleton } from '@/components/ui/skeleton';
+import { FormSkeleton } from '@/components/ui/skeletons/form-skeleton';
 import { AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { ReportFormData } from '@/lib/types/reports';
@@ -53,8 +53,11 @@ export default function EditReportPage() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-12 w-64" />
-        <Skeleton className="h-96 w-full" />
+        <div className="space-y-2">
+          <div className="h-9 w-48 bg-accent rounded-md animate-pulse" />
+          <div className="h-5 w-96 bg-accent rounded-md animate-pulse" />
+        </div>
+        <FormSkeleton sections={2} fieldsPerSection={5} showTabs={true} />
       </div>
     );
   }
@@ -71,7 +74,7 @@ export default function EditReportPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 fade-in">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold">Edit Report</h1>

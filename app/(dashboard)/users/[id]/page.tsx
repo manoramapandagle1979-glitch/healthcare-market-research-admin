@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { UserFormTabs } from '@/components/users/user-form-tabs';
 import { useUser } from '@/hooks/use-user';
 import type { UpdateUserRequest } from '@/lib/types/api-types';
+import { FormSkeleton } from '@/components/ui/skeletons/form-skeleton';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { use } from 'react';
@@ -21,7 +22,16 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
   };
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading user...</div>;
+    return (
+      <div className="space-y-6">
+        <div className="h-9 w-32 bg-accent rounded-md animate-pulse" />
+        <div className="space-y-2">
+          <div className="h-9 w-48 bg-accent rounded-md animate-pulse" />
+          <div className="h-5 w-96 bg-accent rounded-md animate-pulse" />
+        </div>
+        <FormSkeleton sections={1} fieldsPerSection={4} showTabs={true} />
+      </div>
+    );
   }
 
   if (error) {
@@ -49,7 +59,7 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 fade-in">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="sm" onClick={() => router.push('/users')}>
           <ArrowLeft className="h-4 w-4 mr-2" />

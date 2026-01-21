@@ -18,6 +18,7 @@ export interface ChartMetadata {
   showLegend: boolean;
   showGridlines: boolean;
   mapColorScheme?: 'blue' | 'green' | 'red' | 'purple';
+  source?: string;
 }
 
 export interface DataSeries {

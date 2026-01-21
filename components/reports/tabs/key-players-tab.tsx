@@ -9,7 +9,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import type { ReportFormData } from '@/lib/types/reports';
 
 interface KeyPlayersTabProps {
-  form: UseFormReturn<ReportFormData>;
+  form: UseFormReturn<any>;
   onSaveTab?: (tabKey: string, data: Partial<ReportFormData>) => Promise<void>;
   isSaving: boolean;
 }
@@ -18,9 +18,7 @@ export function KeyPlayersTab({ form, onSaveTab, isSaving }: KeyPlayersTabProps)
   const handleSaveTab = async () => {
     const values = form.getValues();
     if (onSaveTab) {
-      await onSaveTab('keyPlayers', {
-        keyPlayers: values.keyPlayers,
-      });
+      await onSaveTab('keyPlayers', values);
     }
   };
 
@@ -36,12 +34,12 @@ export function KeyPlayersTab({ form, onSaveTab, isSaving }: KeyPlayersTabProps)
         <CardContent className="space-y-4">
           <FormField
             control={form.control}
-            name="keyPlayers"
+            name="sections.keyPlayers"
             render={({ field }) => (
               <FormItem>
                 <FormDescription>Add key companies and their market share data</FormDescription>
                 <div className="space-y-4">
-                  {field.value?.map((player, index) => (
+                  {field.value?.map((player: any, index: number) => (
                     <Card key={index} className="p-4">
                       <div className="space-y-3">
                         <div className="flex items-start justify-between">
@@ -53,7 +51,7 @@ export function KeyPlayersTab({ form, onSaveTab, isSaving }: KeyPlayersTabProps)
                             variant="ghost"
                             size="sm"
                             onClick={() => {
-                              const updated = field.value?.filter((_, i) => i !== index);
+                              const updated = field.value?.filter((_: any, i: number) => i !== index);
                               field.onChange(updated);
                             }}
                           >

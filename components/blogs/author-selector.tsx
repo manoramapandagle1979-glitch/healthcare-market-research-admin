@@ -13,8 +13,8 @@ import {
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import type { BlogAuthor } from '@/lib/types/blogs';
-import { fetchAuthors } from '@/lib/api/blogs';
+import type { ReportAuthor } from '@/lib/types/reports';
+import { fetchAuthors } from '@/lib/api/authors';
 import { cn } from '@/lib/utils';
 
 interface AuthorSelectorProps {
@@ -35,7 +35,7 @@ function getAuthorInitials(name?: string): string {
 
 export function AuthorSelector({ value, onChange, disabled = false }: AuthorSelectorProps) {
   const [open, setOpen] = useState(false);
-  const [authors, setAuthors] = useState<BlogAuthor[]>([]);
+  const [authors, setAuthors] = useState<ReportAuthor[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -45,8 +45,8 @@ export function AuthorSelector({ value, onChange, disabled = false }: AuthorSele
   const loadAuthors = async () => {
     try {
       setIsLoading(true);
-      const { authors } = await fetchAuthors();
-      setAuthors(authors);
+      const response = await fetchAuthors();
+      setAuthors(response.data || []);
     } catch (error) {
       console.error('Failed to load authors:', error);
     } finally {
@@ -54,7 +54,7 @@ export function AuthorSelector({ value, onChange, disabled = false }: AuthorSele
     }
   };
 
-  const selectedAuthor = authors.find(a => a.id === value);
+  const selectedAuthor = authors.find(a => a.id === Number(value));
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -100,14 +100,14 @@ export function AuthorSelector({ value, onChange, disabled = false }: AuthorSele
                     key={author.id}
                     value={author.name}
                     onSelect={() => {
-                      onChange(author.id);
+                      onChange(String(author.id));
                       setOpen(false);
                     }}
                   >
                     <Check
                       className={cn(
                         'mr-2 h-4 w-4',
-                        value === author.id ? 'opacity-100' : 'opacity-0'
+                        Number(value) === author.id ? 'opacity-100' : 'opacity-0'
                       )}
                     />
                     <div className="flex items-center gap-2">
@@ -118,7 +118,9 @@ export function AuthorSelector({ value, onChange, disabled = false }: AuthorSele
                       </Avatar>
                       <div>
                         <p className="text-sm font-medium">{author.name}</p>
-                        <p className="text-xs text-muted-foreground">{author.email}</p>
+                        {author.role && (
+                          <p className="text-xs text-muted-foreground">{author.role}</p>
+                        )}
                       </div>
                     </div>
                   </CommandItem>

@@ -20,7 +20,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import type { ReportFormData, ReportAuthor } from '@/lib/types/reports';
 
 interface PublishSettingsTabProps {
-  form: UseFormReturn<ReportFormData>;
+  form: UseFormReturn<any>;
   onSubmit: (data: ReportFormData) => Promise<void>;
   onPreview?: () => void;
   isSaving: boolean;
@@ -88,7 +88,7 @@ export function PublishSettingsTab({
                           onCheckedChange={checked => {
                             const updated = checked
                               ? [...(field.value || []), String(author.id)]
-                              : field.value?.filter(id => id !== String(author.id)) || [];
+                              : field.value?.filter((id: string) => id !== String(author.id)) || [];
                             field.onChange(updated);
                           }}
                         />

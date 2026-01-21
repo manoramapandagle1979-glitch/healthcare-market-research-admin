@@ -12,6 +12,7 @@ import type {
   Report,
   ReportFormat,
   TableOfContentsStructure,
+  KeyPlayer,
 } from '@/lib/types/reports';
 import * as reportsApi from './reports.api';
 import type { ApiReport, ApiReportFilters } from '@/lib/types/api-types';
@@ -31,44 +32,6 @@ function convertDateToRFC3339(dateString: string | undefined): string | undefine
 
   // Convert "YYYY-MM-DD" to "YYYY-MM-DDT00:00:00Z"
   return `${dateString}T00:00:00Z`;
-}
-
-/**
- * Converts key findings array to HTML string for backend storage
- * @param findings Array of key finding strings
- * @returns HTML unordered list string
- */
-function convertKeyFindingsToHtml(findings: string[]): string {
-  if (!findings || findings.length === 0) return '';
-  const items = findings.map(finding => `<li>${finding}</li>`).join('');
-  return `<ul>${items}</ul>`;
-}
-
-/**
- * Converts key findings HTML string from backend to array
- * @param html HTML string from backend
- * @returns Array of key finding strings
- */
-function convertKeyFindingsFromHtml(html: string | undefined): string[] {
-  if (!html) return [];
-
-  // Try to parse JSON first (in case it was stored as JSON)
-  if (html.startsWith('[')) {
-    try {
-      return JSON.parse(html);
-    } catch {
-      // Not JSON, continue with HTML parsing
-    }
-  }
-
-  // Extract text from list items
-  const matches = html.match(/<li>(.*?)<\/li>/g);
-  if (matches) {
-    return matches.map(match => match.replace(/<\/?li>/g, ''));
-  }
-
-  // Fallback: return as single item if not empty
-  return html.trim() ? [html.trim()] : [];
 }
 
 /**
@@ -105,6 +68,32 @@ function convertTOCFromJson(json: string | undefined): TableOfContentsStructure 
   return { chapters: [] };
 }
 
+/**
+ * Converts key players array to JSON string for backend storage
+ * @param players Array of key players
+ * @returns JSON string
+ */
+function convertKeyPlayersToJson(players: KeyPlayer[] | undefined): string {
+  if (!players || players.length === 0) return JSON.stringify([]);
+  return JSON.stringify(players);
+}
+
+/**
+ * Converts JSON string key players from backend to array
+ * @param json JSON string from backend
+ * @returns Array of key players
+ */
+function convertKeyPlayersFromJson(json: string | undefined): KeyPlayer[] {
+  if (!json) return [];
+  try {
+    const parsed = JSON.parse(json);
+    if (Array.isArray(parsed)) return parsed;
+  } catch (error) {
+    console.error('Failed to parse key players JSON:', error);
+  }
+  return [];
+}
+
 // ============ Helper: Convert API types to Legacy types ============
 function convertApiReportToLegacy(apiReport: ApiReport): Report {
   return {
@@ -125,21 +114,10 @@ function convertApiReportToLegacy(apiReport: ApiReport): Report {
     formats: apiReport.formats as ReportFormat[],
     marketMetrics: apiReport.market_metrics,
     authorIds: apiReport.author_ids?.map(String),
-    keyPlayers: apiReport.key_players,
     sections: {
-      executiveSummary: apiReport.sections?.executiveSummary || '',
-      marketOverview: apiReport.sections?.marketOverview || '',
-      marketSize: apiReport.sections?.marketSize || '',
-      competitive: apiReport.sections?.competitive || '',
-      keyPlayers: apiReport.sections?.keyPlayers || '',
-      regional: apiReport.sections?.regional || '',
-      trends: apiReport.sections?.trends || '',
-      conclusion: apiReport.sections?.conclusion || '',
       marketDetails: apiReport.sections?.marketDetails || '',
-      keyFindings: convertKeyFindingsFromHtml(apiReport.sections?.keyFindings),
       tableOfContents: convertTOCFromJson(apiReport.sections?.tableOfContents),
-      marketDrivers: apiReport.sections?.marketDrivers,
-      challenges: apiReport.sections?.challenges,
+      keyPlayers: convertKeyPlayersFromJson(apiReport.sections?.keyPlayers),
     },
     faqs: apiReport.faqs,
     metadata: {
@@ -226,9 +204,9 @@ export async function createReport(data: ReportFormData): Promise<ReportResponse
     category_id: Number(data.category_id),
     geography: data.geography,
     sections: {
-      ...data.sections,
-      keyFindings: convertKeyFindingsToHtml(data.sections.keyFindings),
+      marketDetails: data.sections.marketDetails,
       tableOfContents: convertTOCToJson(data.sections.tableOfContents),
+      keyPlayers: convertKeyPlayersToJson(data.sections.keyPlayers),
     },
 
     // Optional fields
@@ -243,7 +221,6 @@ export async function createReport(data: ReportFormData): Promise<ReportResponse
     formats: data.formats,
     market_metrics: data.marketMetrics,
     author_ids: data.authorIds?.map(Number),
-    key_players: data.keyPlayers,
     faqs: data.faqs,
     metadata: data.metadata,
     is_featured: data.isFeatured,
@@ -293,12 +270,11 @@ export async function updateReport(
   if (data.formats) apiData.formats = data.formats;
   if (data.marketMetrics) apiData.market_metrics = data.marketMetrics;
   if (data.authorIds) apiData.author_ids = data.authorIds.map(Number);
-  if (data.keyPlayers) apiData.key_players = data.keyPlayers;
   if (data.sections) {
     apiData.sections = {
-      ...data.sections,
-      keyFindings: convertKeyFindingsToHtml(data.sections.keyFindings),
+      marketDetails: data.sections.marketDetails,
       tableOfContents: convertTOCToJson(data.sections.tableOfContents),
+      keyPlayers: convertKeyPlayersToJson(data.sections.keyPlayers),
     };
   }
   if (data.faqs) apiData.faqs = data.faqs;

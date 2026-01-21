@@ -7,6 +7,7 @@ import { VersionHistory } from '@/components/blogs/version-history';
 import { WorkflowStatus } from '@/components/blogs/workflow-status';
 import { useBlog } from '@/hooks/use-blog';
 import { useAuth } from '@/contexts/auth-context';
+import { FormSkeleton } from '@/components/ui/skeletons/form-skeleton';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -53,8 +54,19 @@ export default function EditBlogPage() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-12 w-64" />
-        <Skeleton className="h-96 w-full" />
+        <div className="space-y-2">
+          <Skeleton className="h-9 w-48" />
+          <Skeleton className="h-5 w-96" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <FormSkeleton sections={1} fieldsPerSection={6} showTabs={false} />
+          </div>
+          <div className="space-y-6">
+            <Skeleton className="h-48 w-full" />
+            <Skeleton className="h-64 w-full" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -73,7 +85,7 @@ export default function EditBlogPage() {
   const isAdmin = user?.role === 'admin';
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 fade-in">
       <div>
         <h1 className="text-3xl font-bold">Edit Blog Post</h1>
         <p className="text-muted-foreground mt-2">{blog.title}</p>

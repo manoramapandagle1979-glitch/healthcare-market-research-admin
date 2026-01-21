@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { TableSkeleton } from '@/components/ui/skeletons/table-skeleton';
 import type { Report } from '@/lib/types/reports';
 import { formatRelativeTime } from '@/lib/utils/date';
 import { formatCurrency } from '@/lib/utils/format';
@@ -25,13 +25,7 @@ interface ReportListProps {
 
 export function ReportList({ reports, isLoading, onDelete }: ReportListProps) {
   if (isLoading) {
-    return (
-      <div className="space-y-2">
-        {[...Array(5)].map((_, i) => (
-          <Skeleton key={i} className="h-16 w-full" />
-        ))}
-      </div>
-    );
+    return <TableSkeleton rows={5} columns={5} showHeader={true} showActions={true} />;
   }
 
   if (!reports || reports.length === 0) {
@@ -43,7 +37,8 @@ export function ReportList({ reports, isLoading, onDelete }: ReportListProps) {
   }
 
   return (
-    <Table>
+    <div className="fade-in">
+      <Table>
       <TableHeader>
         <TableRow>
           <TableHead>Title</TableHead>
@@ -91,5 +86,6 @@ export function ReportList({ reports, isLoading, onDelete }: ReportListProps) {
         ))}
       </TableBody>
     </Table>
+    </div>
   );
 }

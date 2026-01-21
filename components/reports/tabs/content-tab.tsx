@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,19 +12,22 @@ import {
   FormDescription,
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Trash2, Save, FileText, Building2, HelpCircle, Lightbulb, List } from 'lucide-react';
+import { Plus, Trash2, Save, FileText, Building2, HelpCircle, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { SectionEditor } from '../section-editor';
-import { TOCEditor } from '../toc-editor';
 import type { UseFormReturn } from 'react-hook-form';
 import type { ReportFormData } from '@/lib/types/reports';
 
 interface ContentTabProps {
-  form: UseFormReturn<ReportFormData>;
+  form: UseFormReturn<any>;
   onSaveTab?: (tabKey: string, data: Partial<ReportFormData>) => Promise<void>;
   isSaving: boolean;
 }
 
 export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
+  const [showValidationError, setShowValidationError] = useState(false);
+  const reportId = form.watch('id');
+
   const handleSaveTab = async () => {
     if (onSaveTab) {
       // Wait for React to complete any pending state updates from the TiptapEditor
@@ -36,6 +40,19 @@ export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
         });
       });
 
+      // Trigger validation for the entire form
+      const isValid = await form.trigger();
+
+      if (!isValid) {
+        // Validation failed - show error alert and scroll to top
+        setShowValidationError(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
+      // Hide validation error if it was showing
+      setShowValidationError(false);
+
       const values = form.getValues();
       // Send all form values, not just fields from this tab
       await onSaveTab('content', values);
@@ -44,6 +61,17 @@ export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
 
   return (
     <div className="space-y-6">
+      {/* Validation Error Alert */}
+      {showValidationError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Validation Error</AlertTitle>
+          <AlertDescription>
+            Please fix the validation errors before saving. Required fields are marked with an asterisk (*).
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Report Content Sections */}
       <Card>
         <CardHeader>
@@ -59,100 +87,8 @@ export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <SectionEditor sections={field.value} onChange={field.onChange} />
+                  <SectionEditor sections={field.value} onChange={field.onChange} reportId={reportId} />
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </CardContent>
-      </Card>
-
-      {/* Table of Contents */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <List className="h-5 w-5" />
-            Table of Contents
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <FormField
-            control={form.control}
-            name="sections.tableOfContents"
-            render={({ field }) => (
-              <FormItem>
-                <FormDescription>
-                  Build a hierarchical table of contents with chapters, sections, and subsections
-                </FormDescription>
-                <FormControl>
-                  <TOCEditor value={field.value} onChange={field.onChange} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </CardContent>
-      </Card>
-
-      {/* Key Findings */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Lightbulb className="h-5 w-5" />
-            Key Findings
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <FormField
-            control={form.control}
-            name="sections.keyFindings"
-            render={({ field }) => (
-              <FormItem>
-                <FormDescription>
-                  Add key research findings and insights (one per entry)
-                </FormDescription>
-                <div className="space-y-3">
-                  {field.value?.map((finding, index) => (
-                    <div key={index} className="flex gap-2">
-                      <div className="flex-1">
-                        <Textarea
-                          placeholder={`Key finding #${index + 1}...`}
-                          rows={2}
-                          value={finding}
-                          onChange={e => {
-                            const updated = [...(field.value || [])];
-                            updated[index] = e.target.value;
-                            field.onChange(updated);
-                          }}
-                        />
-                      </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          const updated = field.value?.filter((_, i) => i !== index);
-                          field.onChange(updated);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    const updated = [...(field.value || []), ''];
-                    field.onChange(updated);
-                  }}
-                  className="w-full mt-2"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Key Finding
-                </Button>
                 <FormMessage />
               </FormItem>
             )}
@@ -171,42 +107,26 @@ export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
         <CardContent className="space-y-4">
           <FormField
             control={form.control}
-            name="keyPlayers"
+            name="sections.keyPlayers"
             render={({ field }) => (
               <FormItem>
                 <FormDescription>Add key companies and their market share data</FormDescription>
                 <div className="space-y-4">
-                  {field.value?.map((player, index) => (
-                    <Card key={index} className="p-4">
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between">
-                          <span className="text-sm font-medium text-muted-foreground">
-                            Player #{index + 1}
-                          </span>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              const updated = field.value?.filter((_, i) => i !== index);
+                  {field.value?.map((player: any, index: number) => (
+                    <div key={index} className="space-y-3">
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="col-span-2">
+                          <Input
+                            placeholder="Company Name"
+                            value={player.name}
+                            onChange={e => {
+                              const updated = [...(field.value || [])];
+                              updated[index] = { ...updated[index], name: e.target.value };
                               field.onChange(updated);
                             }}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+                          />
                         </div>
-                        <div className="grid grid-cols-3 gap-3">
-                          <div className="col-span-2">
-                            <Input
-                              placeholder="Company Name"
-                              value={player.name}
-                              onChange={e => {
-                                const updated = [...(field.value || [])];
-                                updated[index] = { ...updated[index], name: e.target.value };
-                                field.onChange(updated);
-                              }}
-                            />
-                          </div>
+                        <div className='flex'>
                           <Input
                             placeholder="Market Share (e.g., 14.2%)"
                             value={player.marketShare || ''}
@@ -216,9 +136,22 @@ export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
                               field.onChange(updated);
                             }}
                           />
+                          <Button
+                            className="col-span-1"
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const updated = field.value?.filter((_: any, i: number) => i !== index);
+                              field.onChange(updated);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+
                         </div>
                       </div>
-                    </Card>
+                    </div>
                   ))}
                 </div>
                 <Button
@@ -261,7 +194,7 @@ export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
                   Add questions and answers to help users understand this report better
                 </FormDescription>
                 <div className="space-y-4">
-                  {field.value?.map((faq, index) => (
+                  {field.value?.map((faq: any, index: number) => (
                     <Card key={index} className="p-4">
                       <div className="space-y-3">
                         <div className="flex items-start justify-between">
@@ -273,7 +206,7 @@ export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
                             variant="ghost"
                             size="sm"
                             onClick={() => {
-                              const updated = field.value?.filter((_, i) => i !== index);
+                              const updated = field.value?.filter((_: any, i: number) => i !== index);
                               field.onChange(updated);
                             }}
                           >

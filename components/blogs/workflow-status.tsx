@@ -143,13 +143,13 @@ export function WorkflowStatus({
 
         {/* Available transitions */}
         <div className="space-y-2">
-          <p className="text-sm font-medium">Available Actions</p>
+          <div className="text-sm font-medium">Available Actions</div>
           {availableTransitions.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground">
               {currentStatus === 'draft' && !isAdmin
                 ? 'Submit for review to proceed with publishing.'
                 : 'No actions available.'}
-            </p>
+            </div>
           ) : (
             <div className="space-y-2">
               {availableTransitions.map(toStatus => (
@@ -157,7 +157,7 @@ export function WorkflowStatus({
                   key={toStatus}
                   type="button"
                   variant={toStatus === 'published' ? 'default' : 'outline'}
-                  size="sm"
+                  size="lg"
                   className="w-full justify-start"
                   disabled={isSaving}
                   onClick={() => onStatusChange(toStatus)}
@@ -170,10 +170,10 @@ export function WorkflowStatus({
                     <AlertCircle className="h-4 w-4 mr-2" />
                   )}
                   <div className="text-left">
-                    <p className="text-sm">{getTransitionLabel(toStatus)}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <div className="text-sm">{getTransitionLabel(toStatus)}</div>
+                    <div className="text-xs text-muted-foreground">
                       {getTransitionDescription(toStatus)}
-                    </p>
+                    </div>
                   </div>
                 </Button>
               ))}

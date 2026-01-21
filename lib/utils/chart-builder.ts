@@ -67,7 +67,7 @@ export function buildEChartsConfig(config: ChartBuilderConfig): EChartsOption {
       metadata.showLegend && chartType !== 'world-map'
         ? {
             show: true,
-            bottom: 10,
+            bottom: metadata.source ? 25 : 10,
             left: 'center',
             itemGap: 20,
             itemWidth: 14,
@@ -83,10 +83,20 @@ export function buildEChartsConfig(config: ChartBuilderConfig): EChartsOption {
   // Add grid configuration for bar charts
   if (chartType !== 'pie' && chartType !== 'donut' && chartType !== 'world-map') {
     const standardDataSource = dataSource as DataSource;
+    // Calculate bottom spacing based on legend and source text
+    let bottomSpacing = '8%';
+    if (metadata.showLegend && metadata.source) {
+      bottomSpacing = '15%';
+    } else if (metadata.showLegend) {
+      bottomSpacing = '12%';
+    } else if (metadata.source) {
+      bottomSpacing = '10%';
+    }
+
     baseConfig.grid = {
       left: '10%',
       right: '10%',
-      bottom: metadata.showLegend ? '12%' : '8%',
+      bottom: bottomSpacing,
       top: metadata.subtitle ? '20%' : '15%',
       containLabel: true,
     };
@@ -243,9 +253,22 @@ export function buildEChartsConfig(config: ChartBuilderConfig): EChartsOption {
   // Build series configuration
   baseConfig.series = buildSeriesConfig(chartType, orientation, dataSource, metadata);
 
+  // Build graphics array for logo and source text
+  const graphics: any[] = [];
+
   // Add logo graphic if logo exists
   if (logo.previewUrl) {
-    baseConfig.graphic = buildLogoGraphic(logo);
+    graphics.push(buildLogoGraphic(logo));
+  }
+
+  // Add source text if provided
+  if (metadata.source) {
+    graphics.push(buildSourceTextGraphic(metadata.source));
+  }
+
+  // Set graphic if we have any
+  if (graphics.length > 0) {
+    baseConfig.graphic = graphics;
   }
 
   return baseConfig;
@@ -288,7 +311,7 @@ function buildSeriesConfig(
         {
           type: 'pie',
           radius: ['40%', '70%'], // Inner and outer radius for donut
-          center: ['50%', '55%'],
+          center: ['50%', '50%'],
           data: aggregatedData,
           itemStyle: {
             borderRadius: 8,
@@ -316,7 +339,7 @@ function buildSeriesConfig(
       {
         type: 'pie',
         radius: ['40%', '70%'], // Key difference: inner radius creates donut hole
-        center: ['50%', '55%'],
+        center: ['50%', '50%'],
         data: donutData,
         itemStyle: {
           borderRadius: 8,
@@ -413,7 +436,7 @@ function buildSeriesConfig(
         {
           type: 'pie',
           radius: ['0%', '65%'],
-          center: ['50%', '55%'],
+          center: ['50%', '50%'],
           data: aggregatedData,
           itemStyle: {
             borderRadius: 5,
@@ -441,7 +464,7 @@ function buildSeriesConfig(
       {
         type: 'pie',
         radius: ['0%', '65%'],
-        center: ['50%', '55%'],
+        center: ['50%', '50%'],
         data: pieData,
         itemStyle: {
           borderRadius: 5,
@@ -490,7 +513,7 @@ function buildSeriesConfig(
   }));
 }
 
-function buildLogoGraphic(logo: LogoConfig): EChartsOption['graphic'] {
+function buildLogoGraphic(logo: LogoConfig) {
   const positions = {
     'top-left': { left: 20, top: 20 },
     'top-right': { right: 20, top: 20 },
@@ -505,6 +528,22 @@ function buildLogoGraphic(logo: LogoConfig): EChartsOption['graphic'] {
       width: 100,
       height: 40,
       opacity: logo.opacity / 100,
+    },
+    z: 100,
+  };
+}
+
+function buildSourceTextGraphic(sourceText: string) {
+  return {
+    type: 'text',
+    left: 'center',
+    bottom: 5,
+    style: {
+      text: `Source: ${sourceText}`,
+      fontSize: 11,
+      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      fill: '#666666',
+      fontWeight: 400,
     },
     z: 100,
   };

@@ -19,7 +19,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import type { ReportFormData } from '@/lib/types/reports';
 
 interface SEOMetadataTabProps {
-  form: UseFormReturn<ReportFormData>;
+  form: UseFormReturn<any>;
   onSaveTab?: (tabKey: string, data: Partial<ReportFormData>) => Promise<void>;
   isSaving: boolean;
 }
@@ -112,14 +112,14 @@ export function SEOMetadataTab({ form, onSaveTab, isSaving }: SEOMetadataTabProp
                     </Button>
                   </div>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {field.value?.map((keyword, i) => (
+                    {field.value?.map((keyword: string, i: number) => (
                       <Badge key={i} variant="secondary">
                         {keyword}
                         <button
                           type="button"
                           className="ml-2"
                           onClick={() => {
-                            field.onChange(field.value?.filter((_, idx) => idx !== i));
+                            field.onChange(field.value?.filter((_: any, idx: number) => idx !== i));
                           }}
                         >
                           ×

@@ -1,0 +1,194 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { PressReleaseFiltersComponent } from '@/components/press-releases/press-release-filters';
+import { PressReleaseList } from '@/components/press-releases/press-release-list';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
+import { usePressReleases } from '@/hooks/use-press-releases';
+import { useAuth } from '@/contexts/auth-context';
+import { Plus, RefreshCw } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { toast } from 'sonner';
+import { deletePressRelease, fetchAuthors } from '@/lib/api/press-releases';
+import type { PressReleaseAuthor } from '@/lib/types/press-releases';
+
+export default function PressReleasesPage() {
+  const { user } = useAuth();
+  const [filters, setFilters] = useState({});
+  const [authors, setAuthors] = useState<PressReleaseAuthor[]>([]);
+  const {
+    pressReleases,
+    total,
+    totalPages,
+    currentPage,
+    isLoading,
+    refetch,
+    setFilters: updateFilters,
+  } = usePressReleases(filters);
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean;
+    pressReleaseId: number | null;
+  }>({
+    open: false,
+    pressReleaseId: null,
+  });
+
+  const loadAuthors = async () => {
+    try {
+      const { authors } = await fetchAuthors();
+      setAuthors(authors);
+    } catch {
+      // Error is logged by the API client
+    }
+  };
+
+  useEffect(() => {
+    loadAuthors();
+  }, []);
+
+  const handleDelete = async () => {
+    if (!deleteDialog.pressReleaseId) return;
+
+    try {
+      await deletePressRelease(deleteDialog.pressReleaseId);
+      toast.success('Press release deleted successfully');
+      refetch();
+      setDeleteDialog({ open: false, pressReleaseId: null });
+    } catch {
+      toast.error('Failed to delete press release');
+    }
+  };
+
+  const canCreateEdit = user?.role === 'admin' || user?.role === 'editor';
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Press Releases</h1>
+          <p className="text-muted-foreground mt-2">Manage press releases ({total} total)</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={refetch}>
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Refresh
+          </Button>
+          {canCreateEdit && (
+            <Button asChild>
+              <Link href="/press-releases/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Create Press Release
+              </Link>
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Filters */}
+      <PressReleaseFiltersComponent
+        filters={filters}
+        onFiltersChange={newFilters => {
+          setFilters(newFilters);
+          updateFilters(newFilters);
+        }}
+        authors={authors}
+      />
+
+      {/* Press Release List */}
+      <PressReleaseList
+        pressReleases={pressReleases}
+        isLoading={isLoading}
+        onDelete={
+          canCreateEdit ? id => setDeleteDialog({ open: true, pressReleaseId: id }) : undefined
+        }
+      />
+
+      {/* Pagination */}
+      {!isLoading && totalPages > 1 && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={e => {
+                  e.preventDefault();
+                  if (currentPage > 1) updateFilters({ ...filters, page: currentPage - 1 });
+                }}
+                aria-disabled={currentPage <= 1}
+              />
+            </PaginationItem>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <PaginationItem key={page}>
+                <PaginationLink
+                  href="#"
+                  isActive={page === currentPage}
+                  onClick={e => {
+                    e.preventDefault();
+                    if (page !== currentPage) updateFilters({ ...filters, page });
+                  }}
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={e => {
+                  e.preventDefault();
+                  if (currentPage < totalPages) updateFilters({ ...filters, page: currentPage + 1 });
+                }}
+                aria-disabled={currentPage >= totalPages}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialog.open}
+        onOpenChange={open => setDeleteDialog({ open, pressReleaseId: null })}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Press Release</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this press release? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialog({ open: false, pressReleaseId: null })}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

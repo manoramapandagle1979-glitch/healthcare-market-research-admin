@@ -11,17 +11,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Save, TrendingUp } from 'lucide-react';
+import { Save, TrendingUp, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { GEOGRAPHIES, REPORT_FORMATS } from '@/lib/config/reports';
 import { fetchCategories, type Category } from '@/lib/api/categories';
 import type { UseFormReturn } from 'react-hook-form';
 import type { ReportFormData } from '@/lib/types/reports';
 
 interface ReportDetailsTabProps {
-  form: UseFormReturn<ReportFormData>;
+  form: UseFormReturn<any>;
   onSaveTab?: (tabKey: string, data: Partial<ReportFormData>) => Promise<void>;
   isSaving: boolean;
 }
@@ -29,6 +30,7 @@ interface ReportDetailsTabProps {
 export function ReportDetailsTab({ form, onSaveTab, isSaving }: ReportDetailsTabProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [showValidationError, setShowValidationError] = useState(false);
 
   useEffect(() => {
     loadCategories();
@@ -47,6 +49,19 @@ export function ReportDetailsTab({ form, onSaveTab, isSaving }: ReportDetailsTab
     }
   };
   const handleSaveTab = async () => {
+    // Trigger validation for the entire form
+    const isValid = await form.trigger();
+
+    if (!isValid) {
+      // Validation failed - show error alert and scroll to top
+      setShowValidationError(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // Hide validation error if it was showing
+    setShowValidationError(false);
+
     const values = form.getValues();
     if (onSaveTab) {
       // Send all form values, not just fields from this tab
@@ -56,6 +71,17 @@ export function ReportDetailsTab({ form, onSaveTab, isSaving }: ReportDetailsTab
 
   return (
     <div className="space-y-6">
+      {/* Validation Error Alert */}
+      {showValidationError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Validation Error</AlertTitle>
+          <AlertDescription>
+            Please fix the validation errors below before saving. Required fields are marked with an asterisk (*).
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Basic Information */}
       <Card>
         <CardHeader>
@@ -67,10 +93,31 @@ export function ReportDetailsTab({ form, onSaveTab, isSaving }: ReportDetailsTab
             name="title"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Report Title</FormLabel>
+                <FormLabel className="flex items-center gap-1">
+                  Report Title
+                  <span className="text-destructive">*</span>
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., Global Healthcare Market Analysis 2024" {...field} />
+                  <Input
+                    placeholder="e.g., Global Healthcare Market Analysis 2024"
+                    {...field}
+                    onChange={e => {
+                      field.onChange(e);
+                      // Auto-generate slug if slug is empty
+                      const currentSlug = form.getValues('slug');
+                      if (!currentSlug) {
+                        const slug = e.target.value
+                          .toLowerCase()
+                          .replace(/[^a-z0-9\s-]/g, '')
+                          .replace(/\s+/g, '-')
+                          .replace(/-+/g, '-')
+                          .trim();
+                        form.setValue('slug', slug);
+                      }
+                    }}
+                  />
                 </FormControl>
+                <FormDescription>Minimum 10 characters</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -81,7 +128,10 @@ export function ReportDetailsTab({ form, onSaveTab, isSaving }: ReportDetailsTab
             name="slug"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>URL Slug</FormLabel>
+                <FormLabel className="flex items-center gap-1">
+                  URL Slug
+                  <span className="text-destructive">*</span>
+                </FormLabel>
                 <div className="flex gap-2">
                   <FormControl>
                     <Input placeholder="e.g., global-healthcare-market-analysis-2024" {...field} />
@@ -111,9 +161,9 @@ export function ReportDetailsTab({ form, onSaveTab, isSaving }: ReportDetailsTab
                     Generate
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  URL-friendly identifier for the report (lowercase, hyphens instead of spaces)
-                </p>
+                <FormDescription>
+                  Unique URL identifier (lowercase letters, numbers, and hyphens only)
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -124,14 +174,20 @@ export function ReportDetailsTab({ form, onSaveTab, isSaving }: ReportDetailsTab
             name="summary"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Summary</FormLabel>
+                <FormLabel className="flex items-center gap-1">
+                  Summary
+                  <span className="text-destructive">*</span>
+                </FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Brief overview of the report (50-200 characters)"
+                    placeholder="Brief overview of the report (minimum 50 characters)"
                     rows={3}
                     {...field}
                   />
                 </FormControl>
+                <FormDescription>
+                  {field.value?.length || 0} / 50 minimum characters
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -143,7 +199,10 @@ export function ReportDetailsTab({ form, onSaveTab, isSaving }: ReportDetailsTab
               name="category_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category</FormLabel>
+                  <FormLabel className="flex items-center gap-1">
+                    Category
+                    <span className="text-destructive">*</span>
+                  </FormLabel>
                   <Select
                     onValueChange={value => field.onChange(Number(value))}
                     value={field.value ? String(field.value) : undefined}
@@ -176,7 +235,10 @@ export function ReportDetailsTab({ form, onSaveTab, isSaving }: ReportDetailsTab
               name="geography"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Geography</FormLabel>
+                  <FormLabel className="flex items-center gap-1">
+                    Geography
+                    <span className="text-destructive">*</span>
+                  </FormLabel>
                   <div className="grid grid-cols-2 gap-2 pt-2">
                     {GEOGRAPHIES.map(geo => (
                       <div key={geo} className="flex items-center space-x-2">
@@ -185,7 +247,7 @@ export function ReportDetailsTab({ form, onSaveTab, isSaving }: ReportDetailsTab
                           onCheckedChange={checked => {
                             const updated = checked
                               ? [...field.value, geo]
-                              : field.value.filter(g => g !== geo);
+                              : field.value.filter((g: string) => g !== geo);
                             field.onChange(updated);
                           }}
                         />
@@ -193,6 +255,7 @@ export function ReportDetailsTab({ form, onSaveTab, isSaving }: ReportDetailsTab
                       </div>
                     ))}
                   </div>
+                  <FormDescription>Select at least one geography</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -250,7 +313,7 @@ export function ReportDetailsTab({ form, onSaveTab, isSaving }: ReportDetailsTab
                           onCheckedChange={checked => {
                             const updated = checked
                               ? [...(field.value || []), format]
-                              : field.value?.filter(f => f !== format) || [];
+                              : field.value?.filter((f: string) => f !== format) || [];
                             field.onChange(updated);
                           }}
                         />

@@ -21,7 +21,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import type { ReportFormData } from '@/lib/types/reports';
 
 interface BasicInformationTabProps {
-  form: UseFormReturn<ReportFormData>;
+  form: UseFormReturn<any>;
   onSaveTab?: (tabKey: string, data: Partial<ReportFormData>) => Promise<void>;
   isSaving: boolean;
 }
@@ -150,7 +150,7 @@ export function BasicInformationTab({ form, onSaveTab, isSaving }: BasicInformat
                           onCheckedChange={checked => {
                             const updated = checked
                               ? [...field.value, geo]
-                              : field.value.filter(g => g !== geo);
+                              : field.value.filter((g: string) => g !== geo);
                             field.onChange(updated);
                           }}
                         />
@@ -215,7 +215,7 @@ export function BasicInformationTab({ form, onSaveTab, isSaving }: BasicInformat
                           onCheckedChange={checked => {
                             const updated = checked
                               ? [...(field.value || []), format]
-                              : field.value?.filter(f => f !== format) || [];
+                              : field.value?.filter((f: string) => f !== format) || [];
                             field.onChange(updated);
                           }}
                         />

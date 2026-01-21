@@ -6,6 +6,7 @@ import {
   Users,
   UserCog,
   MessageSquare,
+  Megaphone,
 } from 'lucide-react';
 
 export type UserRole = 'admin' | 'editor' | 'viewer';
@@ -61,6 +62,26 @@ export const navigationItems: NavigationItem[] = [
         title: 'Create Post',
         href: '/blog/new',
         icon: PenSquare,
+        roles: ['admin', 'editor'],
+      },
+    ],
+  },
+  {
+    title: 'Press Releases',
+    href: '/press-releases',
+    icon: Megaphone,
+    roles: ['admin', 'editor'],
+    children: [
+      {
+        title: 'All Press Releases',
+        href: '/press-releases',
+        icon: Megaphone,
+        roles: ['admin', 'editor'],
+      },
+      {
+        title: 'Create Press Release',
+        href: '/press-releases/new',
+        icon: Megaphone,
         roles: ['admin', 'editor'],
       },
     ],

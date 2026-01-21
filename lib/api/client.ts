@@ -173,6 +173,53 @@ class ApiClient {
   delete<T>(endpoint: string, options?: RequestOptions): Promise<T> {
     return this.request<T>(endpoint, { ...options, method: 'DELETE' });
   }
+
+  /**
+   * Upload file with FormData (multipart/form-data)
+   */
+  async upload<T>(endpoint: string, formData: FormData, options?: RequestOptions): Promise<T> {
+    const { requiresAuth = true, params, ...fetchOptions } = options || {};
+    const queryString = this.buildQueryString(params);
+    const fullEndpoint = `${endpoint}${queryString}`;
+
+    const headers: HeadersInit = {
+      // Don't set Content-Type for FormData - browser will set it with boundary
+      ...fetchOptions.headers,
+    };
+
+    if (requiresAuth) {
+      const authHeaders = await this.getAuthHeaders();
+      Object.assign(headers, authHeaders);
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), config.api.timeout);
+
+    try {
+      const response = await fetch(`${this.baseUrl}${fullEndpoint}`, {
+        ...fetchOptions,
+        method: 'POST',
+        headers,
+        body: formData,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new ApiError(response.status, errorData.message || 'Upload failed', errorData);
+      }
+
+      return await response.json();
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(500, error instanceof Error ? error.message : 'Unknown error');
+    }
+  }
 }
 
 export const apiClient = new ApiClient();

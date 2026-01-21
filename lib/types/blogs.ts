@@ -1,5 +1,5 @@
 // Re-use UserReference from reports
-import type { UserReference } from './reports';
+import type { UserReference, ReportAuthor } from './reports';
 
 // Blog status enum with workflow states
 export type BlogStatus = 'draft' | 'review' | 'published';
@@ -21,19 +21,11 @@ export interface BlogAuthor extends UserReference {
   };
 }
 
-// SEO metadata for blog posts
+// SEO metadata for blog posts (API format)
 export interface BlogMetadata {
   metaTitle?: string;
   metaDescription?: string;
   keywords?: string[];
-  canonicalUrl?: string;
-  ogTitle?: string;
-  ogDescription?: string;
-  ogImage?: string;
-  ogType?: string;
-  twitterCard?: 'summary' | 'summary_large_image';
-  schemaJson?: string;
-  robotsDirective?: string;
 }
 
 // Version history item
@@ -48,21 +40,43 @@ export interface BlogVersion {
   excerpt: string;
 }
 
-// Main Blog interface
+// API Blog interface (matches backend schema)
+export interface ApiBlog {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  categoryId: number; // Category ID (required)
+  tags: string; // comma-separated string
+  authorId: number;
+  status: BlogStatus;
+  publishDate: string;
+  location?: string;
+  metadata: BlogMetadata;
+  createdAt: string;
+  updatedAt: string;
+  reviewedBy?: number;
+  reviewedAt?: string;
+}
+
+// Frontend Blog interface (for UI components)
 export interface Blog {
   id: string;
   title: string;
   slug: string;
   excerpt: string;
-  content: string; // HTML from rich text editor
-  featuredImage?: string;
-  category: string;
-  tags: BlogTag[];
-  author: BlogAuthor;
+  content: string;
+  categoryId: number; // Category ID
+  categoryName?: string; // Category name (populated from category lookup)
+  tags: string; // Comma-separated tags
+  author: ReportAuthor;
+  authorId: number;
   status: BlogStatus;
   publishDate: string;
-  readingTime: number; // in minutes
-  viewCount: number;
+  readingTime: number; // in minutes, calculated on frontend
+  viewCount: number; // calculated or from cache
+  location?: string;
   metadata: BlogMetadata;
   versions?: BlogVersion[];
   createdAt: string;
@@ -74,9 +88,10 @@ export interface Blog {
 // List filters
 export interface BlogFilters {
   status?: BlogStatus;
-  category?: string;
-  tag?: string;
-  authorId?: string;
+  categoryId?: number; // Filter by category ID
+  tags?: string; // comma-separated
+  authorId?: number;
+  location?: string;
   search?: string;
   page?: number;
   limit?: number;
@@ -95,27 +110,57 @@ export interface BlogResponse {
   blog: Blog;
 }
 
+// API request types
+export interface CreateBlogRequest {
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  categoryId: number; // Category ID (required)
+  tags?: string; // comma-separated
+  authorId: number;
+  status: BlogStatus;
+  publishDate: string;
+  location?: string;
+  metadata?: BlogMetadata;
+}
+
+export interface UpdateBlogRequest {
+  title?: string;
+  slug?: string;
+  excerpt?: string;
+  content?: string;
+  categoryId?: number; // Category ID
+  tags?: string; // comma-separated
+  authorId?: number;
+  status?: BlogStatus;
+  publishDate?: string;
+  location?: string;
+  metadata?: BlogMetadata;
+}
+
 // Form data (for create/update)
 export interface BlogFormData {
   title: string;
+  slug: string;
   excerpt: string;
   content: string;
-  featuredImage?: string;
-  category: string;
-  tags: BlogTag[];
-  authorId: string;
+  categoryId: number; // Category ID (required)
+  tags: string; // Comma-separated tags
+  authorId: string; // String for form compatibility
   status: BlogStatus;
   publishDate: string;
+  location: string;
   metadata: BlogMetadata;
 }
 
 // Category type
 export interface BlogCategory {
-  id: string;
+  id: number;
   name: string;
   slug: string;
   description?: string;
-  postCount: number;
+  postCount?: number;
 }
 
 // Author list response

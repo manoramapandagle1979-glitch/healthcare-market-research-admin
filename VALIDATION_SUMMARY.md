@@ -48,7 +48,6 @@ These fields are **required** when creating a new report:
      - trends: 1 char minimum
      - conclusion: 50 chars
      - marketDetails: 100 chars
-     - keyFindings: 100 chars
      - tableOfContents: 50 chars
    - Optional sections:
      - marketDrivers (optional)

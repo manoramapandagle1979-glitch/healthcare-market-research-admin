@@ -95,19 +95,9 @@ export interface ApiCategory {
 
 // ============ Report Types ============
 export interface ApiReportSections {
-  executiveSummary?: string;
-  marketOverview?: string;
-  marketSize?: string;
-  competitive?: string;
-  keyPlayers?: string;
-  regional?: string;
-  trends?: string;
-  conclusion?: string;
   marketDetails?: string;
-  keyFindings?: string;
+  keyPlayers?: string;
   tableOfContents?: string;
-  marketDrivers?: string; // Market drivers section
-  challenges?: string; // Market challenges section
 }
 
 export interface ApiMarketMetrics {
@@ -199,7 +189,6 @@ export interface ApiReport {
 
   // Market data (optional)
   market_metrics?: ApiMarketMetrics;
-  key_players?: ApiKeyPlayer[];
 
   // FAQs & metadata (optional)
   faqs?: ApiFAQ[];

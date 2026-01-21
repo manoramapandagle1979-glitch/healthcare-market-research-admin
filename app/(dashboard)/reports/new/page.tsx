@@ -42,19 +42,10 @@ export default function CreateReportPage() {
           formats: data.formats || [],
           marketMetrics: data.marketMetrics || {},
           authorIds: data.authorIds || [],
-          keyPlayers: data.keyPlayers || [],
           sections: data.sections || {
-            executiveSummary: '',
-            marketOverview: '',
-            marketSize: '',
-            competitive: '',
-            keyPlayers: '',
-            regional: '',
-            trends: '',
-            conclusion: '',
             marketDetails: '',
-            keyFindings: [],
             tableOfContents: { chapters: [] },
+            keyPlayers: [],
           },
           faqs: data.faqs || [],
           metadata: data.metadata || {
@@ -76,9 +67,11 @@ export default function CreateReportPage() {
         const result = await saveReport(createdReportId, saveData);
 
         if (result) {
-          // If this was the first save, store the report ID for subsequent saves
+          // If this was the first save, redirect to edit page
           if (!createdReportId) {
-            setCreatedReportId(result.id);
+            toast.success('Report created successfully! Redirecting to edit page...');
+            router.push(`/reports/${result.id}`);
+            return;
           }
 
           setLastSaved(new Date());
@@ -89,7 +82,7 @@ export default function CreateReportPage() {
         toast.error('Failed to save draft');
       }
     },
-    [saveReport, createdReportId]
+    [saveReport, createdReportId, router]
   );
 
   return (

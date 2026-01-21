@@ -10,7 +10,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import type { ReportFormData } from '@/lib/types/reports';
 
 interface FAQsTabProps {
-  form: UseFormReturn<ReportFormData>;
+  form: UseFormReturn<any>;
   onSaveTab?: (tabKey: string, data: Partial<ReportFormData>) => Promise<void>;
   isSaving: boolean;
 }
@@ -44,7 +44,7 @@ export function FAQsTab({ form, onSaveTab, isSaving }: FAQsTabProps) {
                   Add questions and answers to help users understand this report better
                 </FormDescription>
                 <div className="space-y-4">
-                  {field.value?.map((faq, index) => (
+                  {field.value?.map((faq: any, index: number) => (
                     <Card key={index} className="p-4">
                       <div className="space-y-3">
                         <div className="flex items-start justify-between">
@@ -56,7 +56,7 @@ export function FAQsTab({ form, onSaveTab, isSaving }: FAQsTabProps) {
                             variant="ghost"
                             size="sm"
                             onClick={() => {
-                              const updated = field.value?.filter((_, i) => i !== index);
+                              const updated = field.value?.filter((_: any, i: number) => i !== index);
                               field.onChange(updated);
                             }}
                           >

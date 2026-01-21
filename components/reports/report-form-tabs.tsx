@@ -8,6 +8,7 @@ import { Form } from '@/components/ui/form';
 import type { ReportFormData, Report } from '@/lib/types/reports';
 import { ReportDetailsTab } from './tabs/report-details-tab';
 import { ContentTab } from './tabs/content-tab';
+import { TOCTab } from './tabs/toc-tab';
 import { SettingsTab } from './tabs/settings-tab';
 import { ChartsTab } from './tabs/charts-tab';
 import { reportFormSchema, type ReportFormSchemaType } from '@/lib/validation/report-schema';
@@ -52,40 +53,15 @@ const getSampleData = (): ReportFormData => ({
     cagrEndYear: 2031,
   },
   authorIds: [],
-  keyPlayers: [
-    { name: 'Teladoc Health', marketShare: '15.3%' },
-    { name: 'American Well (Amwell)', marketShare: '12.7%' },
-    { name: 'MDLive', marketShare: '9.2%' },
-    { name: 'Doctor on Demand', marketShare: '7.8%' },
-    { name: 'Grand Rounds', marketShare: '5.4%' },
-  ],
   sections: {
-    executiveSummary:
-      '<h2>Executive Summary</h2><p>The global telemedicine market is experiencing unprecedented growth, driven by technological advancements, increasing healthcare costs, and the need for accessible remote healthcare services. Valued at $87.4 billion in 2024, the market is projected to reach $286.2 billion by 2031, growing at a CAGR of 18.4%.</p><p>Key factors driving this growth include widespread adoption of smartphones and high-speed internet, rising prevalence of chronic diseases, shortage of healthcare professionals in remote areas, and supportive government initiatives promoting digital health solutions.</p>',
-    marketOverview:
-      '<h2>Market Overview</h2><p>Telemedicine has evolved from a niche service to a mainstream healthcare delivery model, enabling patients to consult with healthcare providers remotely through video calls, phone consultations, and digital messaging platforms. The COVID-19 pandemic accelerated adoption rates by 5-7 years, normalizing virtual care across demographics.</p><p>The market encompasses various service types including teleconsultation, telemonitoring, teleradiology, telepathology, and telepsychiatry. Healthcare providers, payers, and patients increasingly recognize telemedicine as a cost-effective, convenient alternative to traditional in-person visits.</p>',
-    marketSize:
-      '<h2>Market Size and Growth</h2><p>The global telemedicine market was valued at $87.4 billion in 2024 and is projected to grow at a robust CAGR of 18.4% from 2024 to 2031, reaching $286.2 billion by 2031. North America currently dominates with a 42% market share, followed by Europe at 28% and Asia Pacific at 22%.</p><p>The teleconsultation segment represents the largest share at 38% of total market revenue, while telemonitoring is the fastest-growing segment with a projected CAGR of 21.3%. The enterprise/B2B segment accounts for 65% of revenue, while direct-to-consumer services comprise 35%.</p>',
-    competitive:
-      "<h2>Competitive Landscape</h2><p>The telemedicine market is highly competitive with presence of numerous global and regional players. Major companies are focusing on strategic partnerships, mergers and acquisitions, and technological innovations to strengthen their market position.</p><p>Teladoc Health leads the market with 15.3% share, followed by American Well at 12.7%. The market has seen significant M&A activity, including Teladoc's acquisition of Livongo for $18.5 billion and recent partnerships between tech giants like Amazon and traditional healthcare providers.</p>",
-    keyPlayers:
-      '<h2>Key Market Players</h2><ul><li><strong>Teladoc Health</strong> - Market leader with comprehensive virtual care platform serving 175+ countries</li><li><strong>American Well (Amwell)</strong> - Enterprise telehealth platform with strong hospital partnerships</li><li><strong>MDLive</strong> - Consumer-focused telemedicine services with insurance integration</li><li><strong>Doctor on Demand</strong> - On-demand video consultations with board-certified physicians</li><li><strong>Grand Rounds</strong> - Expert medical opinion and care navigation platform</li></ul>',
-    regional:
-      '<h2>Regional Analysis</h2><p><strong>North America</strong>: Leads global market with 42% share, driven by advanced healthcare infrastructure, high internet penetration, favorable reimbursement policies, and strong presence of major telemedicine providers.</p><p><strong>Europe</strong>: Second-largest market at 28% share, with UK, Germany, and France as key contributors. Growth driven by aging population and government support for digital health initiatives.</p><p><strong>Asia Pacific</strong>: Fastest-growing region with CAGR of 22.1%, led by China, India, and Japan. Rising smartphone adoption and government digital health programs driving expansion.</p>',
-    trends:
-      '<h2>Market Trends and Opportunities</h2><p><strong>AI and Machine Learning Integration</strong>: Advanced diagnostic tools and predictive analytics enhancing consultation quality and efficiency.</p><p><strong>Wearable Device Integration</strong>: Real-time patient monitoring through connected devices enabling proactive care management.</p><p><strong>Mental Health Focus</strong>: Telepsychiatry and virtual behavioral health services seeing explosive growth, particularly post-pandemic.</p><p><strong>Regulatory Evolution</strong>: Governments worldwide updating reimbursement policies and licensing requirements to support telemedicine expansion.</p>',
-    conclusion:
-      '<h2>Conclusion</h2><p>The global telemedicine market is poised for significant growth over the next decade, transforming healthcare delivery worldwide. While challenges around data privacy, regulatory harmonization, and digital literacy remain, the overall trajectory is overwhelmingly positive. Organizations that invest in user-friendly platforms, ensure data security, and build trust with patients and providers will be well-positioned to capture market share in this rapidly evolving landscape.</p>',
     marketDetails:
       '<p><strong>By Service Type:</strong></p><ul><li>Teleconsultation (38%)</li><li>Telemonitoring (26%)</li><li>Teleradiology (14%)</li><li>Telepathology (9%)</li><li>Others (13%)</li></ul><p><strong>By Delivery Mode:</strong></p><ul><li>Web/Mobile (72%)</li><li>Call Centers (28%)</li></ul><p><strong>By End User:</strong></p><ul><li>Patients (42%)</li><li>Healthcare Providers (38%)</li><li>Payers (20%)</li></ul>',
-    keyFindings: [
-      'Market expected to grow from $87.4B (2024) to $286.2B (2031) at 18.4% CAGR',
-      'Teleconsultation dominates with 38% market share; telemonitoring fastest growing at 21.3% CAGR',
-      'North America leads with 42% share; Asia Pacific fastest-growing at 22.1% CAGR',
-      'COVID-19 accelerated adoption by 5-7 years across all demographics',
-      'Mental health services showing highest growth with 28% year-over-year increase',
-      'B2B segment comprises 65% of revenue vs. 35% B2C',
-      'Regulatory barriers decreasing with 37 US states achieving interstate licensure',
+    keyPlayers: [
+      { name: 'Teladoc Health', marketShare: '14.2%', description: 'Market leader with comprehensive virtual care platform serving 175+ countries' },
+      { name: 'American Well (Amwell)', marketShare: '9.8%', description: 'Enterprise telehealth platform with strong hospital partnerships' },
+      { name: 'MDLive', marketShare: '7.3%', description: 'Consumer-focused telemedicine services with insurance integration' },
+      { name: 'Doctor on Demand', marketShare: '5.1%', description: 'On-demand video consultations with board-certified physicians' },
+      { name: 'Grand Rounds', marketShare: '3.4%', description: 'Expert medical opinion and care navigation platform' },
     ],
     tableOfContents: {
       chapters: [
@@ -165,10 +141,6 @@ const getSampleData = (): ReportFormData => ({
         },
       ],
     },
-    marketDrivers:
-      '<h2>Market Drivers</h2><ul><li><strong>Technological Advancements</strong>: High-speed internet, 5G networks, and advanced video conferencing capabilities enabling seamless virtual consultations</li><li><strong>Healthcare Access</strong>: Addressing shortage of healthcare professionals in rural and underserved areas through remote care delivery</li><li><strong>Cost Reduction</strong>: Lower consultation costs, reduced hospital readmissions, and decreased travel expenses for patients</li><li><strong>Chronic Disease Management</strong>: Rising prevalence of chronic conditions requiring continuous monitoring and follow-up care</li><li><strong>Regulatory Support</strong>: Government initiatives, favorable reimbursement policies, and relaxed licensing requirements</li></ul>',
-    challenges:
-      '<h2>Market Challenges</h2><ul><li><strong>Data Privacy and Security</strong>: Concerns over patient data protection, HIPAA compliance, and cybersecurity threats</li><li><strong>Regulatory Complexity</strong>: Varying regulations across states and countries creating barriers to cross-border telemedicine</li><li><strong>Digital Divide</strong>: Limited internet access and digital literacy in certain demographics and regions</li><li><strong>Reimbursement Issues</strong>: Inconsistent insurance coverage and reimbursement policies across providers and regions</li><li><strong>Technology Adoption</strong>: Resistance from traditional healthcare providers and patients accustomed to in-person care</li></ul>',
   },
   faqs: [
     {
@@ -221,7 +193,7 @@ export const ReportFormTabs = forwardRef<ReportFormTabsRef, ReportFormTabsProps>
   function ReportFormTabs({ report, onSubmit, onSaveTab, onPreview, isSaving }, ref) {
     const [activeTab, setActiveTab] = useState('details');
 
-    const form = useForm<ReportFormSchemaType>({
+    const form = useForm({
       resolver: zodResolver(reportFormSchema),
       defaultValues: report
         ? {
@@ -240,14 +212,15 @@ export const ReportFormTabs = forwardRef<ReportFormTabsRef, ReportFormTabsProps>
             formats: report.formats || [],
             marketMetrics: report.marketMetrics || {},
             authorIds: report.authorIds || [],
-            keyPlayers: report.keyPlayers || [],
-            sections: report.sections,
+            sections: {
+              ...report.sections,
+              keyPlayers: report.sections.keyPlayers || [],
+            },
             faqs: report.faqs || [],
             metadata: report.metadata,
             thumbnailUrl: report.thumbnailUrl,
             isFeatured: report.isFeatured,
             internalNotes: report.internalNotes,
-            charts: [],
           }
         : {
             title: '',
@@ -273,21 +246,10 @@ export const ReportFormTabs = forwardRef<ReportFormTabsRef, ReportFormTabsProps>
               cagrEndYear: new Date().getFullYear() + 7,
             },
             authorIds: [],
-            keyPlayers: [],
             sections: {
-              executiveSummary: '',
-              marketOverview: '',
-              marketSize: '',
-              competitive: '',
-              keyPlayers: '',
-              regional: '',
-              trends: '',
-              conclusion: '',
               marketDetails: '',
-              keyFindings: [],
               tableOfContents: { chapters: [] },
-              marketDrivers: '',
-              challenges: '',
+              keyPlayers: [],
             },
             faqs: [],
             metadata: {
@@ -306,7 +268,6 @@ export const ReportFormTabs = forwardRef<ReportFormTabsRef, ReportFormTabsProps>
             thumbnailUrl: '',
             isFeatured: false,
             internalNotes: '',
-            charts: [],
           },
     });
 
@@ -319,9 +280,10 @@ export const ReportFormTabs = forwardRef<ReportFormTabsRef, ReportFormTabsProps>
     return (
       <Form {...form}>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsList className="grid w-full grid-cols-5 mb-6">
             <TabsTrigger value="details">Report Details</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
+            <TabsTrigger value="toc">Table of Contents</TabsTrigger>
             <TabsTrigger value="charts">Charts</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
@@ -334,8 +296,12 @@ export const ReportFormTabs = forwardRef<ReportFormTabsRef, ReportFormTabsProps>
             <ContentTab form={form} onSaveTab={onSaveTab} isSaving={isSaving} />
           </TabsContent>
 
+          <TabsContent value="toc">
+            <TOCTab form={form} onSaveTab={onSaveTab} isSaving={isSaving} />
+          </TabsContent>
+
           <TabsContent value="charts">
-            <ChartsTab form={form} onSaveTab={onSaveTab} isSaving={isSaving} />
+            <ChartsTab form={form} reportId={report?.id} onSaveTab={onSaveTab} isSaving={isSaving} />
           </TabsContent>
 
           <TabsContent value="settings">

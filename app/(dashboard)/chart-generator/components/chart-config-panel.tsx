@@ -40,7 +40,7 @@ export function ChartConfigPanel() {
               <SelectItem value="stacked-bar">Stacked Bar Chart</SelectItem>
               <SelectItem value="pie">Pie Chart</SelectItem>
               <SelectItem value="donut">Donut Chart</SelectItem>
-              <SelectItem value="world-map">World Map</SelectItem>
+              {/* <SelectItem value="world-map">World Map</SelectItem> */}
             </SelectContent>
           </Select>
         </div>

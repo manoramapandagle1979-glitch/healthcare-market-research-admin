@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Plus, Search, User } from 'lucide-react';
 import { useAuthors } from '@/hooks/use-authors';
 import { AuthorList } from '@/components/authors/author-list';
+import { TableSkeleton } from '@/components/ui/skeletons/table-skeleton';
 import type { ReportAuthor } from '@/lib/types/reports';
 
 export default function AuthorsPage() {
@@ -65,7 +66,7 @@ export default function AuthorsPage() {
           </div>
 
           {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading authors...</div>
+            <TableSkeleton rows={5} columns={4} showHeader={true} showActions={true} />
           ) : filteredAuthors.length === 0 ? (
             <div className="text-center py-8">
               <User className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
@@ -74,7 +75,9 @@ export default function AuthorsPage() {
               </p>
             </div>
           ) : (
-            <AuthorList authors={filteredAuthors} onDelete={handleDelete} />
+            <div className="fade-in">
+              <AuthorList authors={filteredAuthors} onDelete={handleDelete} />
+            </div>
           )}
         </CardContent>
       </Card>

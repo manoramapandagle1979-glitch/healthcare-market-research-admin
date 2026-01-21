@@ -41,7 +41,7 @@ interface SimpleChartPreviewProps {
 }
 
 export const SimpleChartPreview = forwardRef<SimpleChartPreviewRef, SimpleChartPreviewProps>(
-  ({ chart, width = 800, height = 400 }, ref) => {
+  ({ chart, width = 1200, height = 400 }, ref) => {
     const chartRef = useRef<ReactEChartsCore>(null);
     const exportContainerRef = useRef<HTMLDivElement>(null);
 
@@ -63,13 +63,14 @@ export const SimpleChartPreview = forwardRef<SimpleChartPreviewRef, SimpleChartP
           decimalPrecision: chart.decimalPrecision,
           showLegend: chart.showLegend,
           showGridlines: chart.showGridlines,
+          source: chart.source, // Pass source attribution
         },
         dataSource,
         logo: {
           file: null,
-          previewUrl: null,
-          position: 'top-right',
-          opacity: 80,
+          previewUrl: chart.logoUrl || null, // Pass logo URL
+          position: chart.logoPosition || 'top-right', // Pass position
+          opacity: chart.logoOpacity ?? 80, // Pass opacity
         },
       });
     }, [chart]);
@@ -83,8 +84,8 @@ export const SimpleChartPreview = forwardRef<SimpleChartPreviewRef, SimpleChartP
       <div className="w-full bg-white rounded-md border border-border overflow-auto">
         <div
           ref={exportContainerRef}
-          className="bg-white mx-auto"
-          style={{ width: `${width}px`, maxWidth: '100%' }}
+          className="bg-white"
+          style={{ width: `${width}px`, height: `${height}px` }}
         >
           <ReactECharts
             ref={chartRef}

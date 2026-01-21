@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Plus, Search, Users } from 'lucide-react';
 import { useUsers } from '@/hooks/use-users';
 import { UserList } from '@/components/users/user-list';
+import { TableSkeleton } from '@/components/ui/skeletons/table-skeleton';
 import type { ApiUserResponse } from '@/lib/types/api-types';
 
 export default function UsersPage() {
@@ -65,7 +66,7 @@ export default function UsersPage() {
           </div>
 
           {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading users...</div>
+            <TableSkeleton rows={5} columns={6} showHeader={true} showActions={true} />
           ) : filteredUsers.length === 0 ? (
             <div className="text-center py-8">
               <Users className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
@@ -74,7 +75,9 @@ export default function UsersPage() {
               </p>
             </div>
           ) : (
-            <UserList users={filteredUsers} onDelete={handleDelete} />
+            <div className="fade-in">
+              <UserList users={filteredUsers} onDelete={handleDelete} />
+            </div>
           )}
         </CardContent>
       </Card>

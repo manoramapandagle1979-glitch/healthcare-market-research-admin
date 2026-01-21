@@ -61,6 +61,20 @@ export function DataInputPanel() {
             </p>
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="source">Source (Optional)</Label>
+            <Input
+              id="source"
+              value={metadata.source || ''}
+              onChange={e => updateMetadata({ source: e.target.value })}
+              placeholder="www.healthcareforesights.com"
+              maxLength={100}
+            />
+            <p className="text-xs text-muted-foreground">
+              Displayed at the bottom of the chart as &quot;Source: [your text]&quot;
+            </p>
+          </div>
+
           {/* Only show axis labels for charts that have axes */}
           {chartConfig.chartType !== 'pie' &&
             chartConfig.chartType !== 'donut' &&

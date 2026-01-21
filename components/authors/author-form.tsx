@@ -18,11 +18,14 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Save } from 'lucide-react';
 import type { ReportAuthor, AuthorFormData } from '@/lib/types/reports';
+import { ImageUpload } from './image-upload';
 
 const authorFormSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   role: z.string().optional(),
   bio: z.string().optional(),
+  imageUrl: z.string().optional(),
+  linkedinUrl: z.string().url('Please enter a valid URL').optional().or(z.literal('')),
 });
 
 interface AuthorFormProps {
@@ -39,11 +42,15 @@ export function AuthorForm({ author, onSubmit, isSaving }: AuthorFormProps) {
           name: author.name,
           role: author.role || '',
           bio: author.bio || '',
+          imageUrl: author.imageUrl || '',
+          linkedinUrl: author.linkedinUrl || '',
         }
       : {
           name: '',
           role: '',
           bio: '',
+          imageUrl: '',
+          linkedinUrl: '',
         },
   });
 
@@ -55,6 +62,35 @@ export function AuthorForm({ author, onSubmit, isSaving }: AuthorFormProps) {
             <CardTitle>Author Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <FormField
+              control={form.control}
+              name="imageUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Profile Image</FormLabel>
+                  <FormControl>
+                    <ImageUpload
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={isSaving}
+                      fallbackText={form.watch('name')?.substring(0, 2).toUpperCase() || 'AU'}
+                      authorId={author?.id}
+                      metadata={{
+                        type: 'author-avatar',
+                        authorName: form.watch('name') || 'unknown',
+                      }}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    {author?.id
+                      ? 'Upload an author profile image (JPEG, PNG, WebP, or GIF, max 10MB)'
+                      : 'Save the author first to upload an image'}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="name"
@@ -98,6 +134,25 @@ export function AuthorForm({ author, onSubmit, isSaving }: AuthorFormProps) {
                     />
                   </FormControl>
                   <FormDescription>Full biography (optional)</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="linkedinUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>LinkedIn Profile</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="https://www.linkedin.com/in/username"
+                      type="url"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>LinkedIn profile URL (optional)</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

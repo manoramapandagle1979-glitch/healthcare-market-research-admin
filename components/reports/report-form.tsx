@@ -24,6 +24,8 @@ import {
   FormDescription,
 } from '@/components/ui/form';
 import { SectionEditor } from './section-editor';
+import { MultiSelectAuthorDropdown } from './multi-select-author-dropdown';
+import { ReportImagesManager } from './report-images-manager';
 import { GEOGRAPHIES, REPORT_FORMATS } from '@/lib/config/reports';
 import { fetchCategories, type Category } from '@/lib/api/categories';
 import type { ReportFormData, Report } from '@/lib/types/reports';
@@ -33,7 +35,7 @@ import {
 } from '@/lib/validation/report-schema';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Save, Eye, Plus, Trash2, HelpCircle, User, Building2 } from 'lucide-react';
+import { Save, Eye, Plus, Trash2, HelpCircle, User, Building2, Image } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 
@@ -65,7 +67,7 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
     }
   };
 
-  const form = useForm<ReportFormSchemaType>({
+  const form = useForm({
     resolver: zodResolver(importedReportFormSchema),
     defaultValues: report
       ? {
@@ -82,7 +84,6 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
           formats: report.formats || [],
           marketMetrics: report.marketMetrics || {},
           authorIds: report.authorIds || [],
-          keyPlayers: report.keyPlayers || [],
           sections: report.sections,
           faqs: report.faqs || [],
           metadata: report.metadata,
@@ -109,18 +110,8 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
             cagrEndYear: new Date().getFullYear() + 7,
           },
           authorIds: [],
-          keyPlayers: [],
           sections: {
-            executiveSummary: '',
-            marketOverview: '',
-            marketSize: '',
-            competitive: '',
-            keyPlayers: '',
-            regional: '',
-            trends: '',
-            conclusion: '',
             marketDetails: '',
-            keyFindings: [],
             tableOfContents: { chapters: [] },
           },
           faqs: [],
@@ -140,9 +131,13 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
         },
   });
 
+  const handleSubmit = (data: any) => {
+    onSubmit(data as ReportFormData);
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         {/* Basic Information */}
         <Card>
           <CardHeader>
@@ -154,10 +149,54 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Report Title</FormLabel>
+                  <FormLabel className="flex items-center gap-1">
+                    Report Title
+                    <span className="text-destructive">*</span>
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Global Healthcare Market Analysis 2024" {...field} />
+                    <Input
+                      placeholder="e.g., Global Healthcare Market Analysis 2024"
+                      {...field}
+                      onChange={e => {
+                        field.onChange(e);
+                        // Auto-generate slug from title if slug is empty
+                        const currentSlug = form.getValues('slug');
+                        if (!currentSlug || !report) {
+                          const slug = e.target.value
+                            .toLowerCase()
+                            .replace(/[^a-z0-9\s-]/g, '')
+                            .replace(/\s+/g, '-')
+                            .replace(/-+/g, '-')
+                            .trim();
+                          form.setValue('slug', slug);
+                        }
+                      }}
+                    />
                   </FormControl>
+                  <FormDescription>Minimum 10 characters</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="slug"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-1">
+                    URL Slug
+                    <span className="text-destructive">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g., global-healthcare-market-analysis-2024"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Unique URL identifier (lowercase letters, numbers, and hyphens only)
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -168,14 +207,20 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
               name="summary"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Summary</FormLabel>
+                  <FormLabel className="flex items-center gap-1">
+                    Summary
+                    <span className="text-destructive">*</span>
+                  </FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Brief overview of the report (50-200 characters)"
+                      placeholder="Brief overview of the report (minimum 50 characters)"
                       rows={3}
                       {...field}
                     />
                   </FormControl>
+                  <FormDescription>
+                    {field.value?.length || 0} / 50 minimum characters
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -187,7 +232,10 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
                 name="category_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
+                    <FormLabel className="flex items-center gap-1">
+                      Category
+                      <span className="text-destructive">*</span>
+                    </FormLabel>
                     <Select
                       onValueChange={value => field.onChange(Number(value))}
                       value={field.value ? String(field.value) : undefined}
@@ -220,7 +268,10 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
                 name="geography"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Geography</FormLabel>
+                    <FormLabel className="flex items-center gap-1">
+                      Geography
+                      <span className="text-destructive">*</span>
+                    </FormLabel>
                     <div className="grid grid-cols-2 space-y-2">
                       {GEOGRAPHIES.map(geo => (
                         <div key={geo} className="flex items-center space-x-2">
@@ -237,6 +288,7 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
                         </div>
                       ))}
                     </div>
+                    <FormDescription>Select at least one geography</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -508,21 +560,14 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
               name="authorIds"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Author IDs</FormLabel>
+                  <FormLabel>Authors</FormLabel>
                   <FormDescription>
-                    Add author IDs who contributed to this report (comma-separated)
+                    Select authors who contributed to this report
                   </FormDescription>
                   <FormControl>
-                    <Input
-                      placeholder="author-1, author-2, author-3"
-                      value={field.value?.join(', ') || ''}
-                      onChange={e => {
-                        const ids = e.target.value
-                          .split(',')
-                          .map(id => id.trim())
-                          .filter(id => id);
-                        field.onChange(ids);
-                      }}
+                    <MultiSelectAuthorDropdown
+                      value={field.value || []}
+                      onChange={field.onChange}
                     />
                   </FormControl>
                   <FormMessage />
@@ -532,96 +577,26 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
           </CardContent>
         </Card>
 
-        {/* Competitive Landscape */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
-              Key Players
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="keyPlayers"
-              render={({ field }) => (
-                <FormItem>
-                  <FormDescription>Add key companies and their market share data</FormDescription>
-                  <div className="space-y-4">
-                    {field.value?.map((company, index) => (
-                      <Card key={index} className="p-4">
-                        <div className="space-y-3">
-                          <div className="flex items-start justify-between">
-                            <span className="text-sm font-medium text-muted-foreground">
-                              Company #{index + 1}
-                            </span>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                const updated = field.value?.filter((_, i) => i !== index);
-                                field.onChange(updated);
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                          <div className="grid grid-cols-2 gap-3">
-                            <Input
-                              placeholder="Company Name"
-                              value={company.name}
-                              onChange={e => {
-                                const updated = [...(field.value || [])];
-                                updated[index] = { ...updated[index], name: e.target.value };
-                                field.onChange(updated);
-                              }}
-                            />
-                            <Input
-                              placeholder="Market Share (e.g., 14.2%)"
-                              value={company.marketShare || ''}
-                              onChange={e => {
-                                const updated = [...(field.value || [])];
-                                updated[index] = { ...updated[index], marketShare: e.target.value };
-                                field.onChange(updated);
-                              }}
-                            />
-                          </div>
-                          <Textarea
-                            placeholder="Description (optional)"
-                            rows={2}
-                            value={company.description || ''}
-                            onChange={e => {
-                              const updated = [...(field.value || [])];
-                              updated[index] = { ...updated[index], description: e.target.value };
-                              field.onChange(updated);
-                            }}
-                          />
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      const updated = [
-                        ...(field.value || []),
-                        { name: '', marketShare: '', description: '' },
-                      ];
-                      field.onChange(updated);
-                    }}
-                    className="w-full mt-2"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Company
-                  </Button>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
+        {/* Charts & Images - Only show when editing (reportId exists) */}
+        {report?.id && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Image className="h-5 w-5" />
+                Charts & Images
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 mb-4">
+                <p className="text-sm text-muted-foreground">
+                  Create custom charts or upload images for your report. Charts can be generated
+                  from data, and custom images can be manually uploaded.
+                </p>
+              </div>
+              <ReportImagesManager reportId={report.id} disabled={isSaving} />
+            </CardContent>
+          </Card>
+        )}
 
         {/* Report Sections */}
         <Card>
@@ -682,25 +657,45 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
                             </Button>
                           </div>
                           <div className="space-y-2">
-                            <Input
-                              placeholder="Enter your question..."
-                              value={faq.question}
-                              onChange={e => {
-                                const updated = [...(field.value || [])];
-                                updated[index] = { ...updated[index], question: e.target.value };
-                                field.onChange(updated);
-                              }}
-                            />
-                            <Textarea
-                              placeholder="Enter the answer..."
-                              rows={3}
-                              value={faq.answer}
-                              onChange={e => {
-                                const updated = [...(field.value || [])];
-                                updated[index] = { ...updated[index], answer: e.target.value };
-                                field.onChange(updated);
-                              }}
-                            />
+                            <div>
+                              <Input
+                                placeholder="Enter your question... *"
+                                value={faq.question}
+                                onChange={e => {
+                                  const updated = [...(field.value || [])];
+                                  updated[index] = { ...updated[index], question: e.target.value };
+                                  field.onChange(updated);
+                                }}
+                                className={
+                                  faq.question && faq.question.length < 5 ? 'border-destructive' : ''
+                                }
+                              />
+                              {faq.question && faq.question.length < 5 && (
+                                <p className="text-xs text-destructive mt-1">
+                                  Question must be at least 5 characters
+                                </p>
+                              )}
+                            </div>
+                            <div>
+                              <Textarea
+                                placeholder="Enter the answer... *"
+                                rows={3}
+                                value={faq.answer}
+                                onChange={e => {
+                                  const updated = [...(field.value || [])];
+                                  updated[index] = { ...updated[index], answer: e.target.value };
+                                  field.onChange(updated);
+                                }}
+                                className={
+                                  faq.answer && faq.answer.length < 10 ? 'border-destructive' : ''
+                                }
+                              />
+                              {faq.answer && faq.answer.length < 10 && (
+                                <p className="text-xs text-destructive mt-1">
+                                  Answer must be at least 10 characters
+                                </p>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </Card>
