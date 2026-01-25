@@ -29,15 +29,15 @@ import { ReportImagesManager } from './report-images-manager';
 import { GEOGRAPHIES, REPORT_FORMATS } from '@/lib/config/reports';
 import { fetchCategories, type Category } from '@/lib/api/categories';
 import type { ReportFormData, Report } from '@/lib/types/reports';
-import {
-  reportFormSchema as importedReportFormSchema,
-  type ReportFormSchemaType,
-} from '@/lib/validation/report-schema';
+import { reportFormSchema as importedReportFormSchema } from '@/lib/validation/report-schema';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Save, Eye, Plus, Trash2, HelpCircle, User, Building2, Image } from 'lucide-react';
+import { Save, Eye, Plus, Trash2, HelpCircle, User, Image as ImageIcon } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { CharacterCounter } from '@/components/seo/character-counter';
+import { SEO_LIMITS } from '@/lib/config/seo';
+import { measureTextWidth } from '@/lib/utils/text-measurement';
 
 interface ReportFormProps {
   report?: Report;
@@ -131,8 +131,8 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
         },
   });
 
-  const handleSubmit = (data: any) => {
-    onSubmit(data as ReportFormData);
+  const handleSubmit = (data: ReportFormData) => {
+    onSubmit(data);
   };
 
   return (
@@ -189,10 +189,7 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
                     <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="e.g., global-healthcare-market-analysis-2024"
-                      {...field}
-                    />
+                    <Input placeholder="e.g., global-healthcare-market-analysis-2024" {...field} />
                   </FormControl>
                   <FormDescription>
                     Unique URL identifier (lowercase letters, numbers, and hyphens only)
@@ -561,9 +558,7 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Authors</FormLabel>
-                  <FormDescription>
-                    Select authors who contributed to this report
-                  </FormDescription>
+                  <FormDescription>Select authors who contributed to this report</FormDescription>
                   <FormControl>
                     <MultiSelectAuthorDropdown
                       value={field.value || []}
@@ -582,7 +577,7 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Image className="h-5 w-5" />
+                <ImageIcon className="h-5 w-5" />
                 Charts & Images
               </CardTitle>
             </CardHeader>
@@ -667,7 +662,9 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
                                   field.onChange(updated);
                                 }}
                                 className={
-                                  faq.question && faq.question.length < 5 ? 'border-destructive' : ''
+                                  faq.question && faq.question.length < 5
+                                    ? 'border-destructive'
+                                    : ''
                                 }
                               />
                               {faq.question && faq.question.length < 5 && (
@@ -733,7 +730,19 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
                 name="metadata.metaTitle"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Meta Title</FormLabel>
+                    <div className="flex justify-between items-center">
+                      <FormLabel>Meta Title</FormLabel>
+                      <CharacterCounter
+                        current={field.value?.length || 0}
+                        max={SEO_LIMITS.metaTitle.max}
+                        optimal={SEO_LIMITS.metaTitle.optimal}
+                        pixelWidth={{
+                          current: measureTextWidth(field.value || '', '16px system-ui'),
+                          max: SEO_LIMITS.metaTitle.pixelWidth.max,
+                        }}
+                        variant="inline"
+                      />
+                    </div>
                     <FormControl>
                       <Input placeholder="SEO-friendly title (optional)" {...field} />
                     </FormControl>
@@ -748,9 +757,24 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
                 name="metadata.metaDescription"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Meta Description</FormLabel>
+                    <div className="flex justify-between items-center">
+                      <FormLabel>Meta Description</FormLabel>
+                      <CharacterCounter
+                        current={field.value?.length || 0}
+                        max={SEO_LIMITS.metaDescription.max}
+                        optimal={SEO_LIMITS.metaDescription.optimal}
+                        pixelWidth={{
+                          current: measureTextWidth(field.value || '', '16px system-ui'),
+                          max: SEO_LIMITS.metaDescription.pixelWidth.max,
+                        }}
+                      />
+                    </div>
                     <FormControl>
-                      <Textarea placeholder="SEO description (120-160 characters)" {...field} />
+                      <Textarea
+                        placeholder="SEO description (120-160 characters)"
+                        {...field}
+                        rows={3}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

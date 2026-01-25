@@ -39,53 +39,53 @@ export function ReportList({ reports, isLoading, onDelete }: ReportListProps) {
   return (
     <div className="fade-in">
       <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Title</TableHead>
-          <TableHead>Category</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Price</TableHead>
-          <TableHead>Updated</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {reports.map(report => (
-          <TableRow key={report.id}>
-            <TableCell className="font-medium max-w-xs truncate">{report.title}</TableCell>
-            <TableCell>{report.category}</TableCell>
-            <TableCell>
-              <Badge variant={report.status === 'published' ? 'default' : 'secondary'}>
-                {report.status}
-              </Badge>
-            </TableCell>
-            <TableCell>{formatCurrency(report.price)}</TableCell>
-            <TableCell className="text-sm text-muted-foreground">
-              {formatRelativeTime(report.updatedAt)}
-            </TableCell>
-            <TableCell className="text-right">
-              <div className="flex justify-end gap-2">
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href={`/reports/${report.slug}/preview`}>
-                    <Eye className="h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href={`/reports/${report.slug}`}>
-                    <Edit className="h-4 w-4" />
-                  </Link>
-                </Button>
-                {onDelete && (
-                  <Button variant="ghost" size="sm" onClick={() => onDelete(report.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                )}
-              </div>
-            </TableCell>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Title</TableHead>
+            <TableHead>Category</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Price</TableHead>
+            <TableHead>Updated</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {reports.map(report => (
+            <TableRow key={report.id}>
+              <TableCell className="font-medium max-w-xs truncate">{report.title}</TableCell>
+              <TableCell>{report.category}</TableCell>
+              <TableCell>
+                <Badge variant={report.status === 'published' ? 'default' : 'secondary'}>
+                  {report.status}
+                </Badge>
+              </TableCell>
+              <TableCell>{formatCurrency(report.price)}</TableCell>
+              <TableCell className="text-sm text-muted-foreground">
+                {formatRelativeTime(report.updatedAt)}
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex justify-end gap-2">
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href={`/reports/${report.id}/preview`}>
+                      <Eye className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href={`/reports/${report.id}`}>
+                      <Edit className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                  {onDelete && (
+                    <Button variant="ghost" size="sm" onClick={() => onDelete(report.id)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  )}
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }

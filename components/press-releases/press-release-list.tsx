@@ -15,7 +15,7 @@ import { TableSkeleton } from '@/components/ui/skeletons/table-skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import type { PressRelease, PressReleaseStatus } from '@/lib/types/press-releases';
 import { formatRelativeTime } from '@/lib/utils/date';
-import { Edit, Eye, Trash2, Clock } from 'lucide-react';
+import { Edit, Eye, Trash2 } from 'lucide-react';
 import { PRESS_RELEASE_STATUS_CONFIG } from '@/lib/config/press-releases';
 
 interface PressReleaseListProps {
@@ -64,90 +64,76 @@ export function PressReleaseList({ pressReleases, isLoading, onDelete }: PressRe
   return (
     <div className="fade-in">
       <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Title</TableHead>
-          <TableHead>Author</TableHead>
-          <TableHead>Category</TableHead>
-          <TableHead>Location</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Read Time</TableHead>
-          <TableHead>Updated</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {pressReleases.map(pressRelease => {
-          const tagsList = pressRelease.tags ? pressRelease.tags.split(',').filter(Boolean) : [];
-
-          return (
-            <TableRow key={pressRelease.id}>
-              <TableCell className="font-medium max-w-xs">
-                <div className="truncate">{pressRelease.title}</div>
-                <div className="flex gap-1 mt-1 flex-wrap">
-                  {tagsList.slice(0, 2).map((tag, idx) => (
-                    <Badge key={idx} variant="outline" className="text-xs">
-                      {tag.trim()}
-                    </Badge>
-                  ))}
-                  {tagsList.length > 2 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{tagsList.length - 2}
-                    </Badge>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-6 w-6">
-                    <AvatarFallback className="text-xs">
-                      {getAuthorInitials(`Author ${pressRelease.authorId}`)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm truncate max-w-[100px]">
-                    Author #{pressRelease.authorId}
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell>Category #{pressRelease.categoryId}</TableCell>
-              <TableCell className="text-sm text-muted-foreground">
-                {pressRelease.location || '-'}
-              </TableCell>
-              <TableCell>
-                <Badge variant={getStatusBadgeVariant(pressRelease.status)}>
-                  {PRESS_RELEASE_STATUS_CONFIG[pressRelease.status].label}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <span className="text-xs text-muted-foreground">-</span>
-              </TableCell>
-              <TableCell className="text-sm text-muted-foreground">
-                {formatRelativeTime(pressRelease.updatedAt)}
-              </TableCell>
-              <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/press-releases/${pressRelease.id}/preview`}>
-                      <Eye className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/press-releases/${pressRelease.id}`}>
-                      <Edit className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                  {onDelete && (
-                    <Button variant="ghost" size="sm" onClick={() => onDelete(pressRelease.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
+        <TableHeader>
+          <TableRow>
+            <TableHead>Title</TableHead>
+            <TableHead>Author</TableHead>
+            <TableHead>Category</TableHead>
+            <TableHead>Location</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Read Time</TableHead>
+            <TableHead>Updated</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {pressReleases.map(pressRelease => {
+            return (
+              <TableRow key={pressRelease.id}>
+                <TableCell className="font-medium max-w-xs">
+                  <div className="truncate">{pressRelease.title}</div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-6 w-6">
+                      <AvatarFallback className="text-xs">
+                        {getAuthorInitials(pressRelease.author?.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm truncate max-w-[100px]">
+                      {pressRelease.author?.name || 'Unknown Author'}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell>Category #{pressRelease.categoryId}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {pressRelease.location || '-'}
+                </TableCell>
+                <TableCell>
+                  <Badge variant={getStatusBadgeVariant(pressRelease.status)}>
+                    {PRESS_RELEASE_STATUS_CONFIG[pressRelease.status].label}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <span className="text-xs text-muted-foreground">-</span>
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {formatRelativeTime(pressRelease.updatedAt)}
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link href={`/press-releases/${pressRelease.id}/preview`}>
+                        <Eye className="h-4 w-4" />
+                      </Link>
                     </Button>
-                  )}
-                </div>
-              </TableCell>
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link href={`/press-releases/${pressRelease.id}`}>
+                        <Edit className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    {onDelete && (
+                      <Button variant="ghost" size="sm" onClick={() => onDelete(pressRelease.id)}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
     </div>
   );
 }

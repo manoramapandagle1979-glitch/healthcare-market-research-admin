@@ -1,5 +1,5 @@
-// Re-use UserReference from reports
-import type { UserReference } from './reports';
+// Re-use UserReference and ReportAuthor from reports
+import type { UserReference, ReportAuthor } from './reports';
 
 // Press Release status enum with workflow states
 export type PressReleaseStatus = 'draft' | 'review' | 'published';
@@ -9,16 +9,6 @@ export interface PressReleaseTag {
   id: string;
   name: string;
   slug: string;
-}
-
-// Press Release author (extends UserReference with author-specific fields)
-export interface PressReleaseAuthor extends UserReference {
-  bio?: string;
-  avatar?: string;
-  socialLinks?: {
-    twitter?: string;
-    linkedin?: string;
-  };
 }
 
 // SEO metadata for press releases (matches API spec)
@@ -48,7 +38,18 @@ export interface PressRelease {
   excerpt: string;
   content: string; // HTML from rich text editor
   authorId: number;
+  author?: ReportAuthor; // Author details populated from API
   categoryId: number; // Single category ID from API
+  category?: {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string;
+    image_url?: string;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+  }; // Category details from API
   tags: string; // Comma-separated tags from API
   status: PressReleaseStatus;
   publishDate: string;
@@ -137,12 +138,6 @@ export interface PressReleaseCategory {
   slug: string;
   description?: string;
   postCount?: number;
-}
-
-// Author list response
-export interface PressReleaseAuthorsResponse {
-  authors: PressReleaseAuthor[];
-  total: number;
 }
 
 // Tag list response

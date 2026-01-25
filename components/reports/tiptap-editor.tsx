@@ -30,12 +30,15 @@ import {
   Heading1,
   Heading2,
   Heading3,
+  Heading4,
+  Heading5,
   Link as LinkIcon,
   Table as TableIcon,
   Image as ImageIcon,
   AlignLeft,
   AlignCenter,
   AlignRight,
+  AlignJustify,
   Undo,
   Redo,
   Columns3,
@@ -43,12 +46,17 @@ import {
   TableProperties,
   Trash2,
   Plus,
+  Search,
+  Code,
+  Eye,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ImagePickerDialog } from './image-picker-dialog';
+import { FindReplaceDialog } from './find-replace-dialog';
 import { ReportImage } from '@/lib/types/reports';
 import { uploadReportImage } from '@/lib/api/report-images';
 import { toast } from 'sonner';
+import { beautifyHtml, minifyHtml } from '@/lib/utils/html-beautifier';
 
 interface TiptapEditorProps {
   content: string;
@@ -66,12 +74,15 @@ export function TiptapEditor({
   reportId,
 }: TiptapEditorProps) {
   const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
+  const [isFindReplaceOpen, setIsFindReplaceOpen] = useState(false);
+  const [showHtmlCode, setShowHtmlCode] = useState(false);
+  const [htmlCode, setHtmlCode] = useState('');
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         heading: {
-          levels: [1, 2, 3],
+          levels: [1, 2, 3, 4, 5],
         },
       }),
       Link.configure({
@@ -147,10 +158,9 @@ export function TiptapEditor({
 
             // Upload the pasted image
             toast.promise(
-              uploadReportImage(reportId, file).then((uploadedImage) => {
+              uploadReportImage(reportId, file).then(uploadedImage => {
                 // Insert the uploaded image into the editor
                 const { state } = view;
-                const { selection } = state;
                 const node = state.schema.nodes.image.create({
                   src: uploadedImage.imageUrl,
                   alt: uploadedImage.title || 'Pasted image',
@@ -220,21 +230,33 @@ export function TiptapEditor({
   };
 
   const alignImageLeft = () => {
-    editor.chain().focus().updateAttributes('image', {
-      class: 'tiptap-image tiptap-image-left'
-    }).run();
+    editor
+      .chain()
+      .focus()
+      .updateAttributes('image', {
+        class: 'tiptap-image tiptap-image-left',
+      })
+      .run();
   };
 
   const alignImageCenter = () => {
-    editor.chain().focus().updateAttributes('image', {
-      class: 'tiptap-image tiptap-image-center'
-    }).run();
+    editor
+      .chain()
+      .focus()
+      .updateAttributes('image', {
+        class: 'tiptap-image tiptap-image-center',
+      })
+      .run();
   };
 
   const alignImageRight = () => {
-    editor.chain().focus().updateAttributes('image', {
-      class: 'tiptap-image tiptap-image-right'
-    }).run();
+    editor
+      .chain()
+      .focus()
+      .updateAttributes('image', {
+        class: 'tiptap-image tiptap-image-right',
+      })
+      .run();
   };
 
   const setImageWidth = (width: string) => {
@@ -253,10 +275,33 @@ export function TiptapEditor({
       style = `${style} max-width: ${width}%;`.trim();
     }
 
-    editor.chain().focus().updateAttributes('image', {
-      class: currentClass,
-      style: style || undefined,
-    }).run();
+    editor
+      .chain()
+      .focus()
+      .updateAttributes('image', {
+        class: currentClass,
+        style: style || undefined,
+      })
+      .run();
+  };
+
+  const toggleHtmlView = () => {
+    if (!showHtmlCode) {
+      // Switching to HTML view - get current HTML from editor and beautify it
+      const rawHtml = editor.getHTML();
+      const beautifiedHtml = beautifyHtml(rawHtml);
+      setHtmlCode(beautifiedHtml);
+    } else {
+      // Switching back to visual view - minify HTML and update editor
+      const minifiedHtml = minifyHtml(htmlCode);
+      editor.commands.setContent(minifiedHtml);
+      onChange(minifiedHtml);
+    }
+    setShowHtmlCode(!showHtmlCode);
+  };
+
+  const handleHtmlCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setHtmlCode(e.target.value);
   };
 
   return (
@@ -327,6 +372,26 @@ export function TiptapEditor({
           <Heading3 className="h-4 w-4" />
         </Button>
 
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
+          className={editor.isActive('heading', { level: 4 }) ? 'bg-muted' : ''}
+        >
+          <Heading4 className="h-4 w-4" />
+        </Button>
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 5 }).run()}
+          className={editor.isActive('heading', { level: 5 }) ? 'bg-muted' : ''}
+        >
+          <Heading5 className="h-4 w-4" />
+        </Button>
+
         <Separator orientation="vertical" className="h-8" />
 
         {/* Lists */}
@@ -383,6 +448,16 @@ export function TiptapEditor({
           <AlignRight className="h-4 w-4" />
         </Button>
 
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+          className={editor.isActive({ textAlign: 'justify' }) ? 'bg-muted' : ''}
+        >
+          <AlignJustify className="h-4 w-4" />
+        </Button>
+
         <Separator orientation="vertical" className="h-8" />
 
         {/* Link & Table */}
@@ -409,6 +484,31 @@ export function TiptapEditor({
           title={!reportId ? 'Save report to add images' : 'Insert image'}
         >
           <ImageIcon className="h-4 w-4" />
+        </Button>
+
+        <Separator orientation="vertical" className="h-8" />
+
+        {/* Find & Replace */}
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsFindReplaceOpen(true)}
+          title="Find and Replace"
+        >
+          <Search className="h-4 w-4" />
+        </Button>
+
+        {/* HTML Code View Toggle */}
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={toggleHtmlView}
+          className={showHtmlCode ? 'bg-muted' : ''}
+          title={showHtmlCode ? 'Switch to visual editor' : 'View HTML code'}
+        >
+          {showHtmlCode ? <Eye className="h-4 w-4" /> : <Code className="h-4 w-4" />}
         </Button>
 
         {/* Table manipulation controls - only show when inside a table */}
@@ -617,7 +717,22 @@ export function TiptapEditor({
       </div>
 
       {/* Editor content */}
-      <EditorContent editor={editor} />
+      {showHtmlCode ? (
+        <div className="relative">
+          <textarea
+            value={htmlCode}
+            onChange={handleHtmlCodeChange}
+            className="w-full min-h-[300px] max-h-[600px] p-4 font-mono text-sm focus:outline-none resize-y bg-muted/30 border-0"
+            placeholder="HTML code will appear here..."
+            spellCheck={false}
+          />
+          <div className="absolute top-2 right-2 text-xs text-muted-foreground bg-background/80 px-2 py-1 rounded">
+            HTML Code View
+          </div>
+        </div>
+      ) : (
+        <EditorContent editor={editor} />
+      )}
 
       {/* Image Picker Dialog */}
       {reportId && (
@@ -628,6 +743,13 @@ export function TiptapEditor({
           onSelect={insertImage}
         />
       )}
+
+      {/* Find and Replace Dialog */}
+      <FindReplaceDialog
+        editor={editor}
+        open={isFindReplaceOpen}
+        onClose={() => setIsFindReplaceOpen(false)}
+      />
     </div>
   );
 }

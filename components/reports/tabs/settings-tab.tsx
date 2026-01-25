@@ -19,11 +19,14 @@ import { Badge } from '@/components/ui/badge';
 import { Save, Eye, Search, User, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { MultiSelectAuthorDropdown } from '../multi-select-author-dropdown';
+import { CharacterCounter } from '@/components/seo/character-counter';
+import { SEO_LIMITS } from '@/lib/config/seo';
+import { measureTextWidth } from '@/lib/utils/text-measurement';
 import type { UseFormReturn } from 'react-hook-form';
 import type { ReportFormData } from '@/lib/types/reports';
 
 interface SettingsTabProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<ReportFormData>;
   onSubmit: (data: ReportFormData) => Promise<void>;
   onPreview?: () => void;
   isSaving: boolean;
@@ -55,7 +58,8 @@ export function SettingsTab({ form, onSubmit, onPreview, isSaving }: SettingsTab
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Validation Error</AlertTitle>
           <AlertDescription>
-            Please fix the validation errors before saving. Required fields are marked with an asterisk (*) in the Report Details tab.
+            Please fix the validation errors before saving. Required fields are marked with an
+            asterisk (*) in the Report Details tab.
           </AlertDescription>
         </Alert>
       )}
@@ -79,10 +83,7 @@ export function SettingsTab({ form, onSubmit, onPreview, isSaving }: SettingsTab
                   Choose the researchers and analysts who contributed to this report
                 </FormDescription>
                 <FormControl>
-                  <MultiSelectAuthorDropdown
-                    value={field.value || []}
-                    onChange={field.onChange}
-                  />
+                  <MultiSelectAuthorDropdown value={field.value || []} onChange={field.onChange} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -107,7 +108,19 @@ export function SettingsTab({ form, onSubmit, onPreview, isSaving }: SettingsTab
               name="metadata.metaTitle"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Meta Title</FormLabel>
+                  <div className="flex justify-between items-center">
+                    <FormLabel>Meta Title</FormLabel>
+                    <CharacterCounter
+                      current={field.value?.length || 0}
+                      max={SEO_LIMITS.metaTitle.max}
+                      optimal={SEO_LIMITS.metaTitle.optimal}
+                      pixelWidth={{
+                        current: measureTextWidth(field.value || '', '16px system-ui'),
+                        max: SEO_LIMITS.metaTitle.pixelWidth.max,
+                      }}
+                      variant="inline"
+                    />
+                  </div>
                   <FormControl>
                     <Input placeholder="SEO-friendly title (optional)" {...field} />
                   </FormControl>
@@ -122,9 +135,25 @@ export function SettingsTab({ form, onSubmit, onPreview, isSaving }: SettingsTab
               name="metadata.metaDescription"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Meta Description</FormLabel>
+                  <div className="flex justify-between items-center">
+                    <FormLabel>Meta Description</FormLabel>
+                    <CharacterCounter
+                      current={field.value?.length || 0}
+                      max={SEO_LIMITS.metaDescription.max}
+                      optimal={SEO_LIMITS.metaDescription.optimal}
+                      pixelWidth={{
+                        current: measureTextWidth(field.value || '', '16px system-ui'),
+                        max: SEO_LIMITS.metaDescription.pixelWidth.max,
+                      }}
+                      variant="inline"
+                    />
+                  </div>
                   <FormControl>
-                    <Textarea placeholder="SEO description (120-160 characters)" {...field} />
+                    <Textarea
+                      placeholder="SEO description (120-160 characters)"
+                      {...field}
+                      rows={3}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -173,7 +202,9 @@ export function SettingsTab({ form, onSubmit, onPreview, isSaving }: SettingsTab
                           type="button"
                           className="ml-2"
                           onClick={() => {
-                            field.onChange(field.value?.filter((_: any, idx: number) => idx !== i));
+                            field.onChange(
+                              field.value?.filter((_: string, idx: number) => idx !== i)
+                            );
                           }}
                         >
                           ×
@@ -222,11 +253,7 @@ export function SettingsTab({ form, onSubmit, onPreview, isSaving }: SettingsTab
 
           <div className="flex justify-between">
             <div className="flex gap-2">
-              <Button
-                type="button"
-                onClick={handleSubmit}
-                disabled={isSaving}
-              >
+              <Button type="button" onClick={handleSubmit} disabled={isSaving}>
                 <Save className="h-4 w-4 mr-2" />
                 {isSaving ? 'Saving...' : 'Save Report'}
               </Button>

@@ -194,6 +194,22 @@ export async function fetchReportBySlug(slug: string): Promise<ReportResponse> {
   };
 }
 
+export async function fetchReportById(id: number): Promise<ReportResponse> {
+  const response = await reportsApi.fetchReportById(id);
+
+  if (!response.success) {
+    throw new Error(response.error || 'Failed to fetch report');
+  }
+
+  if (!response.data) {
+    throw new Error('Report not found');
+  }
+
+  return {
+    report: convertApiReportToLegacy(response.data),
+  };
+}
+
 export async function createReport(data: ReportFormData): Promise<ReportResponse> {
   // Convert form data to API format
   const apiData: Partial<ApiReport> = {

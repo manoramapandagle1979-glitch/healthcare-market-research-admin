@@ -5,11 +5,13 @@ export const SEO_LIMITS = {
     min: 30,
     max: 60,
     optimal: { min: 50, max: 60 },
+    pixelWidth: { max: 580 },
   },
   metaDescription: {
     min: 120,
     max: 160,
     optimal: { min: 150, max: 160 },
+    pixelWidth: { max: 920 },
   },
   ogTitle: {
     max: 95, // OpenGraph titles can be longer

@@ -134,11 +134,12 @@ export default function PreviewBlogPage() {
 
           {/* Tags */}
           <div className="flex flex-wrap gap-2">
-            {blog.tags && blog.tags.split(',').map((tag, idx) => (
-              <Badge key={idx} variant="secondary">
-                {tag.trim()}
-              </Badge>
-            ))}
+            {blog.tags &&
+              blog.tags.split(',').map((tag, idx) => (
+                <Badge key={idx} variant="secondary">
+                  {tag.trim()}
+                </Badge>
+              ))}
           </div>
         </CardHeader>
 
@@ -168,22 +169,7 @@ export default function PreviewBlogPage() {
 
       {/* SEO Preview */}
       <Card>
-        <CardHeader>
-          <h2 className="text-lg font-semibold">SEO Preview</h2>
-        </CardHeader>
         <CardContent className="space-y-4">
-          <div className="p-4 bg-muted rounded-lg">
-            <p className="text-blue-600 dark:text-blue-400 text-lg">
-              {blog.metadata.metaTitle || blog.title}
-            </p>
-            <p className="text-green-600 dark:text-green-400 text-sm">
-              https://yoursite.com/blog/{blog.slug}
-            </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              {blog.metadata.metaDescription || blog.excerpt}
-            </p>
-          </div>
-
           {blog.metadata.keywords && blog.metadata.keywords.length > 0 && (
             <div>
               <p className="text-sm font-medium mb-2">Keywords</p>

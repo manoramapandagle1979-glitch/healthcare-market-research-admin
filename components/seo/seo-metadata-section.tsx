@@ -34,6 +34,7 @@ import { SEOPreviewCard } from './seo-preview-card';
 import { SchemaJsonEditor } from './schema-json-editor';
 import { validateSEO } from '@/lib/validation/seo';
 import { SEO_LIMITS, ROBOTS_DIRECTIVES } from '@/lib/config/seo';
+import { measureTextWidth } from '@/lib/utils/text-measurement';
 import type { UseFormReturn } from 'react-hook-form';
 
 type SEOFormValues = Record<string, unknown> & {
@@ -114,15 +115,22 @@ export function SEOMetadataSection({
           name="metadata.metaTitle"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Meta Title</FormLabel>
+              <div className="flex justify-between items-center">
+                <FormLabel>Meta Title</FormLabel>
+                <CharacterCounter
+                  current={field.value?.length || 0}
+                  max={SEO_LIMITS.metaTitle.max}
+                  optimal={SEO_LIMITS.metaTitle.optimal}
+                  pixelWidth={{
+                    current: measureTextWidth(field.value || '', '16px system-ui'),
+                    max: SEO_LIMITS.metaTitle.pixelWidth.max,
+                  }}
+                  variant="inline"
+                />
+              </div>
               <FormControl>
                 <Input placeholder="SEO-friendly title (optional)" {...field} />
               </FormControl>
-              <CharacterCounter
-                current={field.value?.length || 0}
-                max={SEO_LIMITS.metaTitle.max}
-                optimal={SEO_LIMITS.metaTitle.optimal}
-              />
               <FormDescription>Leave empty to use {contentType} title</FormDescription>
               <FormMessage />
             </FormItem>
@@ -134,15 +142,21 @@ export function SEOMetadataSection({
           name="metadata.metaDescription"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Meta Description</FormLabel>
+              <div className="flex justify-between items-center">
+                <FormLabel>Meta Description</FormLabel>
+                <CharacterCounter
+                  current={field.value?.length || 0}
+                  max={SEO_LIMITS.metaDescription.max}
+                  optimal={SEO_LIMITS.metaDescription.optimal}
+                  pixelWidth={{
+                    current: measureTextWidth(field.value || '', '16px system-ui'),
+                    max: SEO_LIMITS.metaDescription.pixelWidth.max,
+                  }}
+                />
+              </div>
               <FormControl>
                 <Textarea placeholder="SEO description (120-160 characters)" {...field} rows={3} />
               </FormControl>
-              <CharacterCounter
-                current={field.value?.length || 0}
-                max={SEO_LIMITS.metaDescription.max}
-                optimal={SEO_LIMITS.metaDescription.optimal}
-              />
               <FormMessage />
             </FormItem>
           )}

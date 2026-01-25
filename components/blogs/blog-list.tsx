@@ -64,87 +64,75 @@ export function BlogList({ blogs, isLoading, onDelete }: BlogListProps) {
   return (
     <div className="fade-in">
       <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Title</TableHead>
-          <TableHead>Author</TableHead>
-          <TableHead>Category</TableHead>
-          <TableHead>Location</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Read Time</TableHead>
-          <TableHead>Updated</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {blogs.map(blog => (
-          <TableRow key={blog.id}>
-            <TableCell className="font-medium max-w-xs">
-              <div className="truncate">{blog.title}</div>
-              <div className="flex gap-1 mt-1">
-                {blog.tags && blog.tags.split(',').slice(0, 2).map((tag, idx) => (
-                  <Badge key={idx} variant="outline" className="text-xs">
-                    {tag.trim()}
-                  </Badge>
-                ))}
-                {blog.tags && blog.tags.split(',').length > 2 && (
-                  <Badge variant="outline" className="text-xs">
-                    +{blog.tags.split(',').length - 2}
-                  </Badge>
-                )}
-              </div>
-            </TableCell>
-            <TableCell>
-              <div className="flex items-center gap-2">
-                <Avatar className="h-6 w-6">
-                  <AvatarFallback className="text-xs">
-                    {getAuthorInitials(blog.author.name)}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-sm truncate max-w-[100px]">{blog.author.name}</span>
-              </div>
-            </TableCell>
-            <TableCell>{blog.categoryName || 'Uncategorized'}</TableCell>
-            <TableCell className="text-sm text-muted-foreground">
-              {blog.location || '-'}
-            </TableCell>
-            <TableCell>
-              <Badge variant={getStatusBadgeVariant(blog.status)}>
-                {BLOG_STATUS_CONFIG[blog.status].label}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <Clock className="h-3 w-3" />
-                {blog.readingTime} min
-              </div>
-            </TableCell>
-            <TableCell className="text-sm text-muted-foreground">
-              {formatRelativeTime(blog.updatedAt)}
-            </TableCell>
-            <TableCell className="text-right">
-              <div className="flex justify-end gap-2">
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href={`/blog/${blog.id}/preview`}>
-                    <Eye className="h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href={`/blog/${blog.id}`}>
-                    <Edit className="h-4 w-4" />
-                  </Link>
-                </Button>
-                {onDelete && (
-                  <Button variant="ghost" size="sm" onClick={() => onDelete(blog.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                )}
-              </div>
-            </TableCell>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Title</TableHead>
+            <TableHead>Author</TableHead>
+            <TableHead>Category</TableHead>
+            <TableHead>Location</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Read Time</TableHead>
+            <TableHead>Updated</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {blogs.map(blog => (
+            <TableRow key={blog.id}>
+              <TableCell className="font-medium max-w-xs">
+                <div className="truncate">{blog.title}</div>
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-6 w-6">
+                    <AvatarFallback className="text-xs">
+                      {getAuthorInitials(blog.author.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm truncate max-w-[100px]">{blog.author.name}</span>
+                </div>
+              </TableCell>
+              <TableCell>{blog.categoryName || 'Uncategorized'}</TableCell>
+              <TableCell className="text-sm text-muted-foreground">
+                {blog.location || '-'}
+              </TableCell>
+              <TableCell>
+                <Badge variant={getStatusBadgeVariant(blog.status)}>
+                  {BLOG_STATUS_CONFIG[blog.status].label}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  {blog.readingTime} min
+                </div>
+              </TableCell>
+              <TableCell className="text-sm text-muted-foreground">
+                {formatRelativeTime(blog.updatedAt)}
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex justify-end gap-2">
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href={`/blog/${blog.id}/preview`}>
+                      <Eye className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href={`/blog/${blog.id}`}>
+                      <Edit className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                  {onDelete && (
+                    <Button variant="ghost" size="sm" onClick={() => onDelete(blog.id)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  )}
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }

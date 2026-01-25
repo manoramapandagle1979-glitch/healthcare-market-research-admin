@@ -64,28 +64,45 @@ async function getCategories(): Promise<Category[]> {
  * Transform API blog to frontend Blog format
  */
 async function transformApiBlogToBlog(apiBlog: ApiBlog): Promise<Blog> {
-  const authors = await getAuthors();
   const categories = await getCategories();
 
-  const author = authors.find(a => a.id === apiBlog.authorId) || {
-    id: apiBlog.authorId,
-    name: 'Unknown Author',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
+  // Use author from API response directly, or fallback to fetching from cache
+  let author: ReportAuthor;
+  if (apiBlog.author) {
+    author = apiBlog.author;
+  } else {
+    // Fallback to cache if author is not in API response (backward compatibility)
+    const authors = await getAuthors();
+    author = authors.find(a => a.id === apiBlog.authorId) || {
+      id: apiBlog.authorId,
+      name: 'Unknown Author',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+  }
 
-  const category = categories.find(c => c.id === apiBlog.categoryId);
-  const categoryName = category?.name || `Category ${apiBlog.categoryId}`;
+  // Prefer populated category from API, fallback to cache
+  let categoryName: string;
+  if (apiBlog.category) {
+    categoryName = apiBlog.category.name;
+  } else {
+    const category = categories.find(c => c.id === apiBlog.categoryId);
+    categoryName = category?.name || `Category ${apiBlog.categoryId}`;
+  }
 
-  const reviewedByAuthor = apiBlog.reviewedBy
-    ? authors.find(a => a.id === apiBlog.reviewedBy)
-    : undefined;
-
-  const reviewedByUserRef = reviewedByAuthor ? {
-    id: String(reviewedByAuthor.id),
-    email: '', // ReportAuthor doesn't have email, using empty string
-    name: reviewedByAuthor.name,
-  } : undefined;
+  // Handle reviewedBy if needed
+  let reviewedByUserRef: { id: string; email: string; name?: string } | undefined;
+  if (apiBlog.reviewedBy) {
+    const authors = await getAuthors();
+    const reviewedByAuthor = authors.find(a => a.id === apiBlog.reviewedBy);
+    reviewedByUserRef = reviewedByAuthor
+      ? {
+          id: String(reviewedByAuthor.id),
+          email: '',
+          name: reviewedByAuthor.name,
+        }
+      : undefined;
+  }
 
   return {
     id: String(apiBlog.id),
@@ -127,9 +144,7 @@ export async function fetchBlogs(filters?: BlogFilters): Promise<BlogsResponse> 
     params: filters as Record<string, unknown>,
   });
 
-  const blogs = await Promise.all(
-    response.blogs.map(apiBlog => transformApiBlogToBlog(apiBlog))
-  );
+  const blogs = await Promise.all(response.blogs.map(apiBlog => transformApiBlogToBlog(apiBlog)));
 
   return {
     blogs,
@@ -217,9 +232,7 @@ export async function unpublishBlog(id: string | number): Promise<BlogResponse> 
 /**
  * Transform form data to create request
  */
-export function formDataToCreateRequest(
-  formData: BlogFormData
-): CreateBlogRequest {
+export function formDataToCreateRequest(formData: BlogFormData): CreateBlogRequest {
   return {
     title: formData.title,
     slug: formData.slug,
@@ -227,7 +240,8 @@ export function formDataToCreateRequest(
     content: formData.content,
     categoryId: formData.categoryId,
     tags: formData.tags,
-    authorId: typeof formData.authorId === 'string' ? parseInt(formData.authorId, 10) : formData.authorId,
+    authorId:
+      typeof formData.authorId === 'string' ? parseInt(formData.authorId, 10) : formData.authorId,
     status: formData.status,
     publishDate: formData.publishDate,
     location: formData.location,
@@ -238,9 +252,7 @@ export function formDataToCreateRequest(
 /**
  * Transform form data to update request
  */
-export function formDataToUpdateRequest(
-  formData: Partial<BlogFormData>
-): UpdateBlogRequest {
+export function formDataToUpdateRequest(formData: Partial<BlogFormData>): UpdateBlogRequest {
   const request: UpdateBlogRequest = {};
 
   if (formData.title !== undefined) request.title = formData.title;
@@ -250,9 +262,8 @@ export function formDataToUpdateRequest(
   if (formData.categoryId !== undefined) request.categoryId = formData.categoryId;
   if (formData.tags !== undefined) request.tags = formData.tags;
   if (formData.authorId !== undefined) {
-    request.authorId = typeof formData.authorId === 'string'
-      ? parseInt(formData.authorId, 10)
-      : formData.authorId;
+    request.authorId =
+      typeof formData.authorId === 'string' ? parseInt(formData.authorId, 10) : formData.authorId;
   }
   if (formData.status !== undefined) request.status = formData.status;
   if (formData.publishDate !== undefined) request.publishDate = formData.publishDate;

@@ -37,6 +37,9 @@ import type { BlogFormData, Blog } from '@/lib/types/blogs';
 import { Save, Eye, Wand2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { fetchCategories, type Category } from '@/lib/api/categories';
+import { CharacterCounter } from '@/components/seo/character-counter';
+import { SEO_LIMITS } from '@/lib/config/seo';
+import { measureTextWidth } from '@/lib/utils/text-measurement';
 
 // Validation schema
 const blogFormSchema = z.object({
@@ -148,21 +151,30 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving }: BlogFormProps)
     const sampleData: Partial<BlogFormSchema> = {
       title: 'AI-Powered Diagnostics Revolution in Healthcare Market',
       slug: 'ai-powered-diagnostics-revolution-healthcare-market',
-      excerpt: 'The healthcare diagnostics market is experiencing a transformative shift with artificial intelligence integration. This comprehensive analysis explores the latest trends, market dynamics, and future projections for AI-powered diagnostic solutions.',
-      content: '<h2>Introduction</h2><p>The integration of artificial intelligence in healthcare diagnostics is revolutionizing the medical industry. Recent studies show a significant increase in accuracy and efficiency of diagnostic procedures powered by AI algorithms.</p><h2>Market Overview</h2><p>The global AI diagnostics market is projected to reach $15.6 billion by 2028, growing at a CAGR of 31.8% from 2023 to 2028. Key factors driving this growth include:</p><ul><li>Increasing demand for early and accurate disease detection</li><li>Growing adoption of precision medicine</li><li>Rising healthcare costs and need for efficiency</li><li>Advances in machine learning and deep learning technologies</li></ul><h2>Key Market Segments</h2><p>The market can be segmented based on application areas including radiology, pathology, cardiology, and oncology. Radiology currently holds the largest market share due to widespread adoption of AI-powered imaging solutions.</p><h2>Conclusion</h2><p>AI-powered diagnostics represent a significant opportunity for healthcare providers and technology companies alike. As the technology matures and regulatory frameworks evolve, we can expect continued growth and innovation in this space.</p>',
+      excerpt:
+        'The healthcare diagnostics market is experiencing a transformative shift with artificial intelligence integration. This comprehensive analysis explores the latest trends, market dynamics, and future projections for AI-powered diagnostic solutions.',
+      content:
+        '<h2>Introduction</h2><p>The integration of artificial intelligence in healthcare diagnostics is revolutionizing the medical industry. Recent studies show a significant increase in accuracy and efficiency of diagnostic procedures powered by AI algorithms.</p><h2>Market Overview</h2><p>The global AI diagnostics market is projected to reach $15.6 billion by 2028, growing at a CAGR of 31.8% from 2023 to 2028. Key factors driving this growth include:</p><ul><li>Increasing demand for early and accurate disease detection</li><li>Growing adoption of precision medicine</li><li>Rising healthcare costs and need for efficiency</li><li>Advances in machine learning and deep learning technologies</li></ul><h2>Key Market Segments</h2><p>The market can be segmented based on application areas including radiology, pathology, cardiology, and oncology. Radiology currently holds the largest market share due to widespread adoption of AI-powered imaging solutions.</p><h2>Conclusion</h2><p>AI-powered diagnostics represent a significant opportunity for healthcare providers and technology companies alike. As the technology matures and regulatory frameworks evolve, we can expect continued growth and innovation in this space.</p>',
       categoryId: categories.length > 0 ? categories[0].id : 1,
       tags: 'AI in healthcare, diagnostics, market research',
       location: 'San Francisco, USA',
       metadata: {
         metaTitle: 'AI-Powered Diagnostics Market Analysis 2024 | Healthcare Innovation',
-        metaDescription: 'Comprehensive analysis of the AI-powered diagnostics market, including trends, growth projections, and key market segments. Explore the future of healthcare diagnostics.',
-        keywords: ['AI diagnostics', 'healthcare technology', 'medical AI', 'diagnostic imaging', 'precision medicine'],
+        metaDescription:
+          'Comprehensive analysis of the AI-powered diagnostics market, including trends, growth projections, and key market segments. Explore the future of healthcare diagnostics.',
+        keywords: [
+          'AI diagnostics',
+          'healthcare technology',
+          'medical AI',
+          'diagnostic imaging',
+          'precision medicine',
+        ],
       },
     };
 
     // Fill the form with sample data
     Object.entries(sampleData).forEach(([key, value]) => {
-      form.setValue(key as keyof BlogFormSchema, value as any);
+      form.setValue(key as keyof BlogFormSchema, value);
     });
   };
 
@@ -174,12 +186,7 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving }: BlogFormProps)
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Basic Information</CardTitle>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={fillSampleData}
-              >
+              <Button type="button" variant="outline" size="sm" onClick={fillSampleData}>
                 <Wand2 className="h-4 w-4 mr-2" />
                 Fill Sample Data
               </Button>
@@ -213,10 +220,7 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving }: BlogFormProps)
                 <FormItem>
                   <FormLabel>Slug</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="url-friendly-slug-for-blog"
-                      {...field}
-                    />
+                    <Input placeholder="url-friendly-slug-for-blog" {...field} />
                   </FormControl>
                   <FormDescription>
                     URL-friendly identifier (lowercase, hyphens only)
@@ -296,7 +300,9 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving }: BlogFormProps)
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription>Enter comma-separated tags to help readers discover your content</FormDescription>
+                  <FormDescription>
+                    Enter comma-separated tags to help readers discover your content
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -323,10 +329,7 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving }: BlogFormProps)
                 <FormItem>
                   <FormLabel>Location</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Enter location (e.g., New York, USA)"
-                      {...field}
-                    />
+                    <Input placeholder="Enter location (e.g., New York, USA)" {...field} />
                   </FormControl>
                   <FormDescription>Optional location field for the blog post</FormDescription>
                   <FormMessage />
@@ -372,7 +375,19 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving }: BlogFormProps)
               name="metadata.metaTitle"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Meta Title</FormLabel>
+                  <div className="flex justify-between items-center">
+                    <FormLabel>Meta Title</FormLabel>
+                    <CharacterCounter
+                      current={field.value?.length || 0}
+                      max={SEO_LIMITS.metaTitle.max}
+                      optimal={SEO_LIMITS.metaTitle.optimal}
+                      pixelWidth={{
+                        current: measureTextWidth(field.value || '', '16px system-ui'),
+                        max: SEO_LIMITS.metaTitle.pixelWidth.max,
+                      }}
+                      variant="inline"
+                    />
+                  </div>
                   <FormControl>
                     <Input placeholder="SEO-friendly title (optional)" {...field} />
                   </FormControl>
@@ -387,7 +402,19 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving }: BlogFormProps)
               name="metadata.metaDescription"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Meta Description</FormLabel>
+                  <div className="flex justify-between items-center">
+                    <FormLabel>Meta Description</FormLabel>
+                    <CharacterCounter
+                      current={field.value?.length || 0}
+                      max={SEO_LIMITS.metaDescription.max}
+                      optimal={SEO_LIMITS.metaDescription.optimal}
+                      pixelWidth={{
+                        current: measureTextWidth(field.value || '', '16px system-ui'),
+                        max: SEO_LIMITS.metaDescription.pixelWidth.max,
+                      }}
+                      variant="inline"
+                    />
+                  </div>
                   <FormControl>
                     <Textarea placeholder="SEO description (120-160 characters)" {...field} />
                   </FormControl>

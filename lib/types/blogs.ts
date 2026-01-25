@@ -48,8 +48,19 @@ export interface ApiBlog {
   excerpt: string;
   content: string;
   categoryId: number; // Category ID (required)
+  category?: {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string;
+    image_url?: string;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+  }; // Category details from API
   tags: string; // comma-separated string
   authorId: number;
+  author?: ReportAuthor; // Author details from API
   status: BlogStatus;
   publishDate: string;
   location?: string;

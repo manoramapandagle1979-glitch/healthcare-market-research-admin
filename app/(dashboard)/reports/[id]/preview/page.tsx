@@ -14,13 +14,13 @@ import { formatCurrency } from '@/lib/utils/format';
 export default function PreviewReportPage() {
   const params = useParams();
   const { report, isLoading, error, fetchReport } = useReport();
-  const reportSlug = params.id as string;
+  const reportId = parseInt(params.id as string, 10);
 
   useEffect(() => {
-    if (reportSlug) {
-      fetchReport(reportSlug);
+    if (reportId && !isNaN(reportId)) {
+      fetchReport(reportId);
     }
-  }, [reportSlug, fetchReport]);
+  }, [reportId, fetchReport]);
 
   if (isLoading) {
     return (
@@ -46,7 +46,7 @@ export default function PreviewReportPage() {
           </Link>
         </Button>
         <Button asChild>
-          <Link href={`/reports/${report.slug}`}>
+          <Link href={`/reports/${report.id}`}>
             <Edit className="mr-2 h-4 w-4" />
             Edit Report
           </Link>

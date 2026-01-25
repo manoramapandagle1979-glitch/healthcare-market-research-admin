@@ -37,6 +37,16 @@ export async function fetchReportBySlug(slug: string): Promise<ApiReportDetailRe
 }
 
 /**
+ * GET /api/v1/reports/{id}
+ * Get report by ID with relations
+ */
+export async function fetchReportById(id: number): Promise<ApiReportDetailResponse> {
+  return apiClient.get<ApiReportDetailResponse>(`/v1/reports/${id}`, {
+    requiresAuth: false, // Public endpoint
+  });
+}
+
+/**
  * POST /api/v1/reports
  * Create a new report (requires authentication)
  */

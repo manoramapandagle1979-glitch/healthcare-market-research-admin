@@ -27,15 +27,16 @@ import { TiptapEditor } from '@/components/reports/tiptap-editor';
 import { AuthorSelector } from '@/components/blogs/author-selector';
 import { fetchCategories, type Category } from '@/lib/api/categories';
 import {
-  PRESS_RELEASE_TITLE_MIN_LENGTH,
   PRESS_RELEASE_TITLE_MAX_LENGTH,
-  PRESS_RELEASE_EXCERPT_MIN_LENGTH,
   PRESS_RELEASE_EXCERPT_MAX_LENGTH,
 } from '@/lib/config/press-releases';
 import type { PressReleaseFormData, PressRelease } from '@/lib/types/press-releases';
 import { pressReleaseFormSchema } from '@/lib/validation/press-release-schema';
 import { Save, Eye, Wand2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { CharacterCounter } from '@/components/seo/character-counter';
+import { SEO_LIMITS } from '@/lib/config/seo';
+import { measureTextWidth } from '@/lib/utils/text-measurement';
 
 interface PressReleaseFormProps {
   pressRelease?: PressRelease;
@@ -113,26 +114,35 @@ export function PressReleaseForm({
     const sampleData: Partial<PressReleaseFormData> = {
       title: 'Leading Healthcare Technology Company Launches AI-Powered Platform',
       slug: 'healthcare-company-launches-ai-powered-platform',
-      excerpt: 'Global healthcare innovator announces groundbreaking artificial intelligence platform designed to streamline clinical workflows and improve patient outcomes. The new solution integrates advanced machine learning capabilities with existing healthcare systems.',
-      content: '<p><strong>San Francisco, CA</strong> - A pioneering healthcare technology company today announced the launch of its revolutionary AI-powered clinical decision support platform, marking a significant milestone in the digital transformation of healthcare delivery.</p><h2>Revolutionary Technology</h2><p>The new platform leverages cutting-edge artificial intelligence and machine learning algorithms to analyze patient data in real-time, providing healthcare professionals with actionable insights and evidence-based recommendations. Early adopters have reported a 40% reduction in diagnostic errors and a 35% improvement in treatment efficacy.</p><h2>Key Features</h2><ul><li>Real-time clinical decision support powered by advanced AI algorithms</li><li>Seamless integration with existing Electronic Health Record (EHR) systems</li><li>Predictive analytics for early disease detection and prevention</li><li>Natural language processing for automated documentation</li><li>HIPAA-compliant security and data privacy measures</li></ul><h2>Market Impact</h2><p>This launch positions the company at the forefront of the rapidly growing healthcare AI market, which is projected to reach $45.2 billion by 2026. Industry analysts predict that AI-powered clinical tools will become standard practice in healthcare institutions worldwide within the next five years.</p><h2>About the Company</h2><p>Founded in 2015, the company has established itself as a leader in healthcare innovation, serving over 500 healthcare institutions globally. The organization is committed to leveraging technology to improve patient care, reduce costs, and enhance clinical outcomes.</p><p>For more information, visit our website or contact our media relations team.</p>',
+      excerpt:
+        'Global healthcare innovator announces groundbreaking artificial intelligence platform designed to streamline clinical workflows and improve patient outcomes. The new solution integrates advanced machine learning capabilities with existing healthcare systems.',
+      content:
+        '<p><strong>San Francisco, CA</strong> - A pioneering healthcare technology company today announced the launch of its revolutionary AI-powered clinical decision support platform, marking a significant milestone in the digital transformation of healthcare delivery.</p><h2>Revolutionary Technology</h2><p>The new platform leverages cutting-edge artificial intelligence and machine learning algorithms to analyze patient data in real-time, providing healthcare professionals with actionable insights and evidence-based recommendations. Early adopters have reported a 40% reduction in diagnostic errors and a 35% improvement in treatment efficacy.</p><h2>Key Features</h2><ul><li>Real-time clinical decision support powered by advanced AI algorithms</li><li>Seamless integration with existing Electronic Health Record (EHR) systems</li><li>Predictive analytics for early disease detection and prevention</li><li>Natural language processing for automated documentation</li><li>HIPAA-compliant security and data privacy measures</li></ul><h2>Market Impact</h2><p>This launch positions the company at the forefront of the rapidly growing healthcare AI market, which is projected to reach $45.2 billion by 2026. Industry analysts predict that AI-powered clinical tools will become standard practice in healthcare institutions worldwide within the next five years.</p><h2>About the Company</h2><p>Founded in 2015, the company has established itself as a leader in healthcare innovation, serving over 500 healthcare institutions globally. The organization is committed to leveraging technology to improve patient care, reduce costs, and enhance clinical outcomes.</p><p>For more information, visit our website or contact our media relations team.</p>',
       categoryId: categories.length > 0 ? categories[0].id : 0,
       tags: 'AI in healthcare, clinical decision support, healthcare technology, digital health',
       location: 'San Francisco, CA',
       metadata: {
         metaTitle: 'Healthcare Tech Company Launches AI Clinical Platform | Press Release',
-        metaDescription: 'Major healthcare technology company announces revolutionary AI-powered clinical decision support platform to transform patient care and improve outcomes.',
-        keywords: ['healthcare AI', 'clinical decision support', 'digital health', 'medical technology', 'healthcare innovation'],
+        metaDescription:
+          'Major healthcare technology company announces revolutionary AI-powered clinical decision support platform to transform patient care and improve outcomes.',
+        keywords: [
+          'healthcare AI',
+          'clinical decision support',
+          'digital health',
+          'medical technology',
+          'healthcare innovation',
+        ],
       },
     };
 
     // Fill the form with sample data
     Object.entries(sampleData).forEach(([key, value]) => {
-      form.setValue(key as keyof PressReleaseFormData, value as any);
+      form.setValue(key as keyof PressReleaseFormData, value);
     });
   };
 
-  const handleFormSubmit = async (data: any) => {
-    await onSubmit(data as PressReleaseFormData);
+  const handleFormSubmit = async (data: PressReleaseFormData) => {
+    await onSubmit(data);
   };
 
   return (
@@ -143,12 +153,7 @@ export function PressReleaseForm({
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Basic Information</CardTitle>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={fillSampleData}
-              >
+              <Button type="button" variant="outline" size="sm" onClick={fillSampleData}>
                 <Wand2 className="h-4 w-4 mr-2" />
                 Fill Sample Data
               </Button>
@@ -182,10 +187,7 @@ export function PressReleaseForm({
                 <FormItem>
                   <FormLabel>Slug</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="url-friendly-slug-for-press-release"
-                      {...field}
-                    />
+                    <Input placeholder="url-friendly-slug-for-press-release" {...field} />
                   </FormControl>
                   <FormDescription>
                     URL-friendly identifier (lowercase, hyphens only)
@@ -282,7 +284,7 @@ export function PressReleaseForm({
                   <FormControl>
                     <AuthorSelector
                       value={String(field.value)}
-                      onChange={(value) => field.onChange(Number(value))}
+                      onChange={value => field.onChange(Number(value))}
                     />
                   </FormControl>
                   <FormMessage />
@@ -297,10 +299,7 @@ export function PressReleaseForm({
                 <FormItem>
                   <FormLabel>Location</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Enter location (e.g., New York, USA)"
-                      {...field}
-                    />
+                    <Input placeholder="Enter location (e.g., New York, USA)" {...field} />
                   </FormControl>
                   <FormDescription>Optional location field for the press release</FormDescription>
                   <FormMessage />
@@ -346,7 +345,19 @@ export function PressReleaseForm({
               name="metadata.metaTitle"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Meta Title</FormLabel>
+                  <div className="flex justify-between items-center">
+                    <FormLabel>Meta Title</FormLabel>
+                    <CharacterCounter
+                      current={field.value?.length || 0}
+                      max={SEO_LIMITS.metaTitle.max}
+                      optimal={SEO_LIMITS.metaTitle.optimal}
+                      pixelWidth={{
+                        current: measureTextWidth(field.value || '', '16px system-ui'),
+                        max: SEO_LIMITS.metaTitle.pixelWidth.max,
+                      }}
+                      variant="inline"
+                    />
+                  </div>
                   <FormControl>
                     <Input placeholder="SEO-friendly title (optional)" {...field} />
                   </FormControl>
@@ -361,7 +372,19 @@ export function PressReleaseForm({
               name="metadata.metaDescription"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Meta Description</FormLabel>
+                  <div className="flex justify-between items-center">
+                    <FormLabel>Meta Description</FormLabel>
+                    <CharacterCounter
+                      current={field.value?.length || 0}
+                      max={SEO_LIMITS.metaDescription.max}
+                      optimal={SEO_LIMITS.metaDescription.optimal}
+                      pixelWidth={{
+                        current: measureTextWidth(field.value || '', '16px system-ui'),
+                        max: SEO_LIMITS.metaDescription.pixelWidth.max,
+                      }}
+                      variant="inline"
+                    />
+                  </div>
                   <FormControl>
                     <Textarea placeholder="SEO description (120-160 characters)" {...field} />
                   </FormControl>

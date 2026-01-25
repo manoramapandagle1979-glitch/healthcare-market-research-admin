@@ -25,13 +25,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { deletePressRelease, fetchAuthors } from '@/lib/api/press-releases';
-import type { PressReleaseAuthor } from '@/lib/types/press-releases';
+import { deletePressRelease } from '@/lib/api/press-releases';
+import { fetchAuthors } from '@/lib/api/authors';
+import type { ReportAuthor } from '@/lib/types/reports';
 
 export default function PressReleasesPage() {
   const { user } = useAuth();
   const [filters, setFilters] = useState({});
-  const [authors, setAuthors] = useState<PressReleaseAuthor[]>([]);
+  const [authors, setAuthors] = useState<ReportAuthor[]>([]);
   const {
     pressReleases,
     total,
@@ -51,7 +52,7 @@ export default function PressReleasesPage() {
 
   const loadAuthors = async () => {
     try {
-      const { authors } = await fetchAuthors();
+      const { data: authors } = await fetchAuthors();
       setAuthors(authors);
     } catch {
       // Error is logged by the API client
@@ -155,7 +156,8 @@ export default function PressReleasesPage() {
                 href="#"
                 onClick={e => {
                   e.preventDefault();
-                  if (currentPage < totalPages) updateFilters({ ...filters, page: currentPage + 1 });
+                  if (currentPage < totalPages)
+                    updateFilters({ ...filters, page: currentPage + 1 });
                 }}
                 aria-disabled={currentPage >= totalPages}
               />

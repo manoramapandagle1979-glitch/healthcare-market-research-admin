@@ -18,5 +18,20 @@
     "titleBar.inactiveBackground": "#cfda2599",
     "titleBar.inactiveForeground": "#15202b99"
   },
-  "peacock.color": "#cfda25"
+  "peacock.color": "#cfda25",
+  // TypeScript validation
+  "typescript.validate.enable": true,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  // ESLint real-time validation
+  "eslint.enable": true,
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+  // Auto-fix on save
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  // Format on save with Prettier
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  // Show problems in files
+  "problems.showCurrentInStatus": true
 }

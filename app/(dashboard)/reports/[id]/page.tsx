@@ -16,14 +16,14 @@ export default function EditReportPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { report, isLoading, error, fetchReport, saveReport, isSaving } = useReport();
-  const reportSlug = params.id as string;
+  const reportId = parseInt(params.id as string, 10);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
   useEffect(() => {
-    if (reportSlug) {
-      fetchReport(reportSlug);
+    if (reportId && !isNaN(reportId)) {
+      fetchReport(reportId);
     }
-  }, [reportSlug, fetchReport]);
+  }, [reportId, fetchReport]);
 
   useEffect(() => {
     if (user && user.role !== 'admin' && user.role !== 'editor') {
@@ -68,7 +68,7 @@ export default function EditReportPage() {
         <AlertCircle className="h-12 w-12 text-destructive mb-4" />
         <p className="text-lg font-semibold mb-2">Failed to load report</p>
         <p className="text-sm text-muted-foreground mb-4">{error}</p>
-        <Button onClick={() => fetchReport(reportSlug)}>Retry</Button>
+        <Button onClick={() => reportId && !isNaN(reportId) && fetchReport(reportId)}>Retry</Button>
       </div>
     );
   }
@@ -100,7 +100,7 @@ export default function EditReportPage() {
           }
         }}
         onSaveTab={handleSaveTab}
-        onPreview={() => router.push(`/reports/${report.slug}/preview`)}
+        onPreview={() => router.push(`/reports/${report.id}/preview`)}
         isSaving={isSaving}
       />
     </div>

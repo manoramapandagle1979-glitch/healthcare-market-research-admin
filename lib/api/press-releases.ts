@@ -9,7 +9,6 @@ import type {
   PressReleaseTag,
   PressReleaseTagsResponse,
   PressReleaseCategoriesResponse,
-  PressReleaseAuthorsResponse,
 } from '@/lib/types/press-releases';
 
 // Helper function to transform form data to API create/update format
@@ -73,11 +72,6 @@ export async function deleteTag(id: string): Promise<void> {
 // Category operations
 export async function fetchCategories(): Promise<PressReleaseCategoriesResponse> {
   return apiClient.get<PressReleaseCategoriesResponse>('/press-releases/categories');
-}
-
-// Author operations
-export async function fetchAuthors(): Promise<PressReleaseAuthorsResponse> {
-  return apiClient.get<PressReleaseAuthorsResponse>('/press-releases/authors');
 }
 
 // Workflow operations

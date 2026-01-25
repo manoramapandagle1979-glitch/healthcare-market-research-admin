@@ -9,7 +9,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import type { PressReleaseFilters, PressReleaseAuthor } from '@/lib/types/press-releases';
+import type { PressReleaseFilters } from '@/lib/types/press-releases';
+import type { ReportAuthor } from '@/lib/types/reports';
 import { fetchCategories, type Category } from '@/lib/api/categories';
 import { Search, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -17,7 +18,7 @@ import { useState, useEffect } from 'react';
 interface PressReleaseFiltersProps {
   filters: PressReleaseFilters;
   onFiltersChange: (filters: PressReleaseFilters) => void;
-  authors?: PressReleaseAuthor[];
+  authors?: ReportAuthor[];
 }
 
 export function PressReleaseFiltersComponent({
