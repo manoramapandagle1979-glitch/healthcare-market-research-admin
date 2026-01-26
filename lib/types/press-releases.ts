@@ -123,12 +123,12 @@ export interface PressReleaseFormData {
   excerpt: string;
   content: string;
   categoryId: number; // Single category ID
-  tags: string; // Comma-separated tags
+  tags?: string; // Comma-separated tags
   authorId: number;
   status: PressReleaseStatus;
   publishDate: string;
   location?: string;
-  metadata: PressReleaseMetadata;
+  metadata?: PressReleaseMetadata;
 }
 
 // Category type

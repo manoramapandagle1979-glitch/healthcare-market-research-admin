@@ -25,10 +25,7 @@ export interface UserReference {
 export type ReportStatus = 'draft' | 'published';
 
 // Predefined section keys
-export type ReportSectionKey =
-  | 'marketDetails'
-  | 'tableOfContents'
-  | 'keyPlayers';
+export type ReportSectionKey = 'marketDetails' | 'tableOfContents' | 'keyPlayers';
 
 // Section metadata for UI rendering
 export interface ReportSectionMeta {
@@ -40,9 +37,9 @@ export interface ReportSectionMeta {
 
 // Report sections (HTML content)
 export interface ReportSections {
-  marketDetails: string;
-  tableOfContents: TableOfContentsStructure; // Structured TOC
-  keyPlayers: KeyPlayer[]; // Array of key market players
+  marketDetails?: string;
+  tableOfContents?: TableOfContentsStructure; // Structured TOC
+  keyPlayers?: KeyPlayer[]; // Array of key market players
 }
 
 // Market Metrics

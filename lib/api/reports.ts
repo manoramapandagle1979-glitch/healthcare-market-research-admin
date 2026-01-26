@@ -39,7 +39,7 @@ function convertDateToRFC3339(dateString: string | undefined): string | undefine
  * @param toc Table of Contents structure
  * @returns JSON string
  */
-function convertTOCToJson(toc: TableOfContentsStructure): string {
+function convertTOCToJson(toc?: TableOfContentsStructure): string {
   if (!toc || !toc.chapters || toc.chapters.length === 0) {
     return JSON.stringify({ chapters: [] });
   }

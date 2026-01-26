@@ -71,7 +71,7 @@ export function PressReleaseForm({
     }
   };
 
-  const form = useForm({
+  const form = useForm<PressReleaseFormData>({
     resolver: zodResolver(pressReleaseFormSchema),
     defaultValues: pressRelease
       ? {

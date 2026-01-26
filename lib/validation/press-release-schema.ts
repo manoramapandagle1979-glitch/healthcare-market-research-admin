@@ -43,7 +43,7 @@ export const pressReleaseFormSchema = z.object({
       `Content must be at least ${PRESS_RELEASE_CONTENT_MIN_LENGTH} characters`
     ),
   categoryId: z.number().positive('Category is required'),
-  tags: z.string().optional(), // Comma-separated tags
+  tags: z.string().default(''), // Comma-separated tags; default to empty string for consistent form data
   authorId: z.number().positive('Author is required'),
   status: z.enum(['draft', 'review', 'published']),
   publishDate: z.string(),
@@ -52,7 +52,7 @@ export const pressReleaseFormSchema = z.object({
     .object({
       metaTitle: z.string().optional(),
       metaDescription: z.string().optional(),
-      keywords: z.array(z.string()).optional(),
+      keywords: z.array(z.string()).optional().default([]),
     })
-    .optional(),
+    .default(() => ({ metaTitle: '', metaDescription: '', keywords: [] })),
 });
