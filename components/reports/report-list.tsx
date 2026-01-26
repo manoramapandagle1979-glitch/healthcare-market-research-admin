@@ -15,15 +15,32 @@ import { TableSkeleton } from '@/components/ui/skeletons/table-skeleton';
 import type { Report } from '@/lib/types/reports';
 import { formatRelativeTime } from '@/lib/utils/date';
 import { formatCurrency } from '@/lib/utils/format';
-import { Edit, Eye, Trash2 } from 'lucide-react';
+import { Edit, Eye, Trash2, ExternalLink, RotateCcw } from 'lucide-react';
+import { config } from '@/lib/config';
+import { useAuth } from '@/contexts/auth-context';
 
 interface ReportListProps {
   reports: Report[];
   isLoading: boolean;
+  viewMode?: 'active' | 'trash';
   onDelete?: (id: string) => void;
+  onSoftDelete?: (id: string) => void;
+  onRestore?: (id: string) => void;
+  onHardDelete?: (id: string) => void;
 }
 
-export function ReportList({ reports, isLoading, onDelete }: ReportListProps) {
+export function ReportList({
+  reports,
+  isLoading,
+  viewMode = 'active',
+  onDelete,
+  onSoftDelete,
+  onRestore,
+  onHardDelete,
+}: ReportListProps) {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+
   if (isLoading) {
     return <TableSkeleton rows={5} columns={5} showHeader={true} showActions={true} />;
   }
@@ -51,7 +68,7 @@ export function ReportList({ reports, isLoading, onDelete }: ReportListProps) {
         </TableHeader>
         <TableBody>
           {reports.map(report => (
-            <TableRow key={report.id}>
+            <TableRow key={report.id} className={viewMode === 'trash' ? 'opacity-70' : ''}>
               <TableCell className="font-medium max-w-xs truncate">{report.title}</TableCell>
               <TableCell>{report.category}</TableCell>
               <TableCell>
@@ -65,20 +82,64 @@ export function ReportList({ reports, isLoading, onDelete }: ReportListProps) {
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/reports/${report.id}/preview`}>
-                      <Eye className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/reports/${report.id}`}>
-                      <Edit className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                  {onDelete && (
-                    <Button variant="ghost" size="sm" onClick={() => onDelete(report.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                  {viewMode === 'active' ? (
+                    // Active view - show preview, edit, delete (soft)
+                    <>
+                      <Button variant="ghost" size="sm" asChild>
+                        <Link href={`/reports/${report.id}/preview`}>
+                          <Eye className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      {config.preview.domain && (
+                        <Button variant="ghost" size="sm" asChild title="Preview on public site">
+                          <Link
+                            href={`${config.preview.domain}/reports/${report.slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                      )}
+                      <Button variant="ghost" size="sm" asChild>
+                        <Link href={`/reports/${report.id}`}>
+                          <Edit className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      {(onDelete || onSoftDelete) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => (onSoftDelete || onDelete)?.(report.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      )}
+                    </>
+                  ) : (
+                    // Trash view - show restore and permanent delete
+                    <>
+                      {onRestore && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onRestore(report.id)}
+                          title="Restore report"
+                        >
+                          <RotateCcw className="h-4 w-4 text-green-600" />
+                        </Button>
+                      )}
+                      {isAdmin && onHardDelete && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onHardDelete(report.id)}
+                          title="Delete permanently"
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      )}
+                    </>
                   )}
                 </div>
               </TableCell>

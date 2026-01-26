@@ -185,6 +185,7 @@ export interface Report {
   internalNotes?: string; // Admin-only notes
   createdAt: string;
   updatedAt: string;
+  deletedAt?: string; // ISO timestamp when report was soft-deleted
   author: UserReference; // System author (who created in admin)
 }
 

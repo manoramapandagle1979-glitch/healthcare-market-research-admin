@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import type { Report, ReportFilters } from '@/lib/types/reports';
-import { fetchReports } from '@/lib/api/reports';
+import { fetchReports, softDeleteReport, restoreReport } from '@/lib/api/reports';
 
 interface UseReportsReturn {
   reports: Report[];
@@ -14,6 +14,8 @@ interface UseReportsReturn {
   error: string | null;
   refetch: () => Promise<void>;
   setFilters: (filters: ReportFilters) => void;
+  softDelete: (id: string) => Promise<void>;
+  restore: (id: string) => Promise<void>;
 }
 
 export function useReports(initialFilters?: ReportFilters): UseReportsReturn {
@@ -53,6 +55,30 @@ export function useReports(initialFilters?: ReportFilters): UseReportsReturn {
     setFiltersState(prev => ({ ...prev, ...newFilters }));
   }, []);
 
+  const softDelete = useCallback(
+    async (id: string) => {
+      try {
+        await softDeleteReport(id);
+        await fetchData();
+      } catch (error) {
+        throw error;
+      }
+    },
+    [fetchData]
+  );
+
+  const restore = useCallback(
+    async (id: string) => {
+      try {
+        await restoreReport(id);
+        await fetchData();
+      } catch (error) {
+        throw error;
+      }
+    },
+    [fetchData]
+  );
+
   return {
     reports,
     total,
@@ -62,5 +88,7 @@ export function useReports(initialFilters?: ReportFilters): UseReportsReturn {
     error,
     refetch: fetchData,
     setFilters,
+    softDelete,
+    restore,
   };
 }

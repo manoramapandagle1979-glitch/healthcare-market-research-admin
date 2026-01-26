@@ -11,7 +11,7 @@ import { ContentTab } from './tabs/content-tab';
 import { TOCTab } from './tabs/toc-tab';
 import { SettingsTab } from './tabs/settings-tab';
 import { ChartsTab } from './tabs/charts-tab';
-import { reportFormSchema, type ReportFormSchemaType } from '@/lib/validation/report-schema';
+import { reportFormSchema } from '@/lib/validation/report-schema';
 
 export interface ReportFormTabsRef {
   fillWithSampleData: () => void;
@@ -57,11 +57,32 @@ const getSampleData = (): ReportFormData => ({
     marketDetails:
       '<p><strong>By Service Type:</strong></p><ul><li>Teleconsultation (38%)</li><li>Telemonitoring (26%)</li><li>Teleradiology (14%)</li><li>Telepathology (9%)</li><li>Others (13%)</li></ul><p><strong>By Delivery Mode:</strong></p><ul><li>Web/Mobile (72%)</li><li>Call Centers (28%)</li></ul><p><strong>By End User:</strong></p><ul><li>Patients (42%)</li><li>Healthcare Providers (38%)</li><li>Payers (20%)</li></ul>',
     keyPlayers: [
-      { name: 'Teladoc Health', marketShare: '14.2%', description: 'Market leader with comprehensive virtual care platform serving 175+ countries' },
-      { name: 'American Well (Amwell)', marketShare: '9.8%', description: 'Enterprise telehealth platform with strong hospital partnerships' },
-      { name: 'MDLive', marketShare: '7.3%', description: 'Consumer-focused telemedicine services with insurance integration' },
-      { name: 'Doctor on Demand', marketShare: '5.1%', description: 'On-demand video consultations with board-certified physicians' },
-      { name: 'Grand Rounds', marketShare: '3.4%', description: 'Expert medical opinion and care navigation platform' },
+      {
+        name: 'Teladoc Health',
+        marketShare: '14.2%',
+        description:
+          'Market leader with comprehensive virtual care platform serving 175+ countries',
+      },
+      {
+        name: 'American Well (Amwell)',
+        marketShare: '9.8%',
+        description: 'Enterprise telehealth platform with strong hospital partnerships',
+      },
+      {
+        name: 'MDLive',
+        marketShare: '7.3%',
+        description: 'Consumer-focused telemedicine services with insurance integration',
+      },
+      {
+        name: 'Doctor on Demand',
+        marketShare: '5.1%',
+        description: 'On-demand video consultations with board-certified physicians',
+      },
+      {
+        name: 'Grand Rounds',
+        marketShare: '3.4%',
+        description: 'Expert medical opinion and care navigation platform',
+      },
     ],
     tableOfContents: {
       chapters: [
@@ -211,7 +232,7 @@ export const ReportFormTabs = forwardRef<ReportFormTabsRef, ReportFormTabsProps>
             pageCount: report.pageCount,
             formats: report.formats || [],
             marketMetrics: report.marketMetrics || {},
-            authorIds: report.authorIds || [],
+            authorIds: (report.authorIds || []).map(id => String(id)),
             sections: {
               ...report.sections,
               keyPlayers: report.sections.keyPlayers || [],
@@ -301,7 +322,12 @@ export const ReportFormTabs = forwardRef<ReportFormTabsRef, ReportFormTabsProps>
           </TabsContent>
 
           <TabsContent value="charts">
-            <ChartsTab form={form} reportId={report?.id} onSaveTab={onSaveTab} isSaving={isSaving} />
+            <ChartsTab
+              form={form}
+              reportId={report?.id}
+              onSaveTab={onSaveTab}
+              isSaving={isSaving}
+            />
           </TabsContent>
 
           <TabsContent value="settings">

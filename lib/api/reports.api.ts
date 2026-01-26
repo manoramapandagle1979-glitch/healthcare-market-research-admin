@@ -79,6 +79,48 @@ export async function deleteReport(id: number): Promise<ApiResponse<{ message: s
   });
 }
 
+/**
+ * PATCH /api/v1/reports/{id}/soft-delete
+ * Soft delete a report (moves to trash)
+ */
+export async function softDeleteReport(id: number): Promise<ApiResponse<{ message: string }>> {
+  return apiClient.patch<ApiResponse<{ message: string }>>(
+    `/v1/reports/${id}/soft-delete`,
+    {},
+    {
+      requiresAuth: true,
+    }
+  );
+}
+
+/**
+ * PATCH /api/v1/reports/{id}/restore
+ * Restore a soft-deleted report
+ */
+export async function restoreReport(id: number): Promise<ApiResponse<{ message: string }>> {
+  return apiClient.patch<ApiResponse<{ message: string }>>(
+    `/v1/reports/${id}/restore`,
+    {},
+    {
+      requiresAuth: true,
+    }
+  );
+}
+
+/**
+ * GET /api/v1/reports?deleted=true
+ * Fetch trashed reports
+ */
+export async function fetchTrashedReports(
+  filters?: ApiReportFilters
+): Promise<ApiReportsListResponse> {
+  const params = { ...filters, deleted: 'true' };
+  return apiClient.get<ApiReportsListResponse>('/v1/reports', {
+    params: params as Record<string, unknown>,
+    requiresAuth: true,
+  });
+}
+
 // ============ Search Endpoint ============
 
 /**

@@ -154,6 +154,7 @@ export interface ApiReport {
   id: number;
   created_at: string;
   updated_at: string;
+  deleted_at?: string; // ISO timestamp when report was soft-deleted
   view_count?: number; // Auto-managed
   download_count?: number; // Auto-managed
   publish_date?: string; // Auto-set when status changes to published

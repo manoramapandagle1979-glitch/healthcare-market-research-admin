@@ -7,6 +7,7 @@ import {
   UserCog,
   MessageSquare,
   Megaphone,
+  Trash2,
 } from 'lucide-react';
 
 export type UserRole = 'admin' | 'editor' | 'viewer';
@@ -42,6 +43,12 @@ export const navigationItems: NavigationItem[] = [
         title: 'Create Report',
         href: '/reports/new',
         icon: FileText,
+        roles: ['admin', 'editor'],
+      },
+      {
+        title: 'Trash',
+        href: '/reports/trash',
+        icon: Trash2,
         roles: ['admin', 'editor'],
       },
     ],

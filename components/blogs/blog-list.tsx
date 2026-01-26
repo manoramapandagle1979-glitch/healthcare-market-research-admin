@@ -15,8 +15,9 @@ import { TableSkeleton } from '@/components/ui/skeletons/table-skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import type { Blog, BlogStatus } from '@/lib/types/blogs';
 import { formatRelativeTime } from '@/lib/utils/date';
-import { Edit, Eye, Trash2, Clock } from 'lucide-react';
+import { Edit, Eye, Trash2, Clock, ExternalLink } from 'lucide-react';
 import { BLOG_STATUS_CONFIG } from '@/lib/config/blogs';
+import { config } from '@/lib/config';
 
 interface BlogListProps {
   blogs: Blog[];
@@ -117,6 +118,17 @@ export function BlogList({ blogs, isLoading, onDelete }: BlogListProps) {
                       <Eye className="h-4 w-4" />
                     </Link>
                   </Button>
+                  {config.preview.domain && (
+                    <Button variant="ghost" size="sm" asChild title="Preview on public site">
+                      <Link
+                        href={`${config.preview.domain}/blog/${blog.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  )}
                   <Button variant="ghost" size="sm" asChild>
                     <Link href={`/blog/${blog.id}`}>
                       <Edit className="h-4 w-4" />

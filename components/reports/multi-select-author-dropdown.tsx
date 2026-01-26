@@ -19,8 +19,8 @@ import { fetchAuthors } from '@/lib/api/authors';
 import { cn } from '@/lib/utils';
 
 interface MultiSelectAuthorDropdownProps {
-  value: (number | string)[]; // author IDs
-  onChange: (authorIds: (number | string)[]) => void;
+  value: string[]; // author IDs as strings
+  onChange: (authorIds: string[]) => void;
   disabled?: boolean;
 }
 
@@ -59,21 +59,21 @@ export function MultiSelectAuthorDropdown({
     }
   };
 
-  const selectedAuthors = authors.filter(author =>
-    value.includes(author.id) || value.includes(String(author.id))
-  );
+  const selectedAuthors = authors.filter(author => value.includes(String(author.id)));
 
   const toggleAuthor = (authorId: number) => {
-    const isSelected = value.includes(authorId) || value.includes(String(authorId));
+    const authorIdStr = String(authorId);
+    const isSelected = value.includes(authorIdStr);
     if (isSelected) {
-      onChange(value.filter(id => id !== authorId && id !== String(authorId)));
+      onChange(value.filter(id => id !== authorIdStr));
     } else {
-      onChange([...value, authorId]);
+      onChange([...value, authorIdStr]);
     }
   };
 
   const removeAuthor = (authorId: number) => {
-    onChange(value.filter(id => id !== authorId && id !== String(authorId)));
+    const authorIdStr = String(authorId);
+    onChange(value.filter(id => id !== authorIdStr));
   };
 
   return (
@@ -108,7 +108,7 @@ export function MultiSelectAuthorDropdown({
               ) : (
                 <CommandGroup>
                   {authors.map(author => {
-                    const isSelected = value.includes(author.id) || value.includes(String(author.id));
+                    const isSelected = value.includes(String(author.id));
                     return (
                       <CommandItem
                         key={author.id}
@@ -116,10 +116,7 @@ export function MultiSelectAuthorDropdown({
                         onSelect={() => toggleAuthor(author.id)}
                       >
                         <Check
-                          className={cn(
-                            'mr-2 h-4 w-4',
-                            isSelected ? 'opacity-100' : 'opacity-0'
-                          )}
+                          className={cn('mr-2 h-4 w-4', isSelected ? 'opacity-100' : 'opacity-0')}
                         />
                         <div className="flex items-center gap-2">
                           <Avatar className="h-6 w-6">

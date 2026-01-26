@@ -34,4 +34,7 @@ export const config = {
       process.env.NEXT_PUBLIC_ALLOWED_FILE_TYPES || 'image/jpeg,image/png,image/webp'
     ).split(','),
   },
+  preview: {
+    domain: process.env.NEXT_PUBLIC_PREVIEW_DOMAIN || '',
+  },
 } as const;

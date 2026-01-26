@@ -139,6 +139,7 @@ function convertApiReportToLegacy(apiReport: ApiReport): Report {
     internalNotes: apiReport.internal_notes,
     createdAt: apiReport.created_at,
     updatedAt: apiReport.updated_at,
+    deletedAt: apiReport.deleted_at,
     author: { id: '', email: '', name: '' },
   };
 }
@@ -326,4 +327,48 @@ export async function deleteReport(id: string): Promise<void> {
   if (!response.success) {
     throw new Error(response.error || 'Failed to delete report');
   }
+}
+
+export async function softDeleteReport(id: string): Promise<void> {
+  const numericId = parseInt(id, 10);
+  if (isNaN(numericId)) {
+    throw new Error('Invalid report ID');
+  }
+
+  const response = await reportsApi.softDeleteReport(numericId);
+  if (!response.success) {
+    throw new Error(response.error || 'Failed to move report to trash');
+  }
+}
+
+export async function restoreReport(id: string): Promise<void> {
+  const numericId = parseInt(id, 10);
+  if (isNaN(numericId)) {
+    throw new Error('Invalid report ID');
+  }
+
+  const response = await reportsApi.restoreReport(numericId);
+  if (!response.success) {
+    throw new Error(response.error || 'Failed to restore report');
+  }
+}
+
+export async function fetchTrashedReports(filters?: ReportFilters): Promise<ReportsResponse> {
+  const apiFilters = convertLegacyFiltersToApi(filters);
+  const response = await reportsApi.fetchTrashedReports(apiFilters);
+
+  if (!response.success) {
+    throw new Error(response.error || 'Failed to fetch trashed reports');
+  }
+
+  // Handle null data as empty array
+  const reports = response.data ? response.data.map(convertApiReportToLegacy) : [];
+
+  return {
+    reports,
+    total: response.meta?.total || 0,
+    page: response.meta?.page || 1,
+    limit: response.meta?.limit || 10,
+    totalPages: response.meta?.total_pages || 0,
+  };
 }

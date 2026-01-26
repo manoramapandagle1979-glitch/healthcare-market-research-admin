@@ -24,5 +24,8 @@ declare namespace NodeJS {
     // Media/Upload Configuration
     NEXT_PUBLIC_MAX_FILE_SIZE: string;
     NEXT_PUBLIC_ALLOWED_FILE_TYPES: string;
+
+    // Preview Domain
+    NEXT_PUBLIC_PREVIEW_DOMAIN?: string;
   }
 }

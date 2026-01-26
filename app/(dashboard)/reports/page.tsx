@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ReportFiltersComponent } from '@/components/reports/report-filters';
 import { ReportList } from '@/components/reports/report-list';
 import { PaginationWrapper as Pagination } from '@/components/ui/pagination-wrapper';
 import { useReports } from '@/hooks/use-reports';
 import { useAuth } from '@/contexts/auth-context';
-import { Plus, RefreshCw } from 'lucide-react';
+import { Plus, RefreshCw, Trash2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -18,9 +19,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { deleteReport } from '@/lib/api/reports';
 
 export default function ReportsPage() {
+  const router = useRouter();
   const { user } = useAuth();
   const [filters, setFilters] = useState({});
   const {
@@ -31,6 +32,7 @@ export default function ReportsPage() {
     isLoading,
     refetch,
     setFilters: updateFilters,
+    softDelete,
   } = useReports(filters);
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
@@ -44,12 +46,11 @@ export default function ReportsPage() {
     if (!deleteDialog.reportId) return;
 
     try {
-      await deleteReport(deleteDialog.reportId);
-      toast.success('Report deleted successfully');
-      refetch();
+      await softDelete(deleteDialog.reportId);
+      toast.success('Report moved to trash');
       setDeleteDialog({ open: false, reportId: null });
     } catch {
-      toast.error('Failed to delete report');
+      toast.error('Failed to move report to trash');
     }
   };
 
@@ -70,6 +71,12 @@ export default function ReportsPage() {
             <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
           </Button>
+          {canCreateEdit && (
+            <Button variant="outline" size="sm" onClick={() => router.push('/reports/trash')}>
+              <Trash2 className="mr-2 h-4 w-4" />
+              View Trash
+            </Button>
+          )}
           {canCreateEdit && (
             <Button asChild>
               <Link href="/reports/new">
@@ -94,7 +101,10 @@ export default function ReportsPage() {
       <ReportList
         reports={reports}
         isLoading={isLoading}
-        onDelete={canCreateEdit ? id => setDeleteDialog({ open: true, reportId: id }) : undefined}
+        viewMode="active"
+        onSoftDelete={
+          canCreateEdit ? id => setDeleteDialog({ open: true, reportId: id }) : undefined
+        }
       />
 
       {/* Pagination */}
@@ -113,9 +123,9 @@ export default function ReportsPage() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Report</DialogTitle>
+            <DialogTitle>Move Report to Trash</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this report? This action cannot be undone.
+              This report will be moved to trash. You can restore it later from the trash page.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -126,7 +136,7 @@ export default function ReportsPage() {
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleDelete}>
-              Delete
+              Move to Trash
             </Button>
           </DialogFooter>
         </DialogContent>
