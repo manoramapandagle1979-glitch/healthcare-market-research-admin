@@ -54,8 +54,6 @@ import { cn } from '@/lib/utils';
 import { ImagePickerDialog } from './image-picker-dialog';
 import { FindReplaceDialog } from './find-replace-dialog';
 import { ReportImage } from '@/lib/types/reports';
-import { uploadReportImage } from '@/lib/api/report-images';
-import { toast } from 'sonner';
 import { beautifyHtml, minifyHtml } from '@/lib/utils/html-beautifier';
 
 interface TiptapEditorProps {
@@ -136,54 +134,52 @@ export function TiptapEditor({
         class: 'focus:outline-none min-h-[300px] p-4',
       },
       handlePaste: (view, event) => {
-        // Only handle paste if we have a reportId (needed for uploads)
-        if (!reportId) {
-          return false; // Let TipTap handle it normally
-        }
+        const clipboardData = event.clipboardData;
+        if (!clipboardData) return false;
 
-        const items = event.clipboardData?.items;
-        if (!items) {
-          return false;
-        }
+        // Check for HTML content first (from our Copy button)
+        const htmlContent = clipboardData.getData('text/html');
+        if (htmlContent) {
+          // Try to extract image src from HTML
+          const imgMatch = htmlContent.match(/<img[^>]+src="([^"]+)"[^>]*alt="([^"]*)"[^>]*>/i);
+          if (imgMatch) {
+            const src = imgMatch[1];
+            const alt = imgMatch[2] || '';
 
-        // Look for image items in the clipboard
-        for (let i = 0; i < items.length; i++) {
-          const item = items[i];
-
-          if (item.type.indexOf('image') === 0) {
-            event.preventDefault();
-
-            const file = item.getAsFile();
-            if (!file) continue;
-
-            // Upload the pasted image
-            toast.promise(
-              uploadReportImage(reportId, file).then(uploadedImage => {
-                // Insert the uploaded image into the editor
-                const { state } = view;
-                const node = state.schema.nodes.image.create({
-                  src: uploadedImage.imageUrl,
-                  alt: uploadedImage.title || 'Pasted image',
-                  title: uploadedImage.title || undefined,
-                });
-
-                const transaction = state.tr.replaceSelectionWith(node);
-                view.dispatch(transaction);
-
-                return uploadedImage;
-              }),
-              {
-                loading: 'Uploading pasted image...',
-                success: 'Image uploaded and inserted!',
-                error: 'Failed to upload pasted image',
-              }
+            // Insert the image using the URL
+            view.dispatch(
+              view.state.tr.replaceSelectionWith(
+                view.state.schema.nodes.image.create({
+                  src,
+                  alt,
+                })
+              )
             );
-
-            return true; // Prevent default paste behavior
+            return true;
           }
         }
 
-        return false; // Let TipTap handle non-image pastes normally
+        // Check for plain text URL
+        const plainText = clipboardData.getData('text/plain');
+        if (plainText) {
+          // Check if it's a URL pointing to an image
+          const urlPattern = /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i;
+          if (urlPattern.test(plainText.trim())) {
+            // Insert as image
+            view.dispatch(
+              view.state.tr.replaceSelectionWith(
+                view.state.schema.nodes.image.create({
+                  src: plainText.trim(),
+                  alt: '',
+                })
+              )
+            );
+            return true;
+          }
+        }
+
+        // Let TipTap handle normally
+        return false;
       },
     },
   });

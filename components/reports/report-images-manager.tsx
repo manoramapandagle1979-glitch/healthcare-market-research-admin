@@ -174,43 +174,26 @@ export function ReportImagesManager({ reportId, disabled, reportData }: ReportIm
         return;
       }
 
-      // Fetch the image with CORS mode
-      console.log('Fetching image:', image.imageUrl);
-      const response = await fetch(image.imageUrl, {
-        mode: 'cors',
-        credentials: 'omit',
-      });
+      // Copy the image URL in multiple formats for compatibility
+      const htmlContent = `<img src="${image.imageUrl}" alt="${image.title || ''}" />`;
+      const plainText = image.imageUrl;
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
-      }
-
-      // Get the blob from the response
-      const blob = await response.blob();
-      console.log('Blob fetched:', blob.type, blob.size, 'bytes');
-
-      // Ensure we have a valid image mime type
-      if (!blob.type.startsWith('image/')) {
-        throw new Error(`Invalid blob type: ${blob.type}`);
-      }
-
-      // Create a ClipboardItem with the image blob
+      // Create clipboard item with HTML and plain text
       const clipboardItem = new ClipboardItem({
-        [blob.type]: blob,
+        'text/html': new Blob([htmlContent], { type: 'text/html' }),
+        'text/plain': new Blob([plainText], { type: 'text/plain' }),
       });
 
-      // Write the image to clipboard
-      console.log('Writing to clipboard...');
+      // Write to clipboard
       await navigator.clipboard.write([clipboardItem]);
-      console.log('Image copied successfully');
-      toast.success('Image copied! You can now paste it into the editor');
+      toast.success('Image URL copied! You can now paste it into the editor');
     } catch (error) {
       console.error('Error copying image:', error);
 
-      // If copying image fails, fallback to copying the image URL
+      // If copying fails, fallback to copying the image URL as plain text
       try {
         await navigator.clipboard.writeText(image.imageUrl);
-        toast.warning('Could not copy image. Copied image URL instead. You can paste it or use the Image button in the editor.');
+        toast.warning('Copied image URL as text. Paste it in the editor.');
       } catch (fallbackError) {
         console.error('Fallback copy failed:', fallbackError);
         const message = error instanceof Error ? error.message : 'Failed to copy image';
@@ -364,12 +347,7 @@ export function ReportImagesManager({ reportId, disabled, reportData }: ReportIm
                       >
                         <Check className="h-4 w-4" />
                       </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        onClick={handleCancelEdit}
-                      >
+                      <Button type="button" size="sm" variant="ghost" onClick={handleCancelEdit}>
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
@@ -414,7 +392,7 @@ export function ReportImagesManager({ reportId, disabled, reportData }: ReportIm
                         </>
                       )}
                     </Button>
-                    {/* <Button
+                    <Button
                       type="button"
                       size="sm"
                       variant="outline"
@@ -424,7 +402,7 @@ export function ReportImagesManager({ reportId, disabled, reportData }: ReportIm
                     >
                       <Copy className="h-3 w-3 mr-1" />
                       Copy
-                    </Button> */}
+                    </Button>
                   </div>
                   <Button
                     type="button"
@@ -442,10 +420,7 @@ export function ReportImagesManager({ reportId, disabled, reportData }: ReportIm
                 {/* Metadata */}
                 <div className="text-xs text-muted-foreground">
                   <p>ID: {image.id}</p>
-                  <p>
-                    Uploaded:{' '}
-                    {new Date(image.createdAt).toLocaleDateString()}
-                  </p>
+                  <p>Uploaded: {new Date(image.createdAt).toLocaleDateString()}</p>
                 </div>
               </CardContent>
             </Card>

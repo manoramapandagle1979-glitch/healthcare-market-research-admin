@@ -67,7 +67,8 @@ export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Validation Error</AlertTitle>
           <AlertDescription>
-            Please fix the validation errors before saving. Required fields are marked with an asterisk (*).
+            Please fix the validation errors before saving. Required fields are marked with an
+            asterisk (*).
           </AlertDescription>
         </Alert>
       )}
@@ -87,7 +88,11 @@ export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <SectionEditor sections={field.value} onChange={field.onChange} reportId={reportId} />
+                  <SectionEditor
+                    sections={field.value}
+                    onChange={field.onChange}
+                    reportId={reportId}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -126,9 +131,9 @@ export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
                             }}
                           />
                         </div>
-                        <div className='flex'>
+                        <div className="flex">
                           <Input
-                            placeholder="Market Share (e.g., 14.2%)"
+                            placeholder="%"
                             value={player.marketShare || ''}
                             onChange={e => {
                               const updated = [...(field.value || [])];
@@ -142,13 +147,14 @@ export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
                             variant="ghost"
                             size="sm"
                             onClick={() => {
-                              const updated = field.value?.filter((_: any, i: number) => i !== index);
+                              const updated = field.value?.filter(
+                                (_: any, i: number) => i !== index
+                              );
                               field.onChange(updated);
                             }}
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
-
                         </div>
                       </div>
                     </div>
@@ -206,7 +212,9 @@ export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
                             variant="ghost"
                             size="sm"
                             onClick={() => {
-                              const updated = field.value?.filter((_: any, i: number) => i !== index);
+                              const updated = field.value?.filter(
+                                (_: any, i: number) => i !== index
+                              );
                               field.onChange(updated);
                             }}
                           >

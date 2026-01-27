@@ -58,6 +58,7 @@ export function ReportList({
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>ID</TableHead>
             <TableHead>Title</TableHead>
             <TableHead>Category</TableHead>
             <TableHead>Status</TableHead>
@@ -69,6 +70,7 @@ export function ReportList({
         <TableBody>
           {reports.map(report => (
             <TableRow key={report.id} className={viewMode === 'trash' ? 'opacity-70' : ''}>
+              <TableCell className="text-xs text-muted-foreground font-mono">{report.id}</TableCell>
               <TableCell className="font-medium max-w-xs truncate">{report.title}</TableCell>
               <TableCell>{report.category}</TableCell>
               <TableCell>

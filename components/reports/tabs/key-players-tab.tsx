@@ -51,7 +51,9 @@ export function KeyPlayersTab({ form, onSaveTab, isSaving }: KeyPlayersTabProps)
                             variant="ghost"
                             size="sm"
                             onClick={() => {
-                              const updated = field.value?.filter((_: any, i: number) => i !== index);
+                              const updated = field.value?.filter(
+                                (_: any, i: number) => i !== index
+                              );
                               field.onChange(updated);
                             }}
                           >
@@ -69,7 +71,7 @@ export function KeyPlayersTab({ form, onSaveTab, isSaving }: KeyPlayersTabProps)
                             }}
                           />
                           <Input
-                            placeholder="Market Share (e.g., 14.2%)"
+                            placeholder="%"
                             value={player.marketShare || ''}
                             onChange={e => {
                               const updated = [...(field.value || [])];
@@ -86,10 +88,7 @@ export function KeyPlayersTab({ form, onSaveTab, isSaving }: KeyPlayersTabProps)
                   type="button"
                   variant="outline"
                   onClick={() => {
-                    const updated = [
-                      ...(field.value || []),
-                      { name: '', marketShare: '' },
-                    ];
+                    const updated = [...(field.value || []), { name: '', marketShare: '' }];
                     field.onChange(updated);
                   }}
                   className="w-full mt-2"
