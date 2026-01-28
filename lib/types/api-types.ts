@@ -268,6 +268,7 @@ export interface ContactFormData {
   fullName: string;
   email: string;
   company: string;
+  country?: string;
   phone?: string;
   subject: string;
   message: string;
@@ -277,6 +278,7 @@ export interface RequestSampleFormData {
   fullName: string;
   email: string;
   company: string;
+  country?: string;
   jobTitle: string;
   phone?: string;
   reportTitle: string;

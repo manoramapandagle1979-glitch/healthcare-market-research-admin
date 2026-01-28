@@ -1,7 +1,7 @@
 'use client';
 
 import { useEditor, EditorContent } from '@tiptap/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
@@ -75,6 +75,9 @@ export function TiptapEditor({
   const [isFindReplaceOpen, setIsFindReplaceOpen] = useState(false);
   const [showHtmlCode, setShowHtmlCode] = useState(false);
   const [htmlCode, setHtmlCode] = useState('');
+  const [showFloatingMenu, setShowFloatingMenu] = useState(false);
+  const [floatingMenuPosition, setFloatingMenuPosition] = useState({ top: 0, left: 0 });
+  const floatingMenuRef = useRef<HTMLDivElement>(null);
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -198,6 +201,50 @@ export function TiptapEditor({
     }
   }, [editor, content]);
 
+  // Handle floating menu visibility and positioning
+  useEffect(() => {
+    if (!editor) return;
+
+    const updateFloatingMenu = () => {
+      const { selection } = editor.state;
+      const { from, to } = selection;
+
+      // Only show menu if there's a text selection (not just cursor position)
+      if (from === to) {
+        setShowFloatingMenu(false);
+        return;
+      }
+
+      // Get the coordinates of the selection
+      const { view } = editor;
+      const start = view.coordsAtPos(from);
+      const end = view.coordsAtPos(to);
+
+      // Calculate position (centered above selection)
+      const left = (start.left + end.left) / 2;
+      const top = start.top;
+
+      // Position the menu above the selection
+      setFloatingMenuPosition({
+        top: top - 50, // Offset above the selection
+        left: left,
+      });
+      setShowFloatingMenu(true);
+    };
+
+    // Update on selection change
+    editor.on('selectionUpdate', updateFloatingMenu);
+    editor.on('blur', () => {
+      // Delay hiding to allow clicking menu buttons
+      setTimeout(() => setShowFloatingMenu(false), 200);
+    });
+
+    return () => {
+      editor.off('selectionUpdate', updateFloatingMenu);
+      editor.off('blur');
+    };
+  }, [editor]);
+
   if (!editor) {
     return null;
   }
@@ -303,7 +350,7 @@ export function TiptapEditor({
   return (
     <div className={cn('border rounded-md', className)}>
       {/* Toolbar */}
-      <div className="border-b p-2 flex flex-wrap gap-1 bg-muted/50">
+      <div className="sticky top-0 z-10 border-b p-2 flex flex-wrap gap-1 bg-muted/50">
         {/* Text formatting */}
         <Button
           type="button"
@@ -711,6 +758,103 @@ export function TiptapEditor({
           <Redo className="h-4 w-4" />
         </Button>
       </div>
+
+      {/* Floating Menu - appears near selected text */}
+      {showFloatingMenu && (
+        <div
+          ref={floatingMenuRef}
+          className="fixed z-50 flex items-center gap-1 p-1 bg-popover border rounded-md shadow-lg"
+          style={{
+            top: `${floatingMenuPosition.top}px`,
+            left: `${floatingMenuPosition.left}px`,
+            transform: 'translateX(-50%)',
+          }}
+          onMouseDown={e => e.preventDefault()} // Prevent blur when clicking menu
+        >
+          {/* Quick formatting options */}
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            className={editor.isActive('bold') ? 'bg-muted' : ''}
+          >
+            <Bold className="h-4 w-4" />
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            className={editor.isActive('italic') ? 'bg-muted' : ''}
+          >
+            <Italic className="h-4 w-4" />
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            className={editor.isActive('underline') ? 'bg-muted' : ''}
+          >
+            <UnderlineIcon className="h-4 w-4" />
+          </Button>
+
+          <Separator orientation="vertical" className="h-6 mx-1" />
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+            className={editor.isActive('heading', { level: 1 }) ? 'bg-muted' : ''}
+          >
+            <Heading1 className="h-4 w-4" />
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            className={editor.isActive('heading', { level: 2 }) ? 'bg-muted' : ''}
+          >
+            <Heading2 className="h-4 w-4" />
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+            className={editor.isActive('heading', { level: 3 }) ? 'bg-muted' : ''}
+          >
+            <Heading3 className="h-4 w-4" />
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
+            className={editor.isActive('heading', { level: 4 }) ? 'bg-muted' : ''}
+          >
+            <Heading4 className="h-4 w-4" />
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 5 }).run()}
+            className={editor.isActive('heading', { level: 5 }) ? 'bg-muted' : ''}
+          >
+            <Heading5 className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
 
       {/* Editor content */}
       {showHtmlCode ? (

@@ -109,6 +109,10 @@ export function LeadsList({ submissions, onDelete, onStatusUpdate }: LeadsListPr
     return (submission.data as ContactFormData | RequestSampleFormData).company;
   };
 
+  const getSubmissionCountry = (submission: ApiFormSubmission) => {
+    return (submission.data as ContactFormData | RequestSampleFormData).country || '-';
+  };
+
   return (
     <>
       <Table>
@@ -118,6 +122,7 @@ export function LeadsList({ submissions, onDelete, onStatusUpdate }: LeadsListPr
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Company</TableHead>
+            <TableHead>Country</TableHead>
             <TableHead>Category</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Submitted</TableHead>
@@ -131,6 +136,7 @@ export function LeadsList({ submissions, onDelete, onStatusUpdate }: LeadsListPr
               <TableCell className="font-medium">{getSubmissionName(submission)}</TableCell>
               <TableCell>{getSubmissionEmail(submission)}</TableCell>
               <TableCell>{getSubmissionCompany(submission)}</TableCell>
+              <TableCell>{getSubmissionCountry(submission)}</TableCell>
               <TableCell>
                 <Badge variant={getCategoryBadgeVariant(submission.category)}>
                   {submission.category === 'contact' ? 'Contact' : 'Request Sample'}
@@ -216,6 +222,10 @@ export function LeadsList({ submissions, onDelete, onStatusUpdate }: LeadsListPr
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Company</p>
                   <p className="text-sm">{getSubmissionCompany(viewSubmission)}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Country</p>
+                  <p className="text-sm">{getSubmissionCountry(viewSubmission)}</p>
                 </div>
                 {viewSubmission.category === 'request-sample' && (
                   <div>
