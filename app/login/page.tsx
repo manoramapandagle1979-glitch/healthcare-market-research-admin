@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,10 +15,25 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; captcha?: string }>({});
+  const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, answer: 0 });
+  const [captchaInput, setCaptchaInput] = useState('');
+
+  // Generate a new captcha question
+  const generateCaptcha = () => {
+    const num1 = Math.floor(Math.random() * 10);
+    const num2 = Math.floor(Math.random() * 10);
+    setCaptcha({ num1, num2, answer: num1 + num2 });
+    setCaptchaInput('');
+  };
+
+  // Generate captcha on component mount
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
 
   const validateForm = () => {
-    const newErrors: { email?: string; password?: string } = {};
+    const newErrors: { email?: string; password?: string; captcha?: string } = {};
 
     if (!email) {
       newErrors.email = 'Email is required';
@@ -30,6 +45,13 @@ export default function LoginPage() {
       newErrors.password = 'Password is required';
     } else if (password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
+    }
+
+    if (!captchaInput) {
+      newErrors.captcha = 'Please solve the captcha';
+    } else if (parseInt(captchaInput) !== captcha.answer) {
+      newErrors.captcha = 'Incorrect answer. Please try again.';
+      generateCaptcha(); // Generate new captcha on wrong answer
     }
 
     setErrors(newErrors);
@@ -50,6 +72,7 @@ export default function LoginPage() {
       toast.success('Login successful!');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Login failed. Please try again.');
+      generateCaptcha(); // Generate new captcha on failed login
     } finally {
       setIsLoading(false);
     }
@@ -95,6 +118,27 @@ export default function LoginPage() {
                 disabled={isLoading}
               />
               {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="captcha">Security Check</Label>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 bg-muted px-4 py-2 rounded-md text-center font-semibold text-lg">
+                  {captcha.num1} + {captcha.num2} = ?
+                </div>
+                <Input
+                  id="captcha"
+                  type="number"
+                  placeholder="Answer"
+                  value={captchaInput}
+                  onChange={e => {
+                    setCaptchaInput(e.target.value);
+                    setErrors(prev => ({ ...prev, captcha: undefined }));
+                  }}
+                  className={`w-24 ${errors.captcha ? 'border-red-500' : ''}`}
+                  disabled={isLoading}
+                />
+              </div>
+              {errors.captcha && <p className="text-sm text-red-500">{errors.captcha}</p>}
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
