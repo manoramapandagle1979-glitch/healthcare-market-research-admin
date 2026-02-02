@@ -35,7 +35,12 @@ interface ReportDetailsTabProps {
   isSaving: boolean;
 }
 
-export function ReportDetailsTab({ form, _reportId, onSaveTab, isSaving }: ReportDetailsTabProps) {
+export function ReportDetailsTab({
+  form,
+  reportId: _reportId,
+  onSaveTab,
+  isSaving,
+}: ReportDetailsTabProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [showValidationError, setShowValidationError] = useState(false);

@@ -26,7 +26,6 @@ interface ContentTabProps {
 
 export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
   const [showValidationError, setShowValidationError] = useState(false);
-  const reportId = form.watch('id');
 
   const handleSaveTab = async () => {
     if (onSaveTab) {
@@ -88,11 +87,7 @@ export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <SectionEditor
-                    sections={field.value}
-                    onChange={field.onChange}
-                    reportId={reportId}
-                  />
+                  <SectionEditor sections={field.value} onChange={field.onChange} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

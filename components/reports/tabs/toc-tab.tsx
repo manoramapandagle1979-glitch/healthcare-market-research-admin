@@ -87,7 +87,7 @@ export function TOCTab({ form, onSaveTab, isSaving }: TOCTabProps) {
                   Use &ldquo;Generate from Template&rdquo; to create or modify the structure.
                 </FormDescription>
                 <FormControl>
-                  <TOCViewer value={field.value} />
+                  <TOCViewer value={field.value || { chapters: [] }} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -97,7 +97,7 @@ export function TOCTab({ form, onSaveTab, isSaving }: TOCTabProps) {
             open={tocDialogOpen}
             onOpenChange={setTocDialogOpen}
             reportTitle={form.watch('title')}
-            currentTOC={form.watch('sections.tableOfContents')}
+            currentTOC={form.watch('sections.tableOfContents') || { chapters: [] }}
             onImport={toc => {
               form.setValue('sections.tableOfContents', toc);
               setTocDialogOpen(false);
