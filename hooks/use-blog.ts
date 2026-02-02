@@ -14,6 +14,8 @@ import {
   unpublishBlog,
   formDataToCreateRequest,
   formDataToUpdateRequest,
+  schedulePublish,
+  cancelScheduledPublish,
 } from '@/lib/api/blogs';
 
 interface UseBlogReturn {
@@ -27,6 +29,8 @@ interface UseBlogReturn {
   submitBlogForReview: (id: string) => Promise<Blog | null>;
   publishBlogPost: (id: string) => Promise<Blog | null>;
   unpublishBlogPost: (id: string) => Promise<Blog | null>;
+  scheduleBlogPublish: (id: string, publishDate: Date) => Promise<Blog | null>;
+  cancelBlogSchedule: (id: string) => Promise<Blog | null>;
 }
 
 export function useBlog(): UseBlogReturn {
@@ -153,6 +157,41 @@ export function useBlog(): UseBlogReturn {
     }
   }, []);
 
+  const scheduleBlogPublish = useCallback(
+    async (id: string, publishDate: Date): Promise<Blog | null> => {
+      try {
+        setIsSaving(true);
+        const { blog: updatedBlog } = await schedulePublish(id, publishDate);
+        setBlog(updatedBlog);
+        toast.success('Blog scheduled successfully');
+        return updatedBlog;
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to schedule blog';
+        toast.error(errorMessage);
+        return null;
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    []
+  );
+
+  const cancelBlogSchedule = useCallback(async (id: string): Promise<Blog | null> => {
+    try {
+      setIsSaving(true);
+      const { blog: updatedBlog } = await cancelScheduledPublish(id);
+      setBlog(updatedBlog);
+      toast.success('Schedule cancelled');
+      return updatedBlog;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to cancel schedule';
+      toast.error(errorMessage);
+      return null;
+    } finally {
+      setIsSaving(false);
+    }
+  }, []);
+
   return {
     blog,
     isLoading,
@@ -164,5 +203,7 @@ export function useBlog(): UseBlogReturn {
     submitBlogForReview,
     publishBlogPost,
     unpublishBlogPost,
+    scheduleBlogPublish,
+    cancelBlogSchedule,
   };
 }

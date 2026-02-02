@@ -63,12 +63,14 @@ export interface ApiBlog {
   author?: ReportAuthor; // Author details from API
   status: BlogStatus;
   publishDate: string;
+  scheduledPublishEnabled?: boolean;
   location?: string;
   metadata: BlogMetadata;
   createdAt: string;
   updatedAt: string;
   reviewedBy?: number;
   reviewedAt?: string;
+  deletedAt?: string;
 }
 
 // Frontend Blog interface (for UI components)
@@ -85,6 +87,7 @@ export interface Blog {
   authorId: number;
   status: BlogStatus;
   publishDate: string;
+  scheduledPublishEnabled?: boolean;
   readingTime: number; // in minutes, calculated on frontend
   viewCount: number; // calculated or from cache
   location?: string;
@@ -94,6 +97,7 @@ export interface Blog {
   updatedAt: string;
   reviewedBy?: UserReference;
   reviewedAt?: string;
+  deletedAt?: string;
 }
 
 // List filters

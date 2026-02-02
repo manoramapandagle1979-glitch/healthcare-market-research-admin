@@ -3,7 +3,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import type { PressRelease, PressReleaseFilters } from '@/lib/types/press-releases';
-import { fetchPressReleases } from '@/lib/api/press-releases';
+import {
+  fetchPressReleases,
+  softDeletePressRelease,
+  restorePressRelease,
+} from '@/lib/api/press-releases';
 
 interface UsePressReleasesReturn {
   pressReleases: PressRelease[];
@@ -14,11 +18,11 @@ interface UsePressReleasesReturn {
   error: string | null;
   refetch: () => Promise<void>;
   setFilters: (filters: PressReleaseFilters) => void;
+  softDelete: (id: number) => Promise<void>;
+  restore: (id: number) => Promise<void>;
 }
 
-export function usePressReleases(
-  initialFilters?: PressReleaseFilters
-): UsePressReleasesReturn {
+export function usePressReleases(initialFilters?: PressReleaseFilters): UsePressReleasesReturn {
   const [pressReleases, setPressReleases] = useState<PressRelease[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -55,6 +59,35 @@ export function usePressReleases(
     setFiltersState(prev => ({ ...prev, ...newFilters }));
   }, []);
 
+  const handleSoftDelete = useCallback(
+    async (id: number) => {
+      try {
+        await softDeletePressRelease(id);
+        await fetchData();
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to move press release to trash';
+        toast.error(errorMessage);
+        throw err;
+      }
+    },
+    [fetchData]
+  );
+
+  const handleRestore = useCallback(
+    async (id: number) => {
+      try {
+        await restorePressRelease(id);
+        await fetchData();
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to restore press release';
+        toast.error(errorMessage);
+        throw err;
+      }
+    },
+    [fetchData]
+  );
+
   return {
     pressReleases,
     total,
@@ -64,5 +97,7 @@ export function usePressReleases(
     error,
     refetch: fetchData,
     setFilters,
+    softDelete: handleSoftDelete,
+    restore: handleRestore,
   };
 }

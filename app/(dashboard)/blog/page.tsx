@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/pagination';
 import { useBlogs } from '@/hooks/use-blogs';
 import { useAuth } from '@/contexts/auth-context';
-import { Plus, RefreshCw } from 'lucide-react';
+import { Plus, RefreshCw, Trash2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -25,7 +25,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { deleteBlog } from '@/lib/api/blogs';
 import { fetchAuthors } from '@/lib/api/authors';
 import type { ReportAuthor } from '@/lib/types/reports';
 
@@ -41,6 +40,7 @@ export default function BlogPage() {
     isLoading,
     refetch,
     setFilters: updateFilters,
+    softDelete,
   } = useBlogs(filters);
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
@@ -67,12 +67,11 @@ export default function BlogPage() {
     if (!deleteDialog.blogId) return;
 
     try {
-      await deleteBlog(deleteDialog.blogId);
-      toast.success('Blog post deleted successfully');
-      refetch();
+      await softDelete(deleteDialog.blogId);
+      toast.success('Blog moved to trash successfully');
       setDeleteDialog({ open: false, blogId: null });
     } catch {
-      toast.error('Failed to delete blog post');
+      toast.error('Failed to move blog to trash');
     }
   };
 
@@ -91,6 +90,14 @@ export default function BlogPage() {
             <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
           </Button>
+          {canCreateEdit && (
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/blog/trash">
+                <Trash2 className="mr-2 h-4 w-4" />
+                View Trash
+              </Link>
+            </Button>
+          )}
           {canCreateEdit && (
             <Button asChild>
               <Link href="/blog/new">
@@ -116,7 +123,7 @@ export default function BlogPage() {
       <BlogList
         blogs={blogs}
         isLoading={isLoading}
-        onDelete={canCreateEdit ? id => setDeleteDialog({ open: true, blogId: id }) : undefined}
+        onSoftDelete={canCreateEdit ? id => setDeleteDialog({ open: true, blogId: id }) : undefined}
       />
 
       {/* Pagination */}
@@ -171,9 +178,10 @@ export default function BlogPage() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Blog Post</DialogTitle>
+            <DialogTitle>Move Blog to Trash</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this blog post? This action cannot be undone.
+              Are you sure you want to move this blog post to trash? You can restore it later from
+              the trash.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -184,7 +192,7 @@ export default function BlogPage() {
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleDelete}>
-              Delete
+              Move to Trash
             </Button>
           </DialogFooter>
         </DialogContent>

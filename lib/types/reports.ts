@@ -169,6 +169,7 @@ export interface Report {
   categoryId?: number; // Category ID (for editing/API)
   geography: string[];
   publishDate?: string; // Auto-set when status changes to published
+  scheduled_publish_enabled?: boolean;
   price: number;
   discountedPrice: number;
   currency?: string; // Defaults to "USD"

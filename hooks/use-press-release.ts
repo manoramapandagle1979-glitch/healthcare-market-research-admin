@@ -12,6 +12,8 @@ import {
   submitForReview,
   publishPressRelease,
   unpublishPressRelease,
+  schedulePublish,
+  cancelScheduledPublish,
 } from '@/lib/api/press-releases';
 
 interface UsePressReleaseReturn {
@@ -20,14 +22,13 @@ interface UsePressReleaseReturn {
   isSaving: boolean;
   error: string | null;
   fetchPressRelease: (id: number) => Promise<void>;
-  savePressRelease: (
-    id: number | null,
-    data: PressReleaseFormData
-  ) => Promise<PressRelease | null>;
+  savePressRelease: (id: number | null, data: PressReleaseFormData) => Promise<PressRelease | null>;
   removePressRelease: (id: number) => Promise<void>;
   submitPressReleaseForReview: (id: number) => Promise<PressRelease | null>;
   publishPressReleasePost: (id: number) => Promise<PressRelease | null>;
   unpublishPressReleasePost: (id: number) => Promise<PressRelease | null>;
+  schedulePressReleasePublish: (id: string, publishDate: Date) => Promise<PressRelease | null>;
+  cancelPressReleaseSchedule: (id: string) => Promise<PressRelease | null>;
 }
 
 export function usePressRelease(): UsePressReleaseReturn {
@@ -58,9 +59,7 @@ export function usePressRelease(): UsePressReleaseReturn {
         setIsSaving(true);
         setError(null);
 
-        const response = id
-          ? await updatePressRelease(id, data)
-          : await createPressRelease(data);
+        const response = id ? await updatePressRelease(id, data) : await createPressRelease(data);
 
         setPressRelease(response.pressRelease);
         toast.success(
@@ -132,8 +131,7 @@ export function usePressRelease(): UsePressReleaseReturn {
       toast.success('Press release published successfully');
       return response.pressRelease;
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Failed to publish press release';
+      const errorMessage = err instanceof Error ? err.message : 'Failed to publish press release';
       setError(errorMessage);
       toast.error(errorMessage);
       return null;
@@ -164,6 +162,50 @@ export function usePressRelease(): UsePressReleaseReturn {
     []
   );
 
+  const schedulePressReleasePublish = useCallback(
+    async (id: string, publishDate: Date): Promise<PressRelease | null> => {
+      try {
+        setIsSaving(true);
+        setError(null);
+        const response = await schedulePublish(id, publishDate);
+        setPressRelease(response.pressRelease);
+        toast.success('Press release scheduled for publishing');
+        return response.pressRelease;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to schedule press release';
+        setError(errorMessage);
+        toast.error(errorMessage);
+        return null;
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    []
+  );
+
+  const cancelPressReleaseSchedule = useCallback(
+    async (id: string): Promise<PressRelease | null> => {
+      try {
+        setIsSaving(true);
+        setError(null);
+        const response = await cancelScheduledPublish(id);
+        setPressRelease(response.pressRelease);
+        toast.success('Scheduled publishing cancelled');
+        return response.pressRelease;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to cancel scheduled publishing';
+        setError(errorMessage);
+        toast.error(errorMessage);
+        return null;
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    []
+  );
+
   return {
     pressRelease,
     isLoading,
@@ -175,5 +217,7 @@ export function usePressRelease(): UsePressReleaseReturn {
     submitPressReleaseForReview,
     publishPressReleasePost,
     unpublishPressReleasePost,
+    schedulePressReleasePublish,
+    cancelPressReleaseSchedule,
   };
 }

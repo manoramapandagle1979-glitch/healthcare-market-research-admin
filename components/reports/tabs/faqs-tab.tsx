@@ -10,7 +10,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import type { ReportFormData } from '@/lib/types/reports';
 
 interface FAQsTabProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<ReportFormData>;
   onSaveTab?: (tabKey: string, data: Partial<ReportFormData>) => Promise<void>;
   isSaving: boolean;
 }
@@ -56,7 +56,9 @@ export function FAQsTab({ form, onSaveTab, isSaving }: FAQsTabProps) {
                             variant="ghost"
                             size="sm"
                             onClick={() => {
-                              const updated = field.value?.filter((_: any, i: number) => i !== index);
+                              const updated = field.value?.filter(
+                                (_: any, i: number) => i !== index
+                              );
                               field.onChange(updated);
                             }}
                           >
@@ -111,7 +113,7 @@ export function FAQsTab({ form, onSaveTab, isSaving }: FAQsTabProps) {
         <div className="flex justify-end">
           <Button onClick={handleSaveTab} disabled={isSaving}>
             <Save className="h-4 w-4 mr-2" />
-            {isSaving ? 'Saving...' : 'Save Draft'}
+            {isSaving ? 'Saving...' : 'Save Report'}
           </Button>
         </div>
       )}

@@ -16,8 +16,8 @@ import {
   TrendingUp,
   MessageSquare,
   Image,
-  AlertCircle,
   RefreshCw,
+  Megaphone,
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -125,8 +125,8 @@ export default function DashboardPage() {
         </Button>
       </div>
 
-      {/* KPI Cards - 6 cards in 3-column grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {/* KPI Cards - 7 cards in responsive grid */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {/* Total Reports Card */}
         <StatCard
           title="Total Reports"
@@ -158,23 +158,48 @@ export default function DashboardPage() {
           isLoading={isLoading}
         />
 
-        {/* Active Users Card */}
+        {/* Press Releases Card */}
         <StatCard
-          title="Active Users"
-          value={stats ? formatNumber(stats.users.active) : 0}
-          subtext={stats ? `Total: ${formatNumber(stats.users.total)}` : ''}
-          icon={Users}
-          change={stats?.users.change}
+          title="Press Releases"
+          value={stats ? stats.pressReleases.total : 0}
+          subtext={
+            stats
+              ? `${stats.pressReleases.published} published, ${stats.pressReleases.draft} drafts`
+              : ''
+          }
+          icon={Megaphone}
+          change={stats?.pressReleases.change}
           isLoading={isLoading}
         />
 
-        {/* Traffic Card */}
+        {/* Active Users Card - Only show for admins */}
+        {stats?.users && (
+          <StatCard
+            title="Active Users"
+            value={stats ? formatNumber(stats.users.active) : 0}
+            subtext={stats ? `Total: ${formatNumber(stats.users.total)}` : ''}
+            icon={Users}
+            change={stats?.users.change}
+            isLoading={isLoading}
+          />
+        )}
+
+        {/* Content Creation Card */}
         <StatCard
-          title="Page Views"
-          value={stats ? formatNumber(stats.traffic.views) : 0}
-          subtext={stats ? `${formatNumber(stats.traffic.uniqueVisitors)} unique visitors` : ''}
+          title="Content This Month"
+          value={
+            stats
+              ? stats.contentCreation.reportsThisMonth +
+                stats.contentCreation.blogsThisMonth +
+                stats.contentCreation.pressReleasesThisMonth
+              : 0
+          }
+          subtext={
+            stats
+              ? `${stats.contentCreation.reportsThisMonth} reports, ${stats.contentCreation.blogsThisMonth} blogs`
+              : ''
+          }
           icon={TrendingUp}
-          change={stats?.traffic.change}
           isLoading={isLoading}
         />
 
@@ -182,9 +207,8 @@ export default function DashboardPage() {
         <StatCard
           title="Total Leads"
           value={stats ? stats.leads.total : 0}
-          subtext={stats ? `${stats.leads.new} new inquiries` : ''}
+          subtext={stats ? `${stats.leads.pending} pending, ${stats.leads.recent.today} today` : ''}
           icon={MessageSquare}
-          change={stats?.leads.change}
           isLoading={isLoading}
         />
       </div>

@@ -1,23 +1,34 @@
 export type ActivityType =
   | 'report_published'
+  | 'report_created'
   | 'report_updated'
+  | 'report_deleted'
   | 'blog_published'
+  | 'blog_created'
   | 'blog_updated'
-  | 'user_registered'
-  | 'lead_captured';
+  | 'press_release_published'
+  | 'press_release_created'
+  | 'user_created'
+  | 'user_updated'
+  | 'lead_received'
+  | 'lead_processed'
+  | 'auth.login'
+  | 'auth.logout'
+  | 'auth.token_refresh';
 
 export interface Activity {
-  id: string;
+  id: number;
   type: ActivityType;
   title: string;
-  description?: string;
+  description: string;
+  entityType: string;
+  entityId: number;
   user?: {
-    id: string;
+    id: number;
     email: string;
-    name?: string;
+    name: string;
   };
   timestamp: string; // ISO 8601 format
-  metadata?: Record<string, unknown>;
 }
 
 export interface ActivityResponse {
@@ -25,32 +36,82 @@ export interface ActivityResponse {
   total: number;
 }
 
+export interface TopReport {
+  id: number;
+  title: string;
+  slug: string;
+  viewCount: number;
+  downloadCount: number;
+}
+
+export interface TopCategory {
+  id: number;
+  name: string;
+  slug: string;
+  reportCount: number;
+}
+
+export interface ReportStats {
+  total: number;
+  published: number;
+  draft: number;
+  archived: number;
+  change: number;
+  topPerformers?: TopReport[];
+}
+
+export interface BlogStats {
+  total: number;
+  published: number;
+  draft: number;
+  review: number;
+  change: number;
+}
+
+export interface PressReleaseStats {
+  total: number;
+  published: number;
+  draft: number;
+  review: number;
+  change: number;
+}
+
+export interface UserStats {
+  total: number;
+  active: number;
+  byRole: Record<string, number>;
+  change: number;
+}
+
+export interface LeadStats {
+  total: number;
+  pending: number;
+  processed: number;
+  byCategory: Record<string, number>;
+  recent: {
+    today: number;
+    thisWeek: number;
+    thisMonth: number;
+  };
+}
+
+export interface ContentCreationStats {
+  reportsThisMonth: number;
+  blogsThisMonth: number;
+  pressReleasesThisMonth: number;
+}
+
+export interface PerformanceStats {
+  topReports?: TopReport[];
+  topCategories?: TopCategory[];
+}
+
 export interface DashboardStats {
-  reports: {
-    total: number;
-    published: number;
-    draft: number;
-    change: number; // percentage change from last period
-  };
-  blogs: {
-    total: number;
-    published: number;
-    draft: number;
-    change: number;
-  };
-  users: {
-    total: number;
-    active: number; // active in last 30 days
-    change: number;
-  };
-  traffic: {
-    views: number;
-    uniqueVisitors: number;
-    change: number;
-  };
-  leads: {
-    total: number;
-    new: number; // uncontacted leads
-    change: number;
-  };
+  reports: ReportStats;
+  blogs: BlogStats;
+  pressReleases: PressReleaseStats;
+  users?: UserStats; // Only for admins
+  leads: LeadStats;
+  contentCreation: ContentCreationStats;
+  performance?: PerformanceStats;
 }

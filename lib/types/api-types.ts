@@ -158,6 +158,7 @@ export interface ApiReport {
   view_count?: number; // Auto-managed
   download_count?: number; // Auto-managed
   publish_date?: string; // Auto-set when status changes to published
+  scheduled_publish_enabled?: boolean;
 
   // Mandatory fields for creation
   title: string; // Min 10 characters

@@ -11,7 +11,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription,
+} from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Save, TrendingUp, AlertCircle } from 'lucide-react';
@@ -22,12 +29,13 @@ import type { UseFormReturn } from 'react-hook-form';
 import type { ReportFormData } from '@/lib/types/reports';
 
 interface ReportDetailsTabProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<ReportFormData>;
+  reportId?: string | number;
   onSaveTab?: (tabKey: string, data: Partial<ReportFormData>) => Promise<void>;
   isSaving: boolean;
 }
 
-export function ReportDetailsTab({ form, onSaveTab, isSaving }: ReportDetailsTabProps) {
+export function ReportDetailsTab({ form, _reportId, onSaveTab, isSaving }: ReportDetailsTabProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [showValidationError, setShowValidationError] = useState(false);
@@ -77,7 +85,8 @@ export function ReportDetailsTab({ form, onSaveTab, isSaving }: ReportDetailsTab
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Validation Error</AlertTitle>
           <AlertDescription>
-            Please fix the validation errors below before saving. Required fields are marked with an asterisk (*).
+            Please fix the validation errors below before saving. Required fields are marked with an
+            asterisk (*).
           </AlertDescription>
         </Alert>
       )}
@@ -520,7 +529,7 @@ export function ReportDetailsTab({ form, onSaveTab, isSaving }: ReportDetailsTab
         <div className="flex justify-end">
           <Button onClick={handleSaveTab} disabled={isSaving}>
             <Save className="h-4 w-4 mr-2" />
-            {isSaving ? 'Saving...' : 'Save Draft'}
+            {isSaving ? 'Saving...' : 'Save Report'}
           </Button>
         </div>
       )}

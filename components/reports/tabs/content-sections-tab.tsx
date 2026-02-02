@@ -9,7 +9,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import type { ReportFormData } from '@/lib/types/reports';
 
 interface ContentSectionsTabProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<ReportFormData>;
   onSaveTab?: (tabKey: string, data: Partial<ReportFormData>) => Promise<void>;
   isSaving: boolean;
 }
@@ -53,7 +53,7 @@ export function ContentSectionsTab({ form, onSaveTab, isSaving }: ContentSection
         <div className="flex justify-end">
           <Button onClick={handleSaveTab} disabled={isSaving}>
             <Save className="h-4 w-4 mr-2" />
-            {isSaving ? 'Saving...' : 'Save Draft'}
+            {isSaving ? 'Saving...' : 'Save Report'}
           </Button>
         </div>
       )}

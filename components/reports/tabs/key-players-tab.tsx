@@ -9,7 +9,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import type { ReportFormData } from '@/lib/types/reports';
 
 interface KeyPlayersTabProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<ReportFormData>;
   onSaveTab?: (tabKey: string, data: Partial<ReportFormData>) => Promise<void>;
   isSaving: boolean;
 }
@@ -88,7 +88,7 @@ export function KeyPlayersTab({ form, onSaveTab, isSaving }: KeyPlayersTabProps)
                   type="button"
                   variant="outline"
                   onClick={() => {
-                    const updated = [...(field.value || []), { name: '', marketShare: '' }];
+                    const updated = [...(field.value || []), { name: '', marketShare: 'XX' }];
                     field.onChange(updated);
                   }}
                   className="w-full mt-2"
@@ -107,7 +107,7 @@ export function KeyPlayersTab({ form, onSaveTab, isSaving }: KeyPlayersTabProps)
         <div className="flex justify-end">
           <Button onClick={handleSaveTab} disabled={isSaving}>
             <Save className="h-4 w-4 mr-2" />
-            {isSaving ? 'Saving...' : 'Save Draft'}
+            {isSaving ? 'Saving...' : 'Save Report'}
           </Button>
         </div>
       )}

@@ -18,7 +18,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import type { ReportFormData } from '@/lib/types/reports';
 
 interface TOCTabProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<ReportFormData>;
   onSaveTab?: (tabKey: string, data: Partial<ReportFormData>) => Promise<void>;
   isSaving: boolean;
 }
@@ -51,7 +51,8 @@ export function TOCTab({ form, onSaveTab, isSaving }: TOCTabProps) {
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Validation Error</AlertTitle>
           <AlertDescription>
-            Please fix the validation errors before saving. Required fields are marked with an asterisk (*) in the Report Details tab.
+            Please fix the validation errors before saving. Required fields are marked with an
+            asterisk (*) in the Report Details tab.
           </AlertDescription>
         </Alert>
       )}
@@ -97,7 +98,7 @@ export function TOCTab({ form, onSaveTab, isSaving }: TOCTabProps) {
             onOpenChange={setTocDialogOpen}
             reportTitle={form.watch('title')}
             currentTOC={form.watch('sections.tableOfContents')}
-            onImport={(toc) => {
+            onImport={toc => {
               form.setValue('sections.tableOfContents', toc);
               setTocDialogOpen(false);
             }}
@@ -109,7 +110,7 @@ export function TOCTab({ form, onSaveTab, isSaving }: TOCTabProps) {
         <div className="flex justify-end">
           <Button onClick={handleSaveTab} disabled={isSaving}>
             <Save className="h-4 w-4 mr-2" />
-            {isSaving ? 'Saving...' : 'Save Draft'}
+            {isSaving ? 'Saving...' : 'Save Report'}
           </Button>
         </div>
       )}

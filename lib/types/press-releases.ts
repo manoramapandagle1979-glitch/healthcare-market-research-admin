@@ -30,6 +30,39 @@ export interface PressReleaseVersion {
   excerpt: string;
 }
 
+// API Press Release interface (matches backend response)
+export interface ApiPressRelease {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string; // HTML from rich text editor
+  authorId: number;
+  author?: ReportAuthor; // Author details populated from API
+  categoryId: number; // Single category ID from API
+  category?: {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string;
+    image_url?: string;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+  }; // Category details from API
+  tags: string; // Comma-separated tags from API
+  status: PressReleaseStatus;
+  publishDate: string;
+  scheduledPublishEnabled?: boolean;
+  location?: string;
+  metadata: PressReleaseMetadata;
+  createdAt: string;
+  updatedAt: string;
+  reviewedBy?: number;
+  reviewedAt?: string;
+  deletedAt?: string;
+}
+
 // Main Press Release interface (matches API response)
 export interface PressRelease {
   id: number;
@@ -53,12 +86,14 @@ export interface PressRelease {
   tags: string; // Comma-separated tags from API
   status: PressReleaseStatus;
   publishDate: string;
+  scheduledPublishEnabled?: boolean;
   location?: string;
   metadata: PressReleaseMetadata;
   createdAt: string;
   updatedAt: string;
   reviewedBy?: number;
   reviewedAt?: string;
+  deletedAt?: string;
 }
 
 // List filters (matches API query parameters)
@@ -97,6 +132,7 @@ export interface CreatePressReleaseData {
   authorId: number;
   status: PressReleaseStatus;
   publishDate: string;
+  scheduledPublishEnabled?: boolean;
   location?: string;
   metadata?: PressReleaseMetadata;
 }
@@ -112,6 +148,7 @@ export interface UpdatePressReleaseData {
   authorId?: number;
   status?: PressReleaseStatus;
   publishDate?: string;
+  scheduledPublishEnabled?: boolean;
   location?: string;
   metadata?: PressReleaseMetadata;
 }
@@ -127,6 +164,7 @@ export interface PressReleaseFormData {
   authorId: number;
   status: PressReleaseStatus;
   publishDate: string;
+  scheduledPublishEnabled?: boolean;
   location?: string;
   metadata?: PressReleaseMetadata;
 }

@@ -227,6 +227,68 @@ export async function unpublishBlog(id: string | number): Promise<BlogResponse> 
   return { blog };
 }
 
+/**
+ * Soft delete a blog (move to trash)
+ */
+export async function softDeleteBlog(id: string | number): Promise<void> {
+  await apiClient.patch(`/v1/blogs/${id}/soft-delete`);
+}
+
+/**
+ * Restore a soft deleted blog
+ */
+export async function restoreBlog(id: string | number): Promise<void> {
+  await apiClient.patch(`/v1/blogs/${id}/restore`);
+}
+
+/**
+ * Schedule a blog to be published at a specific date/time
+ */
+export async function schedulePublish(
+  id: string | number,
+  publishDate: Date
+): Promise<BlogResponse> {
+  const response = await apiClient.patch<{ blog: ApiBlog }>(`/v1/blogs/${id}/schedule`, {
+    publishDate: publishDate.toISOString(),
+  });
+  const blog = await transformApiBlogToBlog(response.blog);
+  return { blog };
+}
+
+/**
+ * Cancel scheduled publishing for a blog
+ */
+export async function cancelScheduledPublish(id: string | number): Promise<BlogResponse> {
+  const response = await apiClient.patch<{ blog: ApiBlog }>(`/v1/blogs/${id}/cancel-schedule`);
+  const blog = await transformApiBlogToBlog(response.blog);
+  return { blog };
+}
+
+/**
+ * Fetches all trashed blogs with optional filtering
+ */
+export async function fetchTrashedBlogs(filters?: BlogFilters): Promise<BlogsResponse> {
+  const response = await apiClient.get<{
+    blogs: ApiBlog[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }>('/v1/blogs', {
+    params: { ...filters, deleted: 'true' } as Record<string, unknown>,
+  });
+
+  const blogs = await Promise.all(response.blogs.map(apiBlog => transformApiBlogToBlog(apiBlog)));
+
+  return {
+    blogs,
+    total: response.total,
+    page: response.page,
+    limit: response.limit,
+    totalPages: response.totalPages,
+  };
+}
+
 // Helper exports for form handling
 
 /**

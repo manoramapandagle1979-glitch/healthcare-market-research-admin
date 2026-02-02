@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { PressReleaseForm } from '@/components/press-releases/press-release-form';
 import { WorkflowStatus } from '@/components/press-releases/workflow-status';
+import { ScheduledPublishCard } from '@/components/shared/scheduled-publish-card';
 import { usePressRelease } from '@/hooks/use-press-release';
 import { useAuth } from '@/contexts/auth-context';
 import { FormSkeleton } from '@/components/ui/skeletons/form-skeleton';
@@ -25,6 +26,8 @@ export default function EditPressReleasePage() {
     submitPressReleaseForReview,
     publishPressReleasePost,
     unpublishPressReleasePost,
+    schedulePressReleasePublish,
+    cancelPressReleaseSchedule,
   } = usePressRelease();
   const pressReleaseId = params.id as string;
 
@@ -109,6 +112,19 @@ export default function EditPressReleasePage() {
             onStatusChange={handleStatusChange}
             isSaving={isSaving}
             isAdmin={isAdmin}
+          />
+          <ScheduledPublishCard
+            currentScheduledDate={
+              pressRelease.scheduledPublishEnabled ? pressRelease.publishDate : undefined
+            }
+            currentStatus={pressRelease.status}
+            onSchedule={async date => {
+              await schedulePressReleasePublish(pressReleaseId, date);
+            }}
+            onCancelSchedule={async () => {
+              await cancelPressReleaseSchedule(pressReleaseId);
+            }}
+            isSaving={isSaving}
           />
         </div>
       </div>

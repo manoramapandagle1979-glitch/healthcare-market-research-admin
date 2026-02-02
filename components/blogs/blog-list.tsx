@@ -15,14 +15,18 @@ import { TableSkeleton } from '@/components/ui/skeletons/table-skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import type { Blog, BlogStatus } from '@/lib/types/blogs';
 import { formatRelativeTime } from '@/lib/utils/date';
-import { Edit, Eye, Trash2, Clock, ExternalLink } from 'lucide-react';
+import { Edit, Eye, Trash2, Clock, ExternalLink, RotateCcw } from 'lucide-react';
 import { BLOG_STATUS_CONFIG } from '@/lib/config/blogs';
 import { config } from '@/lib/config';
 
 interface BlogListProps {
   blogs: Blog[];
   isLoading: boolean;
+  viewMode?: 'active' | 'trash';
   onDelete?: (id: string) => void;
+  onSoftDelete?: (id: string) => void;
+  onRestore?: (id: string) => void;
+  onHardDelete?: (id: string) => void;
 }
 
 function getStatusBadgeVariant(
@@ -49,7 +53,15 @@ function getAuthorInitials(name?: string): string {
     .slice(0, 2);
 }
 
-export function BlogList({ blogs, isLoading, onDelete }: BlogListProps) {
+export function BlogList({
+  blogs,
+  isLoading,
+  viewMode = 'active',
+  onDelete,
+  onSoftDelete,
+  onRestore,
+  onHardDelete,
+}: BlogListProps) {
   if (isLoading) {
     return <TableSkeleton rows={5} columns={6} showHeader={true} showActions={true} />;
   }
@@ -79,7 +91,7 @@ export function BlogList({ blogs, isLoading, onDelete }: BlogListProps) {
         </TableHeader>
         <TableBody>
           {blogs.map(blog => (
-            <TableRow key={blog.id}>
+            <TableRow key={blog.id} className={viewMode === 'trash' ? 'opacity-70' : ''}>
               <TableCell className="font-medium max-w-xs">
                 <div className="truncate">{blog.title}</div>
               </TableCell>
@@ -113,31 +125,65 @@ export function BlogList({ blogs, isLoading, onDelete }: BlogListProps) {
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/blog/${blog.id}/preview`}>
-                      <Eye className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                  {config.preview.domain && (
-                    <Button variant="ghost" size="sm" asChild title="Preview on public site">
-                      <Link
-                        href={`${config.preview.domain}/blog/${blog.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </Link>
-                    </Button>
+                  {viewMode === 'active' && (
+                    <>
+                      <Button variant="ghost" size="sm" asChild>
+                        <Link href={`/blog/${blog.id}/preview`}>
+                          <Eye className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      {config.preview.domain && (
+                        <Button variant="ghost" size="sm" asChild title="Preview on public site">
+                          <Link
+                            href={`${config.preview.domain}/blog/${blog.slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                      )}
+                      <Button variant="ghost" size="sm" asChild>
+                        <Link href={`/blog/${blog.id}`}>
+                          <Edit className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      {(onSoftDelete || onDelete) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            onSoftDelete ? onSoftDelete(blog.id) : onDelete?.(blog.id)
+                          }
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      )}
+                    </>
                   )}
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/blog/${blog.id}`}>
-                      <Edit className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                  {onDelete && (
-                    <Button variant="ghost" size="sm" onClick={() => onDelete(blog.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                  {viewMode === 'trash' && (
+                    <>
+                      {onRestore && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onRestore(blog.id)}
+                          title="Restore"
+                        >
+                          <RotateCcw className="h-4 w-4 text-green-600" />
+                        </Button>
+                      )}
+                      {onHardDelete && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onHardDelete(blog.id)}
+                          title="Permanent Delete"
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      )}
+                    </>
                   )}
                 </div>
               </TableCell>

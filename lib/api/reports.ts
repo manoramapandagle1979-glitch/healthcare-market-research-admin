@@ -16,6 +16,7 @@ import type {
 } from '@/lib/types/reports';
 import * as reportsApi from './reports.api';
 import type { ApiReport, ApiReportFilters } from '@/lib/types/api-types';
+import { apiClient } from './client';
 
 // ============ Helper Functions ============
 
@@ -106,6 +107,7 @@ function convertApiReportToLegacy(apiReport: ApiReport): Report {
     categoryId: apiReport.category_id,
     geography: apiReport.geography || [],
     publishDate: apiReport.publish_date,
+    scheduled_publish_enabled: apiReport.scheduled_publish_enabled,
     price: apiReport.price || 0,
     discountedPrice: apiReport.discounted_price || 0,
     currency: apiReport.currency,
@@ -371,4 +373,33 @@ export async function fetchTrashedReports(filters?: ReportFilters): Promise<Repo
     limit: response.meta?.limit || 10,
     totalPages: response.meta?.total_pages || 0,
   };
+}
+
+/**
+ * Schedule a report to be published at a specific date/time
+ */
+export async function schedulePublish(
+  id: string | number,
+  publishDate: Date
+): Promise<{ report: Report }> {
+  const response = await apiClient.patch<{ report: ApiReport }>(
+    `/v1/reports/${id}/schedule`,
+    { publishDate: publishDate.toISOString() },
+    { requiresAuth: true }
+  );
+  const report = convertApiReportToLegacy(response.report);
+  return { report };
+}
+
+/**
+ * Cancel scheduled publishing for a report
+ */
+export async function cancelScheduledPublish(id: string | number): Promise<{ report: Report }> {
+  const response = await apiClient.patch<{ report: ApiReport }>(
+    `/v1/reports/${id}/cancel-schedule`,
+    {},
+    { requiresAuth: true }
+  );
+  const report = convertApiReportToLegacy(response.report);
+  return { report };
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ReportFormTabs } from '@/components/reports/report-form-tabs';
+import { ScheduledPublishCard } from '@/components/shared/scheduled-publish-card';
 import { useReport } from '@/hooks/use-report';
 import { useAuth } from '@/contexts/auth-context';
 import { FormSkeleton } from '@/components/ui/skeletons/form-skeleton';
@@ -15,7 +16,16 @@ export default function EditReportPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
-  const { report, isLoading, error, fetchReport, saveReport, isSaving } = useReport();
+  const {
+    report,
+    isLoading,
+    error,
+    fetchReport,
+    saveReport,
+    isSaving,
+    scheduleReportPublish,
+    cancelReportSchedule,
+  } = useReport();
   const reportId = parseInt(params.id as string, 10);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
@@ -41,10 +51,10 @@ export default function EditReportPage() {
         await saveReport(report.id, data as ReportFormData);
 
         setLastSaved(new Date());
-        toast.success('Draft saved successfully');
+        toast.success('Report saved successfully');
       } catch (error) {
-        console.error('Error saving draft:', error);
-        toast.error('Failed to save draft');
+        console.error('Error saving report:', error);
+        toast.error('Failed to save report');
       }
     },
     [saveReport, report]
@@ -91,18 +101,36 @@ export default function EditReportPage() {
         </div>
       </div>
 
-      <ReportFormTabs
-        report={report}
-        onSubmit={async data => {
-          // Final submit - save with form data
-          if (report?.id) {
-            await saveReport(report.id, data);
-          }
-        }}
-        onSaveTab={handleSaveTab}
-        onPreview={() => router.push(`/reports/${report.id}/preview`)}
-        isSaving={isSaving}
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <ReportFormTabs
+            report={report}
+            onSubmit={async data => {
+              // Final submit - save with form data
+              if (report?.id) {
+                await saveReport(report.id, data);
+              }
+            }}
+            onSaveTab={handleSaveTab}
+            onPreview={() => router.push(`/reports/${report.id}/preview`)}
+            isSaving={isSaving}
+          />
+        </div>
+
+        <div className="space-y-6">
+          <ScheduledPublishCard
+            currentScheduledDate={report.scheduled_publish_enabled ? report.publishDate : undefined}
+            currentStatus={report.status}
+            onSchedule={async date => {
+              await scheduleReportPublish(String(reportId), date);
+            }}
+            onCancelSchedule={async () => {
+              await cancelReportSchedule(String(reportId));
+            }}
+            isSaving={isSaving}
+          />
+        </div>
+      </div>
     </div>
   );
 }

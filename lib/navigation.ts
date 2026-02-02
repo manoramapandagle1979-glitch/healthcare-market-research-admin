@@ -2,7 +2,6 @@ import {
   LayoutDashboard,
   FileText,
   PenSquare,
-  BarChart3,
   Users,
   UserCog,
   MessageSquare,
@@ -71,6 +70,12 @@ export const navigationItems: NavigationItem[] = [
         icon: PenSquare,
         roles: ['admin', 'editor'],
       },
+      {
+        title: 'Trash',
+        href: '/blog/trash',
+        icon: Trash2,
+        roles: ['admin', 'editor'],
+      },
     ],
   },
   {
@@ -89,6 +94,12 @@ export const navigationItems: NavigationItem[] = [
         title: 'Create Press Release',
         href: '/press-releases/new',
         icon: Megaphone,
+        roles: ['admin', 'editor'],
+      },
+      {
+        title: 'Trash',
+        href: '/press-releases/trash',
+        icon: Trash2,
         roles: ['admin', 'editor'],
       },
     ],
@@ -129,12 +140,12 @@ export const navigationItems: NavigationItem[] = [
     icon: Users,
     roles: ['admin', 'editor'],
   },
-  {
-    title: 'Chart Generator POC',
-    href: '/chart-generator',
-    icon: BarChart3,
-    roles: ['admin', 'editor'],
-  },
+  // {
+  //   title: 'Chart Generator POC',
+  //   href: '/chart-generator',
+  //   icon: BarChart3,
+  //   roles: ['admin', 'editor'],
+  // },
   // {
   //   title: 'Settings',
   //   href: '/settings',

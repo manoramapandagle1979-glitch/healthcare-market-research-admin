@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { BlogForm } from '@/components/blogs/blog-form';
 import { VersionHistory } from '@/components/blogs/version-history';
 import { WorkflowStatus } from '@/components/blogs/workflow-status';
+import { ScheduledPublishCard } from '@/components/shared/scheduled-publish-card';
 import { useBlog } from '@/hooks/use-blog';
 import { useAuth } from '@/contexts/auth-context';
 import { FormSkeleton } from '@/components/ui/skeletons/form-skeleton';
@@ -26,6 +27,8 @@ export default function EditBlogPage() {
     submitBlogForReview,
     publishBlogPost,
     unpublishBlogPost,
+    scheduleBlogPublish,
+    cancelBlogSchedule,
   } = useBlog();
   const blogId = params.id as string;
 
@@ -109,6 +112,17 @@ export default function EditBlogPage() {
             onStatusChange={handleStatusChange}
             isSaving={isSaving}
             isAdmin={isAdmin}
+          />
+          <ScheduledPublishCard
+            currentScheduledDate={blog.scheduledPublishEnabled ? blog.publishDate : undefined}
+            currentStatus={blog.status}
+            onSchedule={async date => {
+              await scheduleBlogPublish(blogId, date);
+            }}
+            onCancelSchedule={async () => {
+              await cancelBlogSchedule(blogId);
+            }}
+            isSaving={isSaving}
           />
           <VersionHistory versions={blog.versions || []} />
         </div>

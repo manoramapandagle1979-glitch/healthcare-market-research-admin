@@ -14,7 +14,7 @@ export default function CreateReportPage() {
   const router = useRouter();
   const { saveReport, isSaving } = useReport();
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [createdReportId, setCreatedReportId] = useState<string | null>(null);
+  const [createdReportId] = useState<string | null>(null);
   const formRef = useRef<ReportFormTabsRef>(null);
 
   // Role check
@@ -37,7 +37,7 @@ export default function CreateReportPage() {
           geography: data.geography || ['Global'],
           price: data.price !== undefined ? data.price : 0,
           discountedPrice: data.discountedPrice !== undefined ? data.discountedPrice : 0,
-          status: 'draft', // Always save as draft when using Save Draft button
+          status: 'draft', // Always save as draft when using Save Report button
           pageCount: data.pageCount,
           formats: data.formats || [],
           marketMetrics: data.marketMetrics || {},
@@ -75,11 +75,11 @@ export default function CreateReportPage() {
           }
 
           setLastSaved(new Date());
-          toast.success('Draft saved successfully');
+          toast.success('Report saved successfully');
         }
       } catch (error) {
-        console.error('Error saving draft:', error);
-        toast.error('Failed to save draft');
+        console.error('Error saving report:', error);
+        toast.error('Failed to save report');
       }
     },
     [saveReport, createdReportId, router]

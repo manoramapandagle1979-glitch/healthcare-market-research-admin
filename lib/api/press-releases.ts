@@ -9,6 +9,8 @@ import type {
   PressReleaseTag,
   PressReleaseTagsResponse,
   PressReleaseCategoriesResponse,
+  ApiPressRelease,
+  PressRelease,
 } from '@/lib/types/press-releases';
 
 // Helper function to transform form data to API create/update format
@@ -18,6 +20,17 @@ function transformFormDataToApi(
   return {
     ...data,
     // categoryId and tags are already in the correct format
+  };
+}
+
+/**
+ * Transform API press release to frontend PressRelease format
+ */
+async function transformApiPressReleaseToPressRelease(
+  apiPressRelease: ApiPressRelease
+): Promise<PressRelease> {
+  return {
+    ...apiPressRelease,
   };
 }
 
@@ -85,4 +98,47 @@ export async function publishPressRelease(id: number): Promise<PressReleaseRespo
 
 export async function unpublishPressRelease(id: number): Promise<PressReleaseResponse> {
   return apiClient.patch<PressReleaseResponse>(`/v1/press-releases/${id}/unpublish`);
+}
+
+// Soft delete operations
+export async function softDeletePressRelease(id: number): Promise<void> {
+  return apiClient.patch(`/v1/press-releases/${id}/soft-delete`);
+}
+
+export async function restorePressRelease(id: number): Promise<void> {
+  return apiClient.patch(`/v1/press-releases/${id}/restore`);
+}
+
+/**
+ * Schedule a press release to be published at a specific date/time
+ */
+export async function schedulePublish(
+  id: string | number,
+  publishDate: Date
+): Promise<PressReleaseResponse> {
+  const response = await apiClient.patch<{ pressRelease: ApiPressRelease }>(
+    `/v1/press-releases/${id}/schedule`,
+    { publishDate: publishDate.toISOString() }
+  );
+  const pressRelease = await transformApiPressReleaseToPressRelease(response.pressRelease);
+  return { pressRelease };
+}
+
+/**
+ * Cancel scheduled publishing for a press release
+ */
+export async function cancelScheduledPublish(id: string | number): Promise<PressReleaseResponse> {
+  const response = await apiClient.patch<{ pressRelease: ApiPressRelease }>(
+    `/v1/press-releases/${id}/cancel-schedule`
+  );
+  const pressRelease = await transformApiPressReleaseToPressRelease(response.pressRelease);
+  return { pressRelease };
+}
+
+export async function fetchTrashedPressReleases(
+  filters?: PressReleaseFilters
+): Promise<PressReleasesResponse> {
+  return apiClient.get<PressReleasesResponse>('/v1/press-releases', {
+    params: { ...filters, deleted: 'true' } as Record<string, unknown>,
+  });
 }

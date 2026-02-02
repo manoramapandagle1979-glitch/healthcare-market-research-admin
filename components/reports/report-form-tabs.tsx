@@ -12,6 +12,7 @@ import { TOCTab } from './tabs/toc-tab';
 import { SettingsTab } from './tabs/settings-tab';
 import { ChartsTab } from './tabs/charts-tab';
 import { reportFormSchema } from '@/lib/validation/report-schema';
+import { Lock } from 'lucide-react';
 
 export interface ReportFormTabsRef {
   fillWithSampleData: () => void;
@@ -255,13 +256,13 @@ export const ReportFormTabs = forwardRef<ReportFormTabsRef, ReportFormTabsProps>
             discountedPrice: 3090,
             currency: 'USD',
             status: 'draft',
-            pageCount: undefined,
-            formats: [],
+            pageCount: 220,
+            formats: ['PDF', 'Excel', 'PowerPoint'],
             marketMetrics: {
               currentRevenue: '',
               currentYear: new Date().getFullYear(),
               forecastRevenue: '',
-              forecastYear: new Date().getFullYear() + 7,
+              forecastYear: 2035,
               cagr: '',
               cagrStartYear: new Date().getFullYear(),
               cagrEndYear: new Date().getFullYear() + 7,
@@ -305,12 +306,23 @@ export const ReportFormTabs = forwardRef<ReportFormTabsRef, ReportFormTabsProps>
             <TabsTrigger value="details">Report Details</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="toc">Table of Contents</TabsTrigger>
-            <TabsTrigger value="charts">Charts</TabsTrigger>
+            {/* <TabsTrigger value="metrics">Market Metrics</TabsTrigger> */}
+            <TabsTrigger value="charts" className="relative">
+              <span className="flex items-center gap-1.5">
+                Charts
+                {!report?.id && <Lock className="h-3 w-3 opacity-60" />}
+              </span>
+            </TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="details">
-            <ReportDetailsTab form={form} onSaveTab={onSaveTab} isSaving={isSaving} />
+            <ReportDetailsTab
+              form={form}
+              reportId={report?.id}
+              onSaveTab={onSaveTab}
+              isSaving={isSaving}
+            />
           </TabsContent>
 
           <TabsContent value="content">

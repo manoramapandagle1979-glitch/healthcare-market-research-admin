@@ -15,14 +15,18 @@ import { TableSkeleton } from '@/components/ui/skeletons/table-skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import type { PressRelease, PressReleaseStatus } from '@/lib/types/press-releases';
 import { formatRelativeTime } from '@/lib/utils/date';
-import { Edit, Eye, Trash2, ExternalLink } from 'lucide-react';
+import { Edit, Eye, Trash2, ExternalLink, RotateCcw } from 'lucide-react';
 import { PRESS_RELEASE_STATUS_CONFIG } from '@/lib/config/press-releases';
 import { config } from '@/lib/config';
 
 interface PressReleaseListProps {
   pressReleases: PressRelease[];
   isLoading: boolean;
+  viewMode?: 'active' | 'trash';
   onDelete?: (id: number) => void;
+  onSoftDelete?: (id: number) => void;
+  onRestore?: (id: number) => void;
+  onHardDelete?: (id: number) => void;
 }
 
 function getStatusBadgeVariant(
@@ -49,7 +53,15 @@ function getAuthorInitials(name?: string): string {
     .slice(0, 2);
 }
 
-export function PressReleaseList({ pressReleases, isLoading, onDelete }: PressReleaseListProps) {
+export function PressReleaseList({
+  pressReleases,
+  isLoading,
+  viewMode = 'active',
+  onDelete,
+  onSoftDelete,
+  onRestore,
+  onHardDelete,
+}: PressReleaseListProps) {
   if (isLoading) {
     return <TableSkeleton rows={5} columns={6} showHeader={true} showActions={true} />;
   }
@@ -80,7 +92,7 @@ export function PressReleaseList({ pressReleases, isLoading, onDelete }: PressRe
         <TableBody>
           {pressReleases.map(pressRelease => {
             return (
-              <TableRow key={pressRelease.id}>
+              <TableRow key={pressRelease.id} className={viewMode === 'trash' ? 'opacity-70' : ''}>
                 <TableCell className="font-medium max-w-xs">
                   <div className="truncate">{pressRelease.title}</div>
                 </TableCell>
@@ -113,31 +125,67 @@ export function PressReleaseList({ pressReleases, isLoading, onDelete }: PressRe
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/press-releases/${pressRelease.id}/preview`}>
-                        <Eye className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                    {config.preview.domain && (
-                      <Button variant="ghost" size="sm" asChild title="Preview on public site">
-                        <Link
-                          href={`${config.preview.domain}/press-releases/${pressRelease.slug}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </Link>
-                      </Button>
+                    {viewMode === 'active' && (
+                      <>
+                        <Button variant="ghost" size="sm" asChild>
+                          <Link href={`/press-releases/${pressRelease.id}/preview`}>
+                            <Eye className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                        {config.preview.domain && (
+                          <Button variant="ghost" size="sm" asChild title="Preview on public site">
+                            <Link
+                              href={`${config.preview.domain}/press-releases/${pressRelease.slug}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="sm" asChild>
+                          <Link href={`/press-releases/${pressRelease.id}`}>
+                            <Edit className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                        {(onSoftDelete || onDelete) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              onSoftDelete
+                                ? onSoftDelete(pressRelease.id)
+                                : onDelete?.(pressRelease.id)
+                            }
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        )}
+                      </>
                     )}
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/press-releases/${pressRelease.id}`}>
-                        <Edit className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                    {onDelete && (
-                      <Button variant="ghost" size="sm" onClick={() => onDelete(pressRelease.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                    {viewMode === 'trash' && (
+                      <>
+                        {onRestore && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onRestore(pressRelease.id)}
+                            title="Restore"
+                          >
+                            <RotateCcw className="h-4 w-4 text-green-600" />
+                          </Button>
+                        )}
+                        {onHardDelete && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onHardDelete(pressRelease.id)}
+                            title="Permanent Delete"
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        )}
+                      </>
                     )}
                   </div>
                 </TableCell>

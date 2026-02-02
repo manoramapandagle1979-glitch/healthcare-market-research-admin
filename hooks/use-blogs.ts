@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import type { Blog, BlogFilters } from '@/lib/types/blogs';
-import { fetchBlogs } from '@/lib/api/blogs';
+import { fetchBlogs, softDeleteBlog, restoreBlog } from '@/lib/api/blogs';
 
 interface UseBlogsReturn {
   blogs: Blog[];
@@ -14,6 +14,8 @@ interface UseBlogsReturn {
   error: string | null;
   refetch: () => Promise<void>;
   setFilters: (filters: BlogFilters) => void;
+  softDelete: (id: string) => Promise<void>;
+  restore: (id: string) => Promise<void>;
 }
 
 export function useBlogs(initialFilters?: BlogFilters): UseBlogsReturn {
@@ -53,6 +55,34 @@ export function useBlogs(initialFilters?: BlogFilters): UseBlogsReturn {
     setFiltersState(prev => ({ ...prev, ...newFilters }));
   }, []);
 
+  const handleSoftDelete = useCallback(
+    async (id: string) => {
+      try {
+        await softDeleteBlog(id);
+        await fetchData();
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to move blog to trash';
+        toast.error(errorMessage);
+        throw err;
+      }
+    },
+    [fetchData]
+  );
+
+  const handleRestore = useCallback(
+    async (id: string) => {
+      try {
+        await restoreBlog(id);
+        await fetchData();
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to restore blog';
+        toast.error(errorMessage);
+        throw err;
+      }
+    },
+    [fetchData]
+  );
+
   return {
     blogs,
     total,
@@ -62,5 +92,7 @@ export function useBlogs(initialFilters?: BlogFilters): UseBlogsReturn {
     error,
     refetch: fetchData,
     setFilters,
+    softDelete: handleSoftDelete,
+    restore: handleRestore,
   };
 }

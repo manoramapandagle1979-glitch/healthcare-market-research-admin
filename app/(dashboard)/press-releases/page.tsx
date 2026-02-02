@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/pagination';
 import { usePressReleases } from '@/hooks/use-press-releases';
 import { useAuth } from '@/contexts/auth-context';
-import { Plus, RefreshCw } from 'lucide-react';
+import { Plus, RefreshCw, Trash2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -25,7 +25,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { deletePressRelease } from '@/lib/api/press-releases';
 import { fetchAuthors } from '@/lib/api/authors';
 import type { ReportAuthor } from '@/lib/types/reports';
 
@@ -41,6 +40,7 @@ export default function PressReleasesPage() {
     isLoading,
     refetch,
     setFilters: updateFilters,
+    softDelete,
   } = usePressReleases(filters);
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
@@ -67,12 +67,11 @@ export default function PressReleasesPage() {
     if (!deleteDialog.pressReleaseId) return;
 
     try {
-      await deletePressRelease(deleteDialog.pressReleaseId);
-      toast.success('Press release deleted successfully');
-      refetch();
+      await softDelete(deleteDialog.pressReleaseId);
+      toast.success('Press release moved to trash successfully');
       setDeleteDialog({ open: false, pressReleaseId: null });
     } catch {
-      toast.error('Failed to delete press release');
+      toast.error('Failed to move press release to trash');
     }
   };
 
@@ -91,6 +90,14 @@ export default function PressReleasesPage() {
             <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
           </Button>
+          {canCreateEdit && (
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/press-releases/trash">
+                <Trash2 className="mr-2 h-4 w-4" />
+                View Trash
+              </Link>
+            </Button>
+          )}
           {canCreateEdit && (
             <Button asChild>
               <Link href="/press-releases/new">
@@ -116,7 +123,7 @@ export default function PressReleasesPage() {
       <PressReleaseList
         pressReleases={pressReleases}
         isLoading={isLoading}
-        onDelete={
+        onSoftDelete={
           canCreateEdit ? id => setDeleteDialog({ open: true, pressReleaseId: id }) : undefined
         }
       />
@@ -173,9 +180,10 @@ export default function PressReleasesPage() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Press Release</DialogTitle>
+            <DialogTitle>Move Press Release to Trash</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this press release? This action cannot be undone.
+              Are you sure you want to move this press release to trash? You can restore it later
+              from the trash.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -186,7 +194,7 @@ export default function PressReleasesPage() {
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleDelete}>
-              Delete
+              Move to Trash
             </Button>
           </DialogFooter>
         </DialogContent>
