@@ -6,6 +6,7 @@ import type {
   DataSource,
   MapDataSource,
   LogoConfig,
+  AxisLabelDisplay,
 } from '@/lib/types/chart-generator';
 import { MAP_COLOR_SCHEMES } from '@/lib/config/chart-generator';
 
@@ -56,7 +57,7 @@ export function buildEChartsConfig(config: ChartBuilderConfig): EChartsOption {
       },
       formatter:
         chartType === 'pie' || chartType === 'donut'
-          ? '{b}: {c}' + (metadata.unitSuffix || '') + ' ({d}%)'
+          ? '{b}'
           : chartType === 'world-map'
             ? (params: any) => {
                 return `${params.name}<br/>${params.value || 'No data'}${metadata.unitSuffix || ''}`;
@@ -288,9 +289,6 @@ function buildSeriesConfig(
         ? standardDataSource.series[0].values.map((val, idx) => ({
             value: Number(val.toFixed(metadata.decimalPrecision)),
             name: standardDataSource.labels[idx],
-            itemStyle: {
-              color: standardDataSource.series[0]?.color || '#5B8EBC',
-            },
           }))
         : [];
 
@@ -320,7 +318,7 @@ function buildSeriesConfig(
           },
           label: {
             show: true,
-            formatter: '{b}: {c}' + (metadata.unitSuffix || '') + ' ({d}%)',
+            formatter: '{b}',
             fontSize: 12,
             color: '#4b5563',
           },
@@ -348,7 +346,7 @@ function buildSeriesConfig(
         },
         label: {
           show: true,
-          formatter: '{b}: {c}' + (metadata.unitSuffix || '') + ' ({d}%)',
+          formatter: '{b}',
           fontSize: 12,
           color: '#4b5563',
         },
@@ -412,9 +410,6 @@ function buildSeriesConfig(
         ? standardDataSource.series[0].values.map((val, idx) => ({
             value: Number(val.toFixed(metadata.decimalPrecision)),
             name: standardDataSource.labels[idx],
-            itemStyle: {
-              color: standardDataSource.series[0]?.color || '#5B8EBC',
-            },
           }))
         : [];
 
@@ -445,7 +440,7 @@ function buildSeriesConfig(
           },
           label: {
             show: true,
-            formatter: '{b}: {c}' + (metadata.unitSuffix || '') + ' ({d}%)',
+            formatter: '{b}',
             fontSize: 12,
             color: '#4b5563',
           },
@@ -473,7 +468,7 @@ function buildSeriesConfig(
         },
         label: {
           show: true,
-          formatter: '{b}: {c}' + (metadata.unitSuffix || '') + ' ({d}%)',
+          formatter: '{b}',
           fontSize: 12,
           color: '#4b5563',
         },
@@ -490,6 +485,9 @@ function buildSeriesConfig(
 
   // Bar chart series (stacked or regular)
   const standardDataSource = dataSource as DataSource;
+  const labelDisplay = metadata.axisLabelDisplay || 'first-second-last';
+  const totalDataPoints = standardDataSource.labels.length;
+
   return standardDataSource.series.map(series => ({
     name: series.name,
     type: 'bar',
@@ -500,7 +498,32 @@ function buildSeriesConfig(
       borderRadius: orientation === 'vertical' ? [5, 5, 0, 0] : [0, 5, 5, 0],
     },
     label: {
-      show: false,
+      show: true,
+      position: orientation === 'vertical' ? 'top' : 'right',
+      formatter: (params: any) => {
+        const dataIndex = params.dataIndex;
+
+        // Determine if this label should be shown based on labelDisplay setting
+        let shouldShow = true;
+        if (labelDisplay === 'none') {
+          shouldShow = false;
+        } else if (labelDisplay === 'first-last') {
+          shouldShow = dataIndex === 0 || dataIndex === totalDataPoints - 1;
+        } else if (labelDisplay === 'first-second-last') {
+          shouldShow = dataIndex === 0 || dataIndex === 1 || dataIndex === totalDataPoints - 1;
+        }
+        // 'all' shows everything by default
+
+        if (!shouldShow) {
+          return '';
+        }
+
+        const value = Number(params.value.toFixed(metadata.decimalPrecision));
+        return value + (metadata.unitSuffix || '');
+      },
+      fontSize: 12,
+      color: '#4b5563',
+      fontWeight: 500,
     },
     emphasis: {
       itemStyle: {

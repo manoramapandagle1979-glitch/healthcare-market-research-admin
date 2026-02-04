@@ -92,6 +92,7 @@ function generateDefaultChartData(reportData?: ReportFormData): ReportChart {
     decimalPrecision: 1,
     showLegend: true,
     showGridlines: true,
+    axisLabelDisplay: 'first-second-last',
     source: 'www.healthcareforesights.com', // POC default
     logoUrl: undefined, // No logo by default
     logoPosition: 'top-right', // Default position
@@ -119,6 +120,7 @@ export function SimpleChartBuilder({ chart, onSave, onCancel, reportData }: Simp
         source: chart.source ?? 'www.healthcareforesights.com',
         logoPosition: chart.logoPosition ?? 'top-right',
         logoOpacity: chart.logoOpacity ?? 80,
+        axisLabelDisplay: chart.axisLabelDisplay ?? 'first-second-last',
       };
     }
     return generateDefaultChartData(reportData);
@@ -358,6 +360,32 @@ export function SimpleChartBuilder({ chart, onSave, onCancel, reportData }: Simp
               </div>
             </div>
 
+            {/* Bar Value Labels Display */}
+            {(chartData.chartType === 'bar' || chartData.chartType === 'stacked-bar') && (
+              <div className="space-y-2">
+                <Label htmlFor="bar-value-labels">Bar Value Labels</Label>
+                <Select
+                  value={chartData.axisLabelDisplay || 'first-second-last'}
+                  onValueChange={(value: 'all' | 'first-second-last' | 'first-last' | 'none') =>
+                    setChartData({ ...chartData, axisLabelDisplay: value })
+                  }
+                >
+                  <SelectTrigger id="bar-value-labels">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Show All Values</SelectItem>
+                    <SelectItem value="first-second-last">Show 1st, 2nd & Last (Default)</SelectItem>
+                    <SelectItem value="first-last">Show 1st & Last Only</SelectItem>
+                    <SelectItem value="none">Hide All Values</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Control which value labels are displayed above the bars
+                </p>
+              </div>
+            )}
+
             {/* Source Attribution */}
             <div className="space-y-2">
               <Label htmlFor="source">Source Attribution</Label>
@@ -541,7 +569,7 @@ export function SimpleChartBuilder({ chart, onSave, onCancel, reportData }: Simp
 
       {/* Image Preview Dialog - Shows what will be saved */}
       <Dialog open={showImagePreview} onOpenChange={setShowImagePreview}>
-        <DialogContent className="max-w-5xl">
+        <DialogContent className="max-w-[90vw] max-h-[90vh]">
           <DialogHeader>
             <DialogTitle>Final Chart Image Preview</DialogTitle>
             <DialogDescription>
@@ -550,11 +578,11 @@ export function SimpleChartBuilder({ chart, onSave, onCancel, reportData }: Simp
           </DialogHeader>
           {previewImageUrl && (
             <div className="space-y-4">
-              <div className="border rounded-lg p-4 bg-muted/30 overflow-auto">
+              <div className="border rounded-lg p-4 bg-muted/30 overflow-auto max-h-[70vh]">
                 <img
                   src={previewImageUrl}
                   alt="Chart preview"
-                  className="max-w-full h-auto mx-auto"
+                  className="w-full h-auto mx-auto"
                 />
               </div>
               <div className="flex items-center justify-between text-sm text-muted-foreground">

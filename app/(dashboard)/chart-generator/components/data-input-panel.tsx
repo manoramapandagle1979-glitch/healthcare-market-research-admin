@@ -79,29 +79,62 @@ export function DataInputPanel() {
           {chartConfig.chartType !== 'pie' &&
             chartConfig.chartType !== 'donut' &&
             chartConfig.chartType !== 'world-map' && (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="x-axis-label">X-Axis Label</Label>
-                  <Input
-                    id="x-axis-label"
-                    value={metadata.xAxisLabel || ''}
-                    onChange={e => updateMetadata({ xAxisLabel: e.target.value })}
-                    placeholder="e.g., Year"
-                    maxLength={CHART_CONSTRAINTS.LABEL_MAX_LENGTH}
-                  />
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="x-axis-label">X-Axis Label</Label>
+                    <Input
+                      id="x-axis-label"
+                      value={metadata.xAxisLabel || ''}
+                      onChange={e => updateMetadata({ xAxisLabel: e.target.value })}
+                      placeholder="e.g., Year"
+                      maxLength={CHART_CONSTRAINTS.LABEL_MAX_LENGTH}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="y-axis-label">Y-Axis Label</Label>
+                    <Input
+                      id="y-axis-label"
+                      value={metadata.yAxisLabel || ''}
+                      onChange={e => updateMetadata({ yAxisLabel: e.target.value })}
+                      placeholder="e.g., Revenue"
+                      maxLength={CHART_CONSTRAINTS.LABEL_MAX_LENGTH}
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="y-axis-label">Y-Axis Label</Label>
-                  <Input
-                    id="y-axis-label"
-                    value={metadata.yAxisLabel || ''}
-                    onChange={e => updateMetadata({ yAxisLabel: e.target.value })}
-                    placeholder="e.g., Revenue"
-                    maxLength={CHART_CONSTRAINTS.LABEL_MAX_LENGTH}
-                  />
+                  <Label htmlFor="axis-label-display">Bar Value Labels</Label>
+                  <Select
+                    value={metadata.axisLabelDisplay || 'first-second-last'}
+                    onValueChange={value =>
+                      updateMetadata({
+                        axisLabelDisplay: value as
+                          | 'all'
+                          | 'first-second-last'
+                          | 'first-last'
+                          | 'none',
+                      })
+                    }
+                  >
+                    <SelectTrigger id="axis-label-display">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Show All Values</SelectItem>
+                      <SelectItem value="first-second-last">
+                        Show 1st, 2nd & Last (Default)
+                      </SelectItem>
+                      <SelectItem value="first-last">Show 1st & Last Only</SelectItem>
+                      <SelectItem value="none">Hide All Values</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Control which value labels are displayed above the bars
+                  </p>
                 </div>
-              </div>
+              </>
             )}
 
           <div className="grid grid-cols-2 gap-4">

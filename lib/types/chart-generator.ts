@@ -8,6 +8,8 @@ export type LogoPosition = 'top-left' | 'top-right' | 'bottom-right';
 
 export type ColorTheme = 'default' | 'custom';
 
+export type AxisLabelDisplay = 'all' | 'first-second-last' | 'first-last' | 'none';
+
 export interface ChartMetadata {
   title: string;
   subtitle?: string;
@@ -17,6 +19,7 @@ export interface ChartMetadata {
   decimalPrecision: 0 | 1 | 2;
   showLegend: boolean;
   showGridlines: boolean;
+  axisLabelDisplay?: AxisLabelDisplay;
   mapColorScheme?: 'blue' | 'green' | 'red' | 'purple';
   source?: string;
 }

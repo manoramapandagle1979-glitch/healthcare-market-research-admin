@@ -4,34 +4,52 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import type { BlogStatus } from '@/lib/types/blogs';
-import { BLOG_STATUS_CONFIG, WORKFLOW_TRANSITIONS } from '@/lib/config/blogs';
-import { FileEdit, Send, Globe, ArrowRight, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import {
+  FileEdit,
+  Send,
+  Globe,
+  ArrowRight,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  type LucideIcon,
+} from 'lucide-react';
 
-interface WorkflowStatusProps {
-  currentStatus: BlogStatus;
-  onStatusChange: (newStatus: BlogStatus) => Promise<void>;
-  isSaving: boolean;
-  isAdmin?: boolean;
+type StatusValue = 'draft' | 'review' | 'published';
+
+interface StatusConfig {
+  label: string;
+  description: string;
 }
 
-const STATUS_ICONS = {
+interface WorkflowStatusProps<T extends StatusValue> {
+  currentStatus: T;
+  onStatusChange: (newStatus: T) => Promise<void>;
+  isSaving: boolean;
+  isAdmin?: boolean;
+  statusConfig: Record<StatusValue, StatusConfig>;
+  workflowTransitions: Record<StatusValue, readonly StatusValue[]>;
+}
+
+const STATUS_ICONS: Record<StatusValue, LucideIcon> = {
   draft: FileEdit,
   review: Clock,
   published: Globe,
 };
 
-export function WorkflowStatus({
+export function WorkflowStatus<T extends StatusValue>({
   currentStatus,
   onStatusChange,
   isSaving,
   isAdmin = false,
-}: WorkflowStatusProps) {
-  const statusConfig = BLOG_STATUS_CONFIG[currentStatus];
-  const allowedTransitions = WORKFLOW_TRANSITIONS[currentStatus] as readonly BlogStatus[];
-  const StatusIcon = STATUS_ICONS[currentStatus];
+  statusConfig,
+  workflowTransitions,
+}: WorkflowStatusProps<T>) {
+  const config = statusConfig[currentStatus];
+  const allowedTransitions = workflowTransitions[currentStatus] as readonly T[];
+  const StatusIcon: LucideIcon = STATUS_ICONS[currentStatus];
 
-  const getTransitionLabel = (toStatus: BlogStatus): string => {
+  const getTransitionLabel = (toStatus: T): string => {
     switch (toStatus) {
       case 'review':
         return 'Submit for Review';
@@ -44,7 +62,7 @@ export function WorkflowStatus({
     }
   };
 
-  const getTransitionDescription = (toStatus: BlogStatus): string => {
+  const getTransitionDescription = (toStatus: T): string => {
     switch (toStatus) {
       case 'review':
         return 'Send to editors for approval';
@@ -57,7 +75,7 @@ export function WorkflowStatus({
     }
   };
 
-  const canTransitionTo = (toStatus: BlogStatus): boolean => {
+  const canTransitionTo = (toStatus: T): boolean => {
     // Admin can always publish directly
     if (isAdmin && toStatus === 'published') return true;
     // Non-admin can't publish directly from draft
@@ -67,7 +85,7 @@ export function WorkflowStatus({
     return allowedTransitions.includes(toStatus);
   };
 
-  const availableTransitions = (['draft', 'review', 'published'] as BlogStatus[]).filter(
+  const availableTransitions = (['draft', 'review', 'published'] as T[]).filter(
     status => status !== currentStatus && canTransitionTo(status)
   );
 
@@ -85,7 +103,7 @@ export function WorkflowStatus({
         <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
           <div>
             <p className="text-sm font-medium">Current Status</p>
-            <p className="text-xs text-muted-foreground mt-1">{statusConfig.description}</p>
+            <p className="text-xs text-muted-foreground mt-1">{config.description}</p>
           </div>
           <Badge
             variant={
@@ -97,7 +115,7 @@ export function WorkflowStatus({
             }
             className="text-sm"
           >
-            {statusConfig.label}
+            {config.label}
           </Badge>
         </div>
 

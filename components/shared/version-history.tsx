@@ -5,15 +5,30 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { PressReleaseVersion } from '@/lib/types/press-releases';
 import { formatRelativeTime } from '@/lib/utils/date';
 
-interface VersionHistoryProps {
-  versions: PressReleaseVersion[];
-  onRestore?: (version: PressReleaseVersion) => void;
+interface BaseVersion {
+  id: string;
+  versionNumber: number;
+  summary: string;
+  createdAt: string;
+  author: {
+    name?: string | null;
+    email: string;
+  };
 }
 
-export function VersionHistory({ versions, onRestore }: VersionHistoryProps) {
+interface VersionHistoryProps<T extends BaseVersion> {
+  versions: T[];
+  onRestore?: (version: T) => void;
+  contentType?: string;
+}
+
+export function VersionHistory<T extends BaseVersion>({
+  versions,
+  onRestore,
+  contentType = 'content',
+}: VersionHistoryProps<T>) {
   const sortedVersions = [...versions].sort((a, b) => b.versionNumber - a.versionNumber);
 
   return (
@@ -23,12 +38,12 @@ export function VersionHistory({ versions, onRestore }: VersionHistoryProps) {
           <Clock className="h-5 w-5" />
           Version History
         </CardTitle>
-        <CardDescription>Track changes to your press release</CardDescription>
+        <CardDescription>Track changes to your {contentType}</CardDescription>
       </CardHeader>
       <CardContent>
         {sortedVersions.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">
-            No version history yet. Versions are created when the press release is published.
+            No version history yet. Versions are created when the {contentType} is published.
           </p>
         ) : (
           <ScrollArea className="h-[300px] pr-4">

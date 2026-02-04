@@ -3,9 +3,10 @@
 import { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { BlogForm } from '@/components/blogs/blog-form';
-import { VersionHistory } from '@/components/blogs/version-history';
-import { WorkflowStatus } from '@/components/blogs/workflow-status';
+import { VersionHistory } from '@/components/shared/version-history';
+import { WorkflowStatus } from '@/components/shared/workflow-status';
 import { ScheduledPublishCard } from '@/components/shared/scheduled-publish-card';
+import { BLOG_STATUS_CONFIG, WORKFLOW_TRANSITIONS } from '@/lib/config/blogs';
 import { useBlog } from '@/hooks/use-blog';
 import { useAuth } from '@/contexts/auth-context';
 import { FormSkeleton } from '@/components/ui/skeletons/form-skeleton';
@@ -112,6 +113,8 @@ export default function EditBlogPage() {
             onStatusChange={handleStatusChange}
             isSaving={isSaving}
             isAdmin={isAdmin}
+            statusConfig={BLOG_STATUS_CONFIG}
+            workflowTransitions={WORKFLOW_TRANSITIONS}
           />
           <ScheduledPublishCard
             currentScheduledDate={blog.scheduledPublishEnabled ? blog.publishDate : undefined}
@@ -124,7 +127,7 @@ export default function EditBlogPage() {
             }}
             isSaving={isSaving}
           />
-          <VersionHistory versions={blog.versions || []} />
+          <VersionHistory versions={blog.versions || []} contentType="blog post" />
         </div>
       </div>
     </div>

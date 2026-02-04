@@ -107,6 +107,7 @@ export interface ReportChart {
   decimalPrecision: 0 | 1 | 2;
   showLegend: boolean;
   showGridlines: boolean;
+  axisLabelDisplay?: 'all' | 'first-second-last' | 'first-last' | 'none';
   data: ReportChartData;
   source?: string; // Source attribution (e.g., "Towards Healthcare")
   logoUrl?: string; // URL of logo image (base64 data URL or uploaded URL)

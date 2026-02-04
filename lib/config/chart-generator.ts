@@ -4,6 +4,7 @@ import type {
   ChartMetadata,
   LogoConfig,
   ChartConfig,
+  AxisLabelDisplay,
 } from '@/lib/types/chart-generator';
 
 // Professional color palette (muted, market-research grade)
@@ -137,6 +138,7 @@ export const DEFAULT_METADATA: ChartMetadata = {
   decimalPrecision: 1,
   showLegend: true,
   showGridlines: true,
+  axisLabelDisplay: 'first-second-last',
   mapColorScheme: 'blue',
   source: 'Healthcare Foresights',
 };

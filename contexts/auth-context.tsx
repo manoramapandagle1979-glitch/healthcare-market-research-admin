@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { tokenStorage, decodeToken } from '@/lib/auth/token';
-import { authApi } from '@/lib/api/auth';
+import * as authApi from '@/lib/api/auth.api';
 import { config } from '@/lib/config';
 import type { User } from '@/lib/types/auth';
 
@@ -68,11 +68,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const handleLogout = useCallback(
     async (shouldCallApi = false) => {
       if (shouldCallApi) {
-        const token = tokenStorage.getToken();
         const refreshToken = tokenStorage.getRefreshToken();
-        if (token) {
+        if (refreshToken) {
           try {
-            await authApi.logout(refreshToken, token);
+            await authApi.logout(refreshToken);
           } catch {
             // Ignore logout API errors - we still want to clear local state
           }
@@ -104,13 +103,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         authApi
-          .refreshToken(refreshToken)
-          .then(data => {
-            tokenStorage.setToken(data.access_token);
-            if (data.refresh_token) {
-              tokenStorage.setRefreshToken(data.refresh_token);
+          .refreshAccessToken(refreshToken)
+          .then(response => {
+            if (response.success && response.data) {
+              // Token storage is already handled by the API
+              loadUserFromToken();
+            } else {
+              handleLogout(false);
             }
-            loadUserFromToken();
           })
           .catch(() => {
             handleLogout(false);
@@ -125,12 +125,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async (email: string, password: string) => {
       setIsLoading(true);
       try {
-        const data = await authApi.login({ email, password });
+        const response = await authApi.login({ email, password });
 
-        tokenStorage.setToken(data.access_token);
-        tokenStorage.setRefreshToken(data.refresh_token);
-        setUser(data.user);
-        router.push('/dashboard');
+        if (response.success && response.data) {
+          // Tokens are already stored by the API
+          // Convert ApiUserResponse to User type
+          setUser({
+            id: response.data.user.id.toString(),
+            email: response.data.user.email,
+            role: response.data.user.role as User['role'],
+            name: response.data.user.name,
+          });
+          router.push('/dashboard');
+        } else {
+          throw new Error(response.error || 'Login failed');
+        }
       } finally {
         setIsLoading(false);
       }

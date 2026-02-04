@@ -63,6 +63,7 @@ export const SimpleChartPreview = forwardRef<SimpleChartPreviewRef, SimpleChartP
           decimalPrecision: chart.decimalPrecision,
           showLegend: chart.showLegend,
           showGridlines: chart.showGridlines,
+          axisLabelDisplay: chart.axisLabelDisplay,
           source: chart.source, // Pass source attribution
         },
         dataSource,

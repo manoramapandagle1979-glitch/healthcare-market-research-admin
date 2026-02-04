@@ -120,7 +120,7 @@ export default function LoginPage() {
               {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="captcha">Security Check</Label>
+              <Label htmlFor="captcha">Enter Captcha</Label>
               <div className="flex items-center gap-2">
                 <div className="flex-1 bg-muted px-4 py-2 rounded-md text-center font-semibold text-lg">
                   {captcha.num1} + {captcha.num2} = ?

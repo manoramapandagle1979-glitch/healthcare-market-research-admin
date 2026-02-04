@@ -3,8 +3,12 @@
 import { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { PressReleaseForm } from '@/components/press-releases/press-release-form';
-import { WorkflowStatus } from '@/components/press-releases/workflow-status';
+import { WorkflowStatus } from '@/components/shared/workflow-status';
 import { ScheduledPublishCard } from '@/components/shared/scheduled-publish-card';
+import {
+  PRESS_RELEASE_STATUS_CONFIG,
+  PRESS_RELEASE_WORKFLOW_TRANSITIONS,
+} from '@/lib/config/press-releases';
 import { usePressRelease } from '@/hooks/use-press-release';
 import { useAuth } from '@/contexts/auth-context';
 import { FormSkeleton } from '@/components/ui/skeletons/form-skeleton';
@@ -112,6 +116,8 @@ export default function EditPressReleasePage() {
             onStatusChange={handleStatusChange}
             isSaving={isSaving}
             isAdmin={isAdmin}
+            statusConfig={PRESS_RELEASE_STATUS_CONFIG}
+            workflowTransitions={PRESS_RELEASE_WORKFLOW_TRANSITIONS}
           />
           <ScheduledPublishCard
             currentScheduledDate={

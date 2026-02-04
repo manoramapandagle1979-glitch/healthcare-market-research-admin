@@ -13,24 +13,36 @@ import {
   CommandList,
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import type { PressReleaseTag } from '@/lib/types/press-releases';
-import { fetchTags, createTag } from '@/lib/api/press-releases';
 import { cn } from '@/lib/utils';
 
-interface TagInputProps {
-  value: PressReleaseTag[];
-  onChange: (tags: PressReleaseTag[]) => void;
-  placeholder?: string;
+interface BaseTag {
+  id: string;
+  name: string;
 }
 
-export function TagInput({ value, onChange, placeholder = 'Add tags...' }: TagInputProps) {
+interface TagInputProps<T extends BaseTag> {
+  value: T[];
+  onChange: (tags: T[]) => void;
+  placeholder?: string;
+  fetchTags: () => Promise<{ tags: T[] }>;
+  createTag: (name: string) => Promise<{ tag: T }>;
+}
+
+export function TagInput<T extends BaseTag>({
+  value,
+  onChange,
+  placeholder = 'Add tags...',
+  fetchTags,
+  createTag,
+}: TagInputProps<T>) {
   const [open, setOpen] = useState(false);
-  const [availableTags, setAvailableTags] = useState<PressReleaseTag[]>([]);
+  const [availableTags, setAvailableTags] = useState<T[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [newTagInput, setNewTagInput] = useState('');
 
   useEffect(() => {
     loadTags();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadTags = async () => {
@@ -45,7 +57,7 @@ export function TagInput({ value, onChange, placeholder = 'Add tags...' }: TagIn
     }
   };
 
-  const handleSelect = (tag: PressReleaseTag) => {
+  const handleSelect = (tag: T) => {
     const isSelected = value.some(t => t.id === tag.id);
     if (isSelected) {
       onChange(value.filter(t => t.id !== tag.id));

@@ -57,7 +57,6 @@ export default function LeadsPage() {
 
   const handleExport = () => {
     // TODO: Implement export functionality
-    console.log('Export functionality to be implemented');
   };
 
   return (
