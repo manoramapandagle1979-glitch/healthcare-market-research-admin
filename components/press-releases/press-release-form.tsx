@@ -352,7 +352,7 @@ export function PressReleaseForm({
                       max={SEO_LIMITS.metaTitle.max}
                       optimal={SEO_LIMITS.metaTitle.optimal}
                       pixelWidth={{
-                        current: measureTextWidth(field.value || '', '16px system-ui'),
+                        current: measureTextWidth(field.value || '', '14px system-ui'),
                         max: SEO_LIMITS.metaTitle.pixelWidth.max,
                       }}
                       variant="inline"
@@ -379,7 +379,7 @@ export function PressReleaseForm({
                       max={SEO_LIMITS.metaDescription.max}
                       optimal={SEO_LIMITS.metaDescription.optimal}
                       pixelWidth={{
-                        current: measureTextWidth(field.value || '', '16px system-ui'),
+                        current: measureTextWidth(field.value || '', '14px system-ui'),
                         max: SEO_LIMITS.metaDescription.pixelWidth.max,
                       }}
                       variant="inline"

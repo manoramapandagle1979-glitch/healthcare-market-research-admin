@@ -17,7 +17,12 @@ interface ChartBuilderDialogProps {
   reportData?: ReportFormData;
 }
 
-export function ChartBuilderDialog({ open, onOpenChange, onSave, reportData }: ChartBuilderDialogProps) {
+export function ChartBuilderDialog({
+  open,
+  onOpenChange,
+  onSave,
+  reportData,
+}: ChartBuilderDialogProps) {
   const handleSave = (chart: ReportChart) => {
     onSave(chart);
     onOpenChange(false);
@@ -29,8 +34,7 @@ export function ChartBuilderDialog({ open, onOpenChange, onSave, reportData }: C
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      {/* <DialogContent className="sm:max-w-7xl max-h-[90vh] overflow-y-auto"> */}
-      <DialogContent className="sm:max-w-[52vw] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] sm:max-w-[85vw] lg:max-w-6xl xl:max-w-7xl 2xl:max-w-[65vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create Chart</DialogTitle>
           <DialogDescription>

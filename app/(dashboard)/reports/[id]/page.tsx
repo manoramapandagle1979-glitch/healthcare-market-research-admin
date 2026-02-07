@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ReportFormTabs } from '@/components/reports/report-form-tabs';
-import { ScheduledPublishCard } from '@/components/shared/scheduled-publish-card';
 import { useReport } from '@/hooks/use-report';
 import { useAuth } from '@/contexts/auth-context';
 import { FormSkeleton } from '@/components/ui/skeletons/form-skeleton';
@@ -101,36 +100,25 @@ export default function EditReportPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <ReportFormTabs
-            report={report}
-            onSubmit={async data => {
-              // Final submit - save with form data
-              if (report?.id) {
-                await saveReport(report.id, data);
-              }
-            }}
-            onSaveTab={handleSaveTab}
-            onPreview={() => router.push(`/reports/${report.id}/preview`)}
-            isSaving={isSaving}
-          />
-        </div>
-
-        <div className="space-y-6">
-          <ScheduledPublishCard
-            currentScheduledDate={report.scheduled_publish_enabled ? report.publishDate : undefined}
-            currentStatus={report.status}
-            onSchedule={async date => {
-              await scheduleReportPublish(String(reportId), date);
-            }}
-            onCancelSchedule={async () => {
-              await cancelReportSchedule(String(reportId));
-            }}
-            isSaving={isSaving}
-          />
-        </div>
-      </div>
+      <ReportFormTabs
+        report={report}
+        onSubmit={async data => {
+          // Final submit - save with form data
+          if (report?.id) {
+            await saveReport(report.id, data);
+          }
+        }}
+        onSaveTab={handleSaveTab}
+        onPreview={() => router.push(`/reports/${report.id}/preview`)}
+        isSaving={isSaving}
+        currentScheduledDate={report.scheduled_publish_enabled ? report.publishDate : undefined}
+        onSchedule={async date => {
+          await scheduleReportPublish(String(reportId), date);
+        }}
+        onCancelSchedule={async () => {
+          await cancelReportSchedule(String(reportId));
+        }}
+      />
     </div>
   );
 }

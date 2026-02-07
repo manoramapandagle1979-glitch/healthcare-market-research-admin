@@ -83,9 +83,10 @@ function generateDefaultChartData(reportData?: ReportFormData): ReportChart {
     chartType: 'bar',
     orientation: 'vertical',
     title: `Global ${marketName} Market Size`,
-    subtitle: metrics?.currentYear && metrics?.forecastYear
-      ? `${metrics.currentYear}-${metrics.forecastYear}`
-      : undefined,
+    subtitle:
+      metrics?.currentYear && metrics?.forecastYear
+        ? `${metrics.currentYear}-${metrics.forecastYear}`
+        : undefined,
     xAxisLabel: 'Year',
     yAxisLabel: 'Revenue',
     unitSuffix: 'B',
@@ -111,7 +112,12 @@ function generateDefaultChartData(reportData?: ReportFormData): ReportChart {
   };
 }
 
-export function SimpleChartBuilder({ chart, onSave, onCancel, reportData }: SimpleChartBuilderProps) {
+export function SimpleChartBuilder({
+  chart,
+  onSave,
+  onCancel,
+  reportData,
+}: SimpleChartBuilderProps) {
   const [chartData, setChartData] = useState<ReportChart>(() => {
     if (chart) {
       // Editing existing chart - apply defaults for missing fields
@@ -333,7 +339,9 @@ export function SimpleChartBuilder({ chart, onSave, onCancel, reportData }: Simp
                 <Switch
                   id="show-gridlines"
                   checked={chartData.showGridlines}
-                  onCheckedChange={checked => setChartData({ ...chartData, showGridlines: checked })}
+                  onCheckedChange={checked =>
+                    setChartData({ ...chartData, showGridlines: checked })
+                  }
                 />
                 <Label htmlFor="show-gridlines" className="cursor-pointer text-sm">
                   Gridlines
@@ -341,7 +349,9 @@ export function SimpleChartBuilder({ chart, onSave, onCancel, reportData }: Simp
               </div>
 
               <div className="flex items-center gap-2">
-                <Label htmlFor="decimal-precision" className="text-sm">Decimals:</Label>
+                <Label htmlFor="decimal-precision" className="text-sm">
+                  Decimals:
+                </Label>
                 <Select
                   value={chartData.decimalPrecision.toString()}
                   onValueChange={value =>
@@ -375,7 +385,9 @@ export function SimpleChartBuilder({ chart, onSave, onCancel, reportData }: Simp
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Show All Values</SelectItem>
-                    <SelectItem value="first-second-last">Show 1st, 2nd & Last (Default)</SelectItem>
+                    <SelectItem value="first-second-last">
+                      Show 1st, 2nd & Last (Default)
+                    </SelectItem>
                     <SelectItem value="first-last">Show 1st & Last Only</SelectItem>
                     <SelectItem value="none">Hide All Values</SelectItem>
                   </SelectContent>
@@ -405,7 +417,11 @@ export function SimpleChartBuilder({ chart, onSave, onCancel, reportData }: Simp
               <Label>Logo (Optional)</Label>
               {chartData.logoUrl ? (
                 <div className="space-y-2">
-                  <img src={chartData.logoUrl} alt="Logo preview" className="h-16 w-auto border rounded" />
+                  <img
+                    src={chartData.logoUrl}
+                    alt="Logo preview"
+                    className="h-16 w-auto border rounded"
+                  />
                   <Button
                     type="button"
                     variant="outline"
@@ -419,7 +435,7 @@ export function SimpleChartBuilder({ chart, onSave, onCancel, reportData }: Simp
                 <Input
                   type="file"
                   accept="image/png,image/svg+xml"
-                  onChange={(e) => {
+                  onChange={e => {
                     const file = e.target.files?.[0];
                     if (!file) return;
 
@@ -437,20 +453,18 @@ export function SimpleChartBuilder({ chart, onSave, onCancel, reportData }: Simp
 
                     // Convert to base64 data URL for preview
                     const reader = new FileReader();
-                    reader.onload = (e) => {
+                    reader.onload = e => {
                       const dataUrl = e.target?.result as string;
                       setChartData({
                         ...chartData,
-                        logoUrl: dataUrl
+                        logoUrl: dataUrl,
                       });
                     };
                     reader.readAsDataURL(file);
                   }}
                 />
               )}
-              <p className="text-xs text-muted-foreground">
-                Upload a PNG or SVG logo (max 2MB)
-              </p>
+              <p className="text-xs text-muted-foreground">Upload a PNG or SVG logo (max 2MB)</p>
             </div>
 
             {/* Logo Configuration */}
@@ -482,7 +496,9 @@ export function SimpleChartBuilder({ chart, onSave, onCancel, reportData }: Simp
                     min="0"
                     max="100"
                     value={chartData.logoOpacity ?? 80}
-                    onChange={e => setChartData({ ...chartData, logoOpacity: parseInt(e.target.value) })}
+                    onChange={e =>
+                      setChartData({ ...chartData, logoOpacity: parseInt(e.target.value) })
+                    }
                   />
                 </div>
               </div>
@@ -530,7 +546,11 @@ export function SimpleChartBuilder({ chart, onSave, onCancel, reportData }: Simp
           {isGeneratingPreview ? 'Generating...' : 'Preview Final Image'}
         </Button>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={onCancel} disabled={isGenerating || isGeneratingPreview}>
+          <Button
+            variant="outline"
+            onClick={onCancel}
+            disabled={isGenerating || isGeneratingPreview}
+          >
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={isGenerating || isGeneratingPreview}>
@@ -569,7 +589,7 @@ export function SimpleChartBuilder({ chart, onSave, onCancel, reportData }: Simp
 
       {/* Image Preview Dialog - Shows what will be saved */}
       <Dialog open={showImagePreview} onOpenChange={setShowImagePreview}>
-        <DialogContent className="max-w-[90vw] max-h-[90vh]">
+        <DialogContent className="w-[95vw] sm:w-[90vw] sm:max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl max-h-[90vh]">
           <DialogHeader>
             <DialogTitle>Final Chart Image Preview</DialogTitle>
             <DialogDescription>
@@ -579,11 +599,7 @@ export function SimpleChartBuilder({ chart, onSave, onCancel, reportData }: Simp
           {previewImageUrl && (
             <div className="space-y-4">
               <div className="border rounded-lg p-4 bg-muted/30 overflow-auto max-h-[70vh]">
-                <img
-                  src={previewImageUrl}
-                  alt="Chart preview"
-                  className="w-full h-auto mx-auto"
-                />
+                <img src={previewImageUrl} alt="Chart preview" className="w-full h-auto mx-auto" />
               </div>
               <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <span>High-resolution PNG image (2x pixel ratio)</span>

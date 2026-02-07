@@ -8,12 +8,12 @@ let context: CanvasRenderingContext2D | null = null;
 /**
  * Measures the pixel width of text using the specified font
  * @param text - The text to measure
- * @param font - CSS font specification (e.g., "16px system-ui")
+ * @param font - CSS font specification (e.g., "14px system-ui")
  * @returns The width in pixels
  */
 export function measureTextWidth(
   text: string,
-  font: string = '16px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+  font: string = '14px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
 ): number {
   // Return 0 for empty text
   if (!text) return 0;

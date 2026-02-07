@@ -24,6 +24,9 @@ interface ReportFormTabsProps {
   onSaveTab?: (tabKey: string, data: Partial<ReportFormData>) => Promise<void>;
   onPreview?: () => void;
   isSaving: boolean;
+  currentScheduledDate?: string;
+  onSchedule?: (date: Date) => Promise<void>;
+  onCancelSchedule?: () => Promise<void>;
 }
 
 const getSampleData = (): ReportFormData => ({
@@ -212,7 +215,19 @@ const getSampleData = (): ReportFormData => ({
 });
 
 export const ReportFormTabs = forwardRef<ReportFormTabsRef, ReportFormTabsProps>(
-  function ReportFormTabs({ report, onSubmit, onSaveTab, onPreview, isSaving }, ref) {
+  function ReportFormTabs(
+    {
+      report,
+      onSubmit,
+      onSaveTab,
+      onPreview,
+      isSaving,
+      currentScheduledDate,
+      onSchedule,
+      onCancelSchedule,
+    },
+    ref
+  ) {
     const [activeTab, setActiveTab] = useState('details');
 
     const form = useForm({
@@ -348,6 +363,9 @@ export const ReportFormTabs = forwardRef<ReportFormTabsRef, ReportFormTabsProps>
               onSubmit={onSubmit}
               onPreview={onPreview}
               isSaving={isSaving}
+              currentScheduledDate={currentScheduledDate}
+              onSchedule={onSchedule}
+              onCancelSchedule={onCancelSchedule}
             />
           </TabsContent>
         </Tabs>
