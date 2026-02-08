@@ -1,0 +1,1182 @@
+<html>
+
+<head>
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no'
+        name='viewport' />
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <style type="text/css">
+        body {
+            font-family: calibri;
+        }
+
+        .card {
+            background-color: transparent;
+            border: hidden;
+        }
+
+        .card-header {
+            background-color: #5e5958;
+            color: white;
+            font-style: italic;
+            font-size: 20px;
+        }
+
+        .card-body {
+            background-color: #fefce9;
+            border: solid;
+            border-color: #464646;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+        }
+
+        .form-control {
+            background-color: #fefce9;
+        }
+
+        /* width */
+
+        ::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        /* Track */
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* Handle */
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 8px;
+        }
+
+        /* Handle on hover */
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .nav {
+            background-color: #d3d3d3 !important;
+        }
+
+        .nav-link {
+            color: black;
+        }
+
+        .nav-item>.active {
+            color: white !important;
+            background-color: #464646 !important;
+        }
+
+        .nav-link:hover {
+            background-color: #909090 !important;
+            color: white !important;
+        }
+
+        button {
+            color: white;
+            background-color: #f2784b;
+            border-radius: 20px;
+            border-color: #f2784b;
+            border: solid;
+            height: 40px;
+            width: auto;
+        }
+
+        /* Toast notification styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast {
+            background-color: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 250px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .toast.hiding {
+            animation: slideOut 0.3s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .toast-icon {
+            font-size: 20px;
+        }
+
+        .toast-message {
+            flex: 1;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body style="background-color: #fafafa;">
+    <!-- Toast container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <div class="col-md-12"
+        style="color:white; font-size: 22px; font-weight: bold; background-color: #313131; text-align: center; height: 60px; padding-top: 15px;">
+        Table of Content Generator Wizard</div>
+    <br>
+    <div class="container">
+        <div class="row" id="toc">
+            <div class="col-md-12" style="width: 100%;">
+                <ul class="nav nav-tabs nav-tabs-solid" style="width: 100%;">
+                    <li class="nav-item"><a href="#colored-justified-tab1" class="nav-link active show"
+                            data-toggle="tab">Report Information</a></li>
+                    <li class="nav-item"><a href="#colored-justified-tab2" class="nav-link" data-toggle="tab">Factors
+                            Affecting Market</a></li>
+                    <li class="nav-item"><a href="#colored-justified-tab3" class="nav-link" data-toggle="tab">Report
+                            Segmentation</a></li>
+                    <li class="nav-item"><a href="#colored-justified-tab4" class="nav-link" data-toggle="tab">Regional
+                            Segmentation</a></li>
+                    <li class="nav-item"><a href="#colored-justified-tab5" class="nav-link" data-toggle="tab">Companies
+                            Profiled</a></li>
+                    <li class="nav-item" style="background-color: #f2784b; "><a href="#colored-justified-tab6"
+                            class="nav-link special" style="color:white !important;" data-toggle="tab">Output</a></li>
+
+                </ul>
+                <div class="tab-content" style="width: 100%; height: 100%;">
+                    <div class="tab-pane fade active show" id="colored-justified-tab1">
+                        <div class="card">
+                            <div class="card-header">Report Information</div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="Keyword">Keyword</label>
+                                    <input type="text" class="form-control full-control" v-model="Keyword" id="Keyword"
+                                        required />
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>From Year</label>
+                                            <input type="text" class="form-control" v-model="FromYear" required />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>To Year</label>
+                                            <input type="text" class="form-control" v-model="ToYear" required />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Base Year</label>
+                                            <input type="text" class="form-control" v-model="BaseYear" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4" style="vertical-align: middle;">
+                                        <div class="form-group">
+                                            <br><i>(Select appropriate option)</i><br>
+                                            <label>
+                                                Is Volume
+                                            </label>
+                                            <input type="checkbox" v-model="IsVolume" />&nbsp;&nbsp;&nbsp;&nbsp;
+                                            <label>
+                                                Is Cross
+                                            </label>
+                                            <input type="checkbox" v-model="IsCross" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Volume</label>
+                                            <input type="text" class="form-control" placeholder="Ex. Kilo Tons"
+                                                :disabled="!IsVolume" :required="IsVolume" v-model="Volume" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Revenue</label>
+                                            <input type="text" class="form-control" placeholder="Ex. USD Million"
+                                                v-model="Revenue" required />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="colored-justified-tab2">
+                        <div class="card">
+                            <div class="card-header">Factors Affecting Market</div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="drivers">Drivers <span class="hint">(One at a line OR Coma
+                                                seprated)</span></label>
+                                        <textarea class="form-control full-control" v-model="drivers"
+                                            v-on:change="Format('drivers')"></textarea>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Restraints">Restraints <span class="hint">(One at a line OR Coma
+                                                seprated)</span></label>
+                                        <textarea class="form-control full-control" v-model="restraints"
+                                            v-on:change="Format('restraints')"></textarea>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Opportunities">Opportunities <span class="hint">(One at a line OR
+                                                Coma
+                                                seprated)</span></label>
+                                        <textarea class="form-control full-control" v-model="opportunities"
+                                            v-on:change="Format('opportunities')"></textarea>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Chalanges">challengeS <span class="hint">(One at a line OR Coma
+                                                seprated)</span></label>
+                                        <textarea class="form-control full-control" v-model="chalanges"
+                                            v-on:change="Format('chalanges')"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="colored-justified-tab3">
+                        <div class="card">
+                            <div class="card-header">Report Segmentation</div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label>Segmentaions</label>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control" id="txtSegName"
+                                                v-model="SegmentName" required />
+                                        </div>
+                                        <div class="col-md-4">
+                                            <select class="form-control" id="ddlSegmentType" v-model="SegmentType"
+                                                required>
+                                                <option value="">-Select-</option>
+                                                <option value="1">Main Segment</option>
+                                                <option value="2">Sub Segment</option>
+                                                <option value="3">Child Segment</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <button type="button" :disabled="SegmentName == '' || SegmentType == ''"
+                                                v-on:click="AddSegment()" class="">&nbsp;Add Segment&nbsp;</button>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div id="segments" style="padding:20px;" class="output">
+                                            <ul>
+                                                <li v-for="(s, parentIndex) in Segment.SubSegment" v-bind:key="s.Index">
+                                                    {{s.SegmentName}}
+                                                    <i class="fa fa-trash-o remove"
+                                                        v-on:click="Remove(parentIndex, -1)"></i>
+                                                    <ul v-if="s.SubSegment">
+                                                        <li v-for="(ss, childIndex) in s.SubSegment"
+                                                            v-bind:key="ss.Index">
+                                                            {{ss.SegmentName}}
+                                                            <i class="fa fa-trash-o remove"
+                                                                v-on:click="Remove(parentIndex, childIndex)"></i>
+                                                            <ul v-if="ss.SubSegment">
+                                                                <li v-for="(sss, index) in ss.SubSegment" :key="index">
+                                                                    {{sss.SegmentName}}</li>
+                                                            </ul>
+                                                        </li>
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="colored-justified-tab4">
+                        <div class="card">
+                            <div class="card-header">Regional Segmentation </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="Country">Country <span class="hint">(Country Specific, Regions Should be
+                                            empty)</span></label>
+                                    <input type="text" class="form-control full-control" v-model="Country" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Regions/Country</label>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <input type="text" class="form-control" id="txtRC" v-model="Region" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select class="form-control" id="ddlRC" v-model="RCType">
+                                                <option value="">-Select-</option>
+                                                <option value="1">Region</option>
+                                                <option value="2">Country</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" v-on:click="AddRegion()" class=""
+                                                :disabled="Region == '' || RCType == ''">&nbsp;Add&nbsp;</button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label><input type="checkbox" id="chkGlobal" v-on:change="Global()"
+                                                    v-model="IsGlobal" />
+                                                IsGlobal</label>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div id="outputRC" style="padding: 20px;">
+                                            <ul v-if="RC.length">
+                                                <li v-for="(r, regionIndex) in RC" v-bind:key="r.Index">
+                                                    {{r.RegionName}}
+                                                    <i class="fa fa-trash-o remove"
+                                                        v-on:click="RemoveRegionCountry(regionIndex, -1)"></i>
+                                                    <ul v-if="r.Country">
+                                                        <li v-for="(c, countryIndex) in r.Country" v-bind:key="c.Index">
+                                                            {{c.CountryName}}
+                                                            <i class="fa fa-trash-o remove"
+                                                                v-on:click="RemoveRegionCountry(regionIndex, countryIndex)"></i>
+                                                        </li>
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="colored-justified-tab5">
+                        <div class="card">
+                            <div class="card-header"> Companies Profiled in Report </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="Companies">Companies <span class="hint">(One at a line OR Coma
+                                            seprated)</span></label>
+                                    <textarea class="form-control full-control" v-model="Companies"
+                                        v-on:change="FormatCompany()"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="colored-justified-tab6">
+                        <div class="card">
+                            <div class="card-header">Output</div>
+                            <div class="card-body">
+                                <div class="col-md-12" style="text-align: right;">
+                                    <button id="btn-export" style="cursor: pointer;" onclick="exportHTML();">
+                                        &nbsp;&nbsp; Export to
+                                        Word Doc &nbsp;&nbsp;</button>
+                                </div>
+                                <div class="toc" id="ToC" style="text-align: justify; font-size:14px;">
+                                    <h3 style="color:#f2784b;">{{Keyword}} Market</h3><br>
+                                    <h5 style="color:#f2784b;">Report Description</h5>
+                                    <p>The report covers forecast and analysis for the {{Keyword}} market on a global
+                                        and regional level. The study provides historic data from {{FromYear}} to
+                                        {{BaseYear}} along with a forecast from {{BaseYear}} to {{ToYear}}
+                                        based on revenue ({{Revenue}}). The study includes drivers and restraints for
+                                        the {{Keyword}} market along with the impact they have on the demand over the
+                                        forecast period. Additionally, the report includes the
+                                        study of opportunities available in the {{Keyword}} market on a global level.
+                                    </p>
+                                    <p>In order to give the users of this report a comprehensive view on the {{Keyword}}
+                                        market, we have included competitive landscape and analysis of Porter’s Five
+                                        Forces model for the market. The study encompasses a market
+                                        attractiveness analysis, wherein
+                                        <li style="display: inline; margin-left: 0px; padding-left: 0px;"
+                                            v-for="(seg, segInex) in Segment.SubSegment">{{seg.SegmentName}}, </li>and
+                                        regional segments are benchmarked based on their market size, growth rate, and
+                                        general attractiveness.
+                                    </p>
+                                    <p>The report provides company market share analysis in order to give a broader
+                                        overview of the key players in the market. In addition, the report also covers
+                                        key strategic developments of the market including acquisitions
+                                        & mergers, new product launches, agreements, partnerships, collaborations &
+                                        joint ventures, research & development, and regional expansion of major
+                                        participants involved in the market on a global and regional basis.</p>
+                                    <p>The study provides a decisive view on the {{Keyword}} market by segmenting the
+                                        market based on
+                                        <li style="display: inline; margin-left: 0px; padding-left: 0px;"
+                                            v-for="(seg, segInex) in Segment.SubSegment">{{seg.SegmentName}}, </li>and
+                                        Regions. All the segments have been analyzed based on present and future trends
+                                        and the market is estimated from {{BaseYear}} to {{ToYear}}. The regional
+                                        segmentation includes the current
+                                        and forecast demand for North America, Europe, Asia Pacific, Latin America, and
+                                        Middle East & Africa with its further bifurcation into major countries.
+                                    </p>
+                                    <p>Key players within global {{Keyword}} market include
+                                        <li style="display: inline; margin-left: 0px; padding-left: 0px;"
+                                            v-for="(c, cIndex) in Company">{{c.CompanyName}}, </li>etc.
+                                    </p>
+                                    <p>This report segments the global {{Keyword}} market as follows:<br />
+                                        <strong>Global {{Keyword}} Market: Drug Class Segment Analysis</strong>
+                                        <!--Implement List-->
+                                    </p>
+
+                                    <hr>
+                                    <h5 style="color:#f2784b;">Table of Content</h5>
+                                    <button class="btn btn-dark btn-sm" @click="createTOC()">Generate TOC</button>
+                                    <button class="btn btn-secondary btn-sm" @click="copyTOC()" v-if="dt && dt.length > 0" style="margin-left: 10px;">Copy TOC</button>
+                                    <div id="toc">
+                                        <toc-Template :item="dt" :parentIndx="1" name="toc"
+                                            v-if="dt && dt.length > 0" />
+                                    </div>
+
+                                    <h5>List Of Figures</h5>
+                                    <button class="btn btn-light" @click="createListOfFigures()">Generate LOF</button>
+                                    <button class="btn btn-secondary btn-sm" @click="copyLOF()" v-if="listoffigures && listoffigures.length > 0" style="margin-left: 10px;">Copy LOF</button>
+                                    <div id="lof">
+                                        <toc-Template :item="listoffigures" name="lof"
+                                            v-if="listoffigures && listoffigures.length > 0" />
+                                    </div>
+
+                                    <h5>List Of Tables</h5>
+                                    <button class="btn btn-light" @click="createListOfTables()">Generate LOT</button>
+                                    <button class="btn btn-secondary btn-sm" @click="copyLOT()" v-if="listOfTables && listOfTables.length > 0" style="margin-left: 10px;">Copy LOT</button>
+                                    <div id="lot">
+                                        <toc-Template :item="listOfTables" name="lot"
+                                            v-if="listOfTables && listOfTables.length > 0" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-12" style="height: 30px;"></div>
+            <div class="col-md-12">
+                <div class="container container-fluid">
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    <br>
+    <script type="text/x-template" id="toc-template">
+        <ul v-if="item && item.length > 0">
+            <li v-for="(v, vindex) in item" :key="v.itemText_vindex">{{v.itemText}}
+                <toc-Template :item="v.SubItem" :parentIndex="vindex" :keyword="Keyword" />
+            </li>
+        </ul>
+    </script>
+
+    <script>
+        var tocTemplate = Vue.component('TocTemplate', {
+            template: '#toc-template',
+            props: {
+                item: [],
+                parentindex: 0,
+                keyword: ''
+
+            },
+            mounted: function () {
+                console.log('Keyword', this.keyword);
+            },
+            data: function () {
+                return {
+                    Keyword: this.keyword,
+                    FromYear: this.fromYear,
+                    Revenue: this.revenue
+                }
+            }
+        });
+
+        var currentSegmentIndex = -1;
+        var currentSubSegmentIndex = -1;
+        var Company = [];
+        var Year = [];
+        var vm = new Vue({
+            el: "#toc",
+            data: {
+                Segment: {
+                    SubSegment: []
+                },
+                SegmentType: '',
+                RC: [],
+                RCType: '',
+                IsVolume: false,
+                Volume: '',
+                Revenue: 'USD Million',
+                Keyword: '',
+                FromYear: '',
+                ToYear: '',
+                BaseYear: '',
+                Country: '',
+                IsGlobal: false,
+                Companies: '',
+                SegmentName: '',
+                Region: '',
+                DisableSubmit: false,
+                applicationHost: '',
+                Drivers: [],
+                drivers: '',
+                Restraints: [],
+                restraints: '',
+                Opportunities: [],
+                opportunities: '',
+                Chalanges: [],
+                chalanges: '',
+                Company: [],
+                dt: [],
+                IsCross: true,
+                Chapter: 0,
+                listoffigures: [],
+                listOfTables: []
+            },
+            computed: {
+                getKeyword: function () {
+                    return this.Keyword;
+                }
+            },
+            mounted: function () {
+
+            },
+            methods: {
+                showToast: function (message, type = 'success') {
+                    const container = document.getElementById('toast-container');
+                    const toast = document.createElement('div');
+                    toast.className = 'toast';
+
+                    const icon = type === 'success' ? '✓' : '✕';
+
+                    toast.innerHTML = `
+                        <span class="toast-icon">${icon}</span>
+                        <span class="toast-message">${message}</span>
+                    `;
+
+                    container.appendChild(toast);
+
+                    setTimeout(() => {
+                        toast.classList.add('hiding');
+                        setTimeout(() => {
+                            container.removeChild(toast);
+                        }, 300);
+                    }, 3000);
+                },
+                copyTOC: function () {
+                    this.copyContent(this.dt, 'Table of Contents');
+                },
+                copyLOF: function () {
+                    this.copyContent(this.listoffigures, 'List of Figures');
+                },
+                copyLOT: function () {
+                    this.copyContent(this.listOfTables, 'List of Tables');
+                },
+                copyContent: function (items, title) {
+                    const extractText = (itemsList, indent = 0) => {
+                        let text = '';
+                        itemsList.forEach(item => {
+                            text += ' '.repeat(indent) + item.itemText + '\n';
+                            if (item.SubItem && item.SubItem.length > 0) {
+                                text += extractText(item.SubItem, indent + 2);
+                            }
+                        });
+                        return text;
+                    };
+
+                    const content = extractText(items);
+
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(content).then(() => {
+                            this.showToast(title + ' copied to clipboard!');
+                        }).catch(err => {
+                            console.error('Failed to copy: ', err);
+                            this.fallbackCopy(content, title);
+                        });
+                    } else {
+                        this.fallbackCopy(content, title);
+                    }
+                },
+                fallbackCopy: function (text, title) {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = text;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        this.showToast(title + ' copied to clipboard!');
+                    } catch (err) {
+                        this.showToast('Failed to copy. Please try again or copy manually.', 'error');
+                    }
+                    document.body.removeChild(textArea);
+                },
+                createListOfTables: function () {
+                    this.listOfTables = [];
+                    let index = 1;
+                    this.listOfTables.push({
+                        itemText: `${index++}. Global ${this.Keyword} Market: Snapshot`
+                    }, {
+                        itemText: `${index++}. Drivers of the ${this.Keyword} Market: impact analysis`
+                    });
+
+                    this.RC.forEach((r, rIndex) => {
+                        this.Segment.SubSegment.forEach((s, sIndex) => {
+                            this.listOfTables.push({
+                                itemText: `${index++}. ${r.RegionName} ${this.Keyword} Market revenue, By ${s.SegmentName}, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`
+                            });
+                        });
+
+                        r.Country.forEach((c, cIndex) => {
+                            this.Segment.SubSegment.forEach((s, sIndex) => {
+                                this.listOfTables.push({
+                                    itemText: `${index++}. ${c.CountryName} ${this.Keyword} Market revenue, By ${s.SegmentName}, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`
+                                });
+                            });
+                        })
+
+                    });
+                },
+                createListOfFigures: function () {
+                    this.listoffigures = [];
+                    let index = 5;
+                    this.listoffigures.push({
+                        itemText: '1. Market research Type',
+                        SubItem: []
+                    }, {
+                        itemText: '2. Market research methodology',
+                        SubItem: []
+                    }, {
+                        itemText: `3. Global ${this.Keyword} Market, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`,
+                        SubItem: []
+                    }, {
+                        itemText: '4. Porter’s Five Forces Analysis',
+                        SubItem: []
+                    }, ...this.Segment.SubSegment.map((s, sInex) => {
+                        return {
+                            itemText: `${index++}. Global ${this.Keyword} Market attractiveness, By ${s.SegmentName}`,
+                            SubItem: []
+                        }
+                    }));
+
+                    let figsegment = [];
+
+                    this.Segment.SubSegment.forEach((s, sIndex) => {
+                        figsegment.push({
+                            itemText: `${index++}. Global ${this.Keyword} Market share by ${s.SegmentName}, ${this.FromYear} and ${this.ToYear} (${this.Revenue})`,
+                            SubItem: []
+                        })
+                        s.SubSegment.forEach((ss, ssIndex) => {
+                            figsegment.push({
+                                itemText: `${index++}. Global ${this.Keyword} Market by ${ss.SegmentName}, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`
+                            })
+                        })
+                    });
+                    this.listoffigures = [...this.listoffigures, ...figsegment];
+                    this.listoffigures.push({
+                        itemText: `${index++}. Global ${this.Keyword} Market share, by Region, ${this.FromYear} and ${this.ToYear}`,
+                        SubItem: []
+                    }, ...this.RC.map((r, rIndex) => {
+                        return {
+                            itemText: `${index++}. ${r.RegionName} ${this.Keyword} Market, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`
+                        }
+                    }));
+                },
+                createTOC: function () {
+                    this.dt = [];
+                    this.dt.push({
+                        itemText: 'Chapter 1. Preface',
+                        SubItem: [{
+                            itemText: '1.1 Report Description and Scope',
+                            SubItem: []
+                        }, {
+                            itemText: '1.2 Research scope',
+                            SubItem: []
+                        }, {
+                            itemText: '1.3 Research methodology',
+                            SubItem: [{
+                                itemText: '1.3.1 Market Research Type',
+                                SubItem: []
+                            }, {
+                                itemText: '1.3.2 Market research methodology',
+                                SubItem: []
+                            }]
+                        }]
+                    }, {
+                        itemText: 'Chapter 2. Executive Summary',
+                        SubItem: [{
+                            itemText: `2.1 Global  ${this.Keyword} Market, (${this.FromYear} - ${this.ToYear}) (${this.Revenue})`
+                        }, {
+                            itemText: `2.2 Global ${this.Keyword} Market : snapshot`,
+                            SubItem: []
+                        }]
+                    }, {
+                        itemText: `Chapter 3. Global ${this.Keyword}  Market - Industry Analysis`,
+                        SubItem: [{
+                            itemText: `3.1 ${this.Keyword} Market: Market Dynamics`,
+                            SubItem: []
+                        }, {
+                            itemText: '3.2 Market Drivers',
+                            SubItem: this.Drivers.map((d, i) => {
+                                return {
+                                    itemText: `3.2.${(i + 1)} ${d.itemText}`,
+                                    SubItem: []
+                                };
+                            })
+                        }, {
+                            itemText: '3.3 Market Restraints',
+                            SubItem: this.Restraints.map((r, i) => {
+                                return {
+                                    itemText: `3.3.${i + 1}. ${r.itemText}`,
+                                    SubItem: []
+                                }
+                            })
+                        }, {
+                            itemText: '3.4 Market Opportunities',
+                            SubItem: this.Opportunities.map((o, i) => {
+                                return {
+                                    itemText: `3.4.${i + 1}. ${o.itemText}`,
+                                    SubItem: []
+                                }
+                            })
+                        }, {
+                            itemText: '3.5 Market Challenges',
+                            SubItem: this.Opportunities.map((c, i) => {
+                                return {
+                                    itemText: `3.5.${i + 1}. ${c.itemText}`,
+                                    SubItem: []
+                                }
+                            })
+                        }, {
+                            itemText: '3.6 Porter’s Five Forces Analysis',
+                            SubItem: []
+                        }, {
+                            itemText: '3.7 Market Attractiveness Analysis',
+                            SubItem: this.Segment.SubSegment.map((s, i) => {
+                                return {
+                                    itemText: `3.7.${(i + 1)} Market attractiveness analysis By ${s.SegmentName}`,
+                                    SubItem: []
+                                };
+                            })
+                        }]
+                    }, {
+                        itemText: `Chapter 4. Global ${this.Keyword} Market- Competitive Landscape`,
+                        SubItem: [{
+                            itemText: '4.1 Company market share analysis',
+                            SubItem: [{
+                                itemText: `4.1.1 Global ${this.Keyword} Market: company market share, ${this.BaseYear}`
+                            }]
+                        }, {
+                            itemText: '4.2 Strategic development',
+                            SubItem: [{
+                                itemText: '4.2.1 Acquisitions & mergers',
+                                SubItem: [],
+                            }, {
+                                itemText: '4.2.2 New Product launches',
+                                SubItem: []
+                            }, {
+                                itemText: '4.2.3 Agreements, partnerships, cullaborations, and joint ventures',
+                                SubItem: []
+                            }, {
+                                itemText: '4.2.4 Research and development and Regional expansion',
+                                SubItem: []
+                            }]
+                        }, {
+                            itemText: '4.3 Price trend analysis',
+                            SubItem: []
+                        }]
+                    }, ...this.Segment.SubSegment.map((s, i) => {
+                        this.Chapter = (4 + i + 1);
+                        return {
+                            itemText: `Chapter ${this.Chapter}. Global ${this.Keyword} Market - ${s.SegmentName} Analysis`,
+                            SubItem: [{
+                                itemText: `${this.Chapter}.1 Global ${this.Keyword} Market overview: By ${s.SegmentName}`,
+                                SubItem: [{
+                                    itemText: `${this.Chapter}.1.1 Global ${this.Keyword} Market share, By ${s.SegmentName}, ${this.BaseYear} and ${this.ToYear}`
+                                }]
+                            }, ...s.SubSegment.map((ss, i2) => {
+                                return {
+                                    itemText: `${this.Chapter}.${i2 + 2} ${ss.SegmentName}`,
+                                    SubItem: [{
+                                        itemText: `${this.Chapter}.${i2 + 2}.1 Global ${this.Keyword} Market by ${ss.SegmentName}, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`
+                                    }]
+                                };
+                            })]
+                        };
+
+                    }));
+
+                    let regionalseg = [];
+                    this.Chapter++;
+
+                    //sub parent index
+                    let subparent = 2;
+
+
+
+                    this.RC.forEach((rc, i) => {
+                        subparent = subparent + 1;
+                        regionalseg.push({
+                            itemText: `${this.Chapter}.${subparent}. ${rc.RegionName}`,
+                            SubItem: [{
+                                itemText: `${this.Chapter}.${subparent}.1 ${rc.RegionName} ${this.Keyword} Market, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`,
+                                SubItem: [{
+                                    itemText: `${this.Chapter}.${subparent}.1.1 ${rc.RegionName} ${this.Keyword} Market, by Country, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`
+                                }]
+                            }]
+                        });
+
+                        this.Segment.SubSegment.forEach((ss, ssi) => {
+                            subparent = subparent + 1;
+                            regionalseg.push({
+                                itemText: `${this.Chapter}.${subparent} ${rc.RegionName} ${this.Keyword} Market, by ${ss.SegmentName}, ${this.FromYear} - ${this.ToYear}`,
+                                SubItem: [{
+                                    itemText: `${this.Chapter}.${subparent}.1 ${rc.RegionName} ${this.Keyword} Market, by ${ss.SegmentName}, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`,
+                                    SubItem: []
+                                }]
+                            });
+
+                        });
+
+
+                    });
+
+                    this.dt.push({
+                        itemText: `Chapter ${this.Chapter}. ${this.Keyword} Market - Regional Analysis`,
+                        SubItem: [{
+                            itemText: `${this.Chapter}.1 Global ${this.Keyword} Market Regional Overview`,
+                            SubItem: []
+                        }, {
+                            itemText: `${this.Chapter}.2 Global ${this.Keyword} Market Share, by Region, ${this.BaseYear} & ${this.ToYear} (${this.Revenue})`,
+                            SubItem: []
+                        }, ...regionalseg]
+                    });
+
+                    //this.dt = [...this.dt, ...regionalseg];
+
+                    this.Chapter += 1;
+
+                    this.dt.push({
+                        itemText: `Chapter ${this.Chapter}. Company Profiles`,
+                        SubItem: this.Company.map((c, i) => {
+                            return {
+                                itemText: `${this.Chapter}.${i + 1} ${c.CompanyName}`,
+                                SubItem: i == 0 ? [{
+                                    itemText: `${this.Chapter}.${i + 1}.1 Overview`,
+                                    SubItem: []
+                                }, {
+                                    itemText: `${this.Chapter}.${i + 1}.2 Financials`,
+                                    SubItem: []
+                                }, {
+                                    itemText: `${this.Chapter}.${i + 1}.3 Product Portfolio`,
+                                    SubItem: []
+                                }, {
+                                    itemText: `${this.Chapter}.${i + 1}.4 Business Strategy`,
+                                    SubItem: []
+                                }, {
+                                    itemText: `${this.Chapter}.${i + 1}.5 Recent Developments`,
+                                    SubItem: []
+                                }] : []
+                            };
+                        })
+                    });
+                },
+                AddSegment: function () {
+                    if (vm.SegmentType == 1) {
+                        let s1 = vm.Segment.SubSegment.length;
+                        vm.Segment.SubSegment.push({
+                            Index: s1 > 0 ? s1 : 0,
+                            SegmentName: vm.SegmentName,
+                            SubSegment: []
+                        });
+                    } else if (vm.SegmentType == 2) {
+                        let s2 = vm.Segment.SubSegment[vm.Segment.SubSegment.length - 1].SubSegment.length;
+                        console.log(s2);
+                        vm.Segment.SubSegment[vm.Segment.SubSegment.length - 1].SubSegment.push({
+                            Index: s2 > 0 ? s2 : 0,
+                            SegmentName: vm.SegmentName,
+                            SubSegment: []
+                        });
+                    } else {
+                        let s3 = Segment.SubSegment[this.Segment.SubSegment.length - 1].SubSegment[vm.Segment.SubSegment[this.Segment.SubSegment.length - 1].SubSegment.length - 1].SubSegment.length;
+                        vm.Segment.SubSegment[this.Segment.SubSegment.length - 1].SubSegment[vm.Segment.SubSegment[this.Segment.SubSegment.length - 1].SubSegment.length - 1].SubSegment.push({
+                            Index: s3 > 0 ? s3 : 0,
+                            SegmentName: this.SegmentName,
+                            SubSegment: []
+                        });
+                    }
+                },
+                Remove: function (parentIndex, childIndex) {
+                    if (childIndex > -1) {
+                        vm.Segment[parentIndex].SubSegment.splice(childIndex, 1);
+                    } else {
+                        vm.Segment.splice(parentIndex, 1);
+                    }
+                },
+                AddRegion: function () {
+                    if (this.RCType == 1) {
+                        vm.RC.push({
+                            Index: this.RC.length > 0 ? this.RC.length - 1 : 0,
+                            RegionName: this.Region,
+                            Country: [],
+                            isFirstRegion: this.RC.length === 0
+                        });
+                    } else {
+                        vm.RC[this.RC.length - 1].Country.push({
+                            Index: this.RC[this.RC.length - 1].Country.length > 0 ? this.RC[this.RC.length - 1].Country.length - 1 : 0,
+                            CountryName: this.Region,
+                            isFirstCountry: this.RC.Country.length === 0
+                        });
+                    }
+                },
+                RemoveRegionCountry: function (regionIndex, countryIndex) {
+                    if (countryIndex > -1) {
+                        vm.RC[regionIndex].Country.splice(countryIndex, 1);
+                    } else {
+                        vm.RC.splice(regionIndex, 1);
+                    }
+                },
+                Global: function () {
+                    vm.RC = [];
+                    if (this.IsGlobal) {
+                        vm.RC.push({
+                            Index: 0,
+                            RegionName: 'North America',
+                            Country: [{
+                                Index: 0,
+                                CountryName: 'U.S.'
+                            }, {
+                                Index: 1,
+                                CountryName: 'Canada'
+                            }],
+                            isFirstRegion: true
+                        });
+                        vm.RC.push({
+                            Index: 1,
+                            RegionName: 'Europe',
+                            Country: [{
+                                Index: 0,
+                                CountryName: 'Germany'
+                            }, {
+                                Index: 1,
+                                CountryName: 'France'
+                            }, {
+                                Index: 2,
+                                CountryName: 'U.K.'
+                            }, {
+                                Index: 3,
+                                CountryName: 'Italy'
+                            }, {
+                                Index: 4,
+                                CountryName: 'Spain'
+                            }, {
+                                Index: 5,
+                                CountryName: 'Rest of Europe'
+                            }],
+                            isFirstRegion: false
+                        });
+                        vm.RC.push({
+                            Index: 2,
+                            RegionName: 'Asia Pacific',
+                            Country: [{
+                                Index: 0,
+                                CountryName: 'China'
+                            }, {
+                                Index: 1,
+                                CountryName: 'Japan'
+                            }, {
+                                Index: 3,
+                                CountryName: 'India'
+                            }, {
+                                Index: 4,
+                                CountryName: 'South  Korea'
+                            }, {
+                                Index: 5,
+                                CountryName: 'South-East Asia'
+                            }, {
+                                Index: 6,
+                                CountryName: 'Rest of Asia Pacific'
+                            },],
+                            isFirstRegion: false
+                        });
+
+                        vm.RC.push({
+                            Index: 3,
+                            RegionName: 'Latin America',
+                            Country: [{
+                                Index: 0,
+                                CountryName: 'Brazil'
+                            }, {
+                                Index: 1,
+                                CountryName: 'Mexico'
+                            }, {
+                                Index: 2,
+                                CountryName: 'Rest of Latin America'
+                            }],
+                            isFirstRegion: false
+                        });
+
+                        vm.RC.push({
+                            Index: 4,
+                            RegionName: 'The Middle-East and Africa',
+                            Country: [{
+                                Index: 0,
+                                CountryName: 'GCC Countries'
+                            }, {
+                                Index: 1,
+                                CountryName: 'South Africa'
+                            }, {
+                                Index: 2,
+                                CountryName: 'Rest of Middle-East Africa'
+                            }],
+                            isFirstRegion: false
+                        });
+                    }
+                },
+                FormatCompany: function () {
+                    Company = [];
+                    var companies = this.Companies.indexOf('\n') > -1 ? this.Companies.split('\n') : this.Companies.split(',');
+                    for (var i = 0; i < companies.length; i++) {
+                        if (companies[i].trim() != '') {
+                            Company.push({
+                                CompanyName: companies[i].trim(),
+                                isFirstCompany: Company.length === 0
+                            });
+                        }
+                    }
+                    vm.Company = Company;
+                    var fromYear = parseInt(this.FromYear);
+                    var toYear = parseInt(this.ToYear);
+
+                    for (var j = fromYear; j <= toYear; j++) {
+                        Year.push({
+                            YearNumber: j
+                        });
+                    }
+                },
+                Format: function (t) {
+                    var ds = [];
+                    switch (t) {
+                        case 'drivers':
+                            ds = this.drivers.indexOf('\n') > -1 ? this.drivers.split('\n') : this.drivers.split(',');
+                            for (var i = 0; i < ds.length; i++) {
+                                if (ds[i].trim() != '') {
+                                    vm.Drivers.push({
+                                        itemText: ds[i].trim(),
+                                        isFirstDriver: ds.length === 0
+                                    });
+                                }
+                            }
+                            break;
+                        case 'restraints':
+                            ds = this.restraints.indexOf('\n') > -1 ? this.restraints.split('\n') : this.restraints.split(',');
+                            for (var i = 0; i < ds.length; i++) {
+                                if (ds[i].trim() != '') {
+                                    vm.Restraints.push({
+                                        itemText: ds[i].trim(),
+                                        isFirstRestraint: ds.length === 0
+                                    });
+                                }
+                            }
+                            break;
+                        case 'opportunities':
+                            ds = this.opportunities.indexOf('\n') > -1 ? this.opportunities.split('\n') : this.opportunities.split(',');
+                            for (var i = 0; i < ds.length; i++) {
+                                if (ds[i].trim() != '') {
+                                    vm.Opportunities.push({
+                                        itemText: ds[i].trim(),
+                                        isFirstOppurtunity: ds.length === 0
+                                    });
+                                }
+                            }
+                            break;
+                        case 'chalanges':
+                            ds = this.chalanges.indexOf('\n') > -1 ? this.chalanges.split('\n') : this.chalanges.split(',');
+                            for (var i = 0; i < ds.length; i++) {
+                                if (ds[i].trim() != '') {
+                                    vm.Chalanges.push({
+                                        itemText: ds[i].trim(),
+                                        isFirstChalange: ds.length === 0
+                                    });
+                                }
+                            }
+                            break;
+                    }
+                }
+            },
+            components: {
+                'tocTemplate': tocTemplate
+            }
+        });
+    </script>
+    <!--Script for sending ToC in Word Document-->
+    <script>
+        function exportHTML() {
+            var header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' " +
+                "xmlns:w='urn:schemas-microsoft-com:office:word' " +
+                "xmlns='http://www.w3.org/TR/REC-html40'>" +
+                "<head><meta charset='utf-8'><title>Export HTML to Word Document with JavaScript</title></head><body>";
+            var footer = "</body></html>";
+            var sourceHTML = header + document.getElementById("ToC").innerHTML + footer;
+
+            var source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+            var fileDownload = document.createElement("a");
+            document.body.appendChild(fileDownload);
+            fileDownload.href = source;
+            fileDownload.download = document.getElementById("Keyword").value + ' Market.doc';
+            fileDownload.click();
+            document.body.removeChild(fileDownload);
+        }
+    </script>
+
+
+
+    <style>
+        #toc ul li {
+            list-style-type: none;
+            list-style: none;
+        }
+    </style>
+</body>
+
+</html>
