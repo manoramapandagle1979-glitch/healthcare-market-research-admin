@@ -21,12 +21,13 @@ import {
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Save, TrendingUp, AlertCircle } from 'lucide-react';
+import { Save, TrendingUp, AlertCircle, Copy } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { GEOGRAPHIES, REPORT_FORMATS } from '@/lib/config/reports';
 import { fetchCategories, type Category } from '@/lib/api/categories';
 import type { UseFormReturn } from 'react-hook-form';
 import type { ReportFormData } from '@/lib/types/reports';
+import { toast } from 'sonner';
 
 interface ReportDetailsTabProps {
   form: UseFormReturn<ReportFormData>;
@@ -173,6 +174,20 @@ export function ReportDetailsTab({
                     }}
                   >
                     Generate
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => {
+                      if (field.value) {
+                        navigator.clipboard.writeText(field.value);
+                        toast.success('Slug copied to clipboard');
+                      }
+                    }}
+                    disabled={!field.value}
+                  >
+                    <Copy className="h-4 w-4" />
                   </Button>
                 </div>
                 <FormDescription>

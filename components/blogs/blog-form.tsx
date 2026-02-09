@@ -34,12 +34,13 @@ import {
   CONTENT_MIN_LENGTH,
 } from '@/lib/config/blogs';
 import type { BlogFormData, Blog } from '@/lib/types/blogs';
-import { Save, Eye, Wand2 } from 'lucide-react';
+import { Save, Eye, Wand2, Copy } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { fetchCategories, type Category } from '@/lib/api/categories';
 import { CharacterCounter } from '@/components/seo/character-counter';
 import { SEO_LIMITS } from '@/lib/config/seo';
 import { measureTextWidth } from '@/lib/utils/text-measurement';
+import { toast } from 'sonner';
 
 // Validation schema
 const blogFormSchema = z.object({
@@ -219,9 +220,25 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving }: BlogFormProps)
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Slug</FormLabel>
-                  <FormControl>
-                    <Input placeholder="url-friendly-slug-for-blog" {...field} />
-                  </FormControl>
+                  <div className="flex gap-2">
+                    <FormControl>
+                      <Input placeholder="url-friendly-slug-for-blog" {...field} />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => {
+                        if (field.value) {
+                          navigator.clipboard.writeText(field.value);
+                          toast.success('Slug copied to clipboard');
+                        }
+                      }}
+                      disabled={!field.value}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
                   <FormDescription>
                     URL-friendly identifier (lowercase, hyphens only)
                   </FormDescription>

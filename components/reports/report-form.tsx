@@ -32,12 +32,13 @@ import type { ReportFormData, Report } from '@/lib/types/reports';
 import { reportFormSchema as importedReportFormSchema } from '@/lib/validation/report-schema';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Save, Eye, Plus, Trash2, HelpCircle, User, Image as ImageIcon } from 'lucide-react';
+import { Save, Eye, Plus, Trash2, HelpCircle, User, Image as ImageIcon, Copy } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { CharacterCounter } from '@/components/seo/character-counter';
 import { SEO_LIMITS } from '@/lib/config/seo';
 import { measureTextWidth } from '@/lib/utils/text-measurement';
+import { toast } from 'sonner';
 
 interface ReportFormProps {
   report?: Report;
@@ -188,9 +189,28 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
                     URL Slug
                     <span className="text-destructive">*</span>
                   </FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., global-healthcare-market-analysis-2024" {...field} />
-                  </FormControl>
+                  <div className="flex gap-2">
+                    <FormControl>
+                      <Input
+                        placeholder="e.g., global-healthcare-market-analysis-2024"
+                        {...field}
+                      />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => {
+                        if (field.value) {
+                          navigator.clipboard.writeText(field.value);
+                          toast.success('Slug copied to clipboard');
+                        }
+                      }}
+                      disabled={!field.value}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
                   <FormDescription>
                     Unique URL identifier (lowercase letters, numbers, and hyphens only)
                   </FormDescription>
