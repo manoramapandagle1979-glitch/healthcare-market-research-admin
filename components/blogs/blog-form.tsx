@@ -41,6 +41,7 @@ import { CharacterCounter } from '@/components/seo/character-counter';
 import { SEO_LIMITS } from '@/lib/config/seo';
 import { measureTextWidth } from '@/lib/utils/text-measurement';
 import { toast } from 'sonner';
+import { config } from '@/lib/config';
 
 // Validation schema
 const blogFormSchema = z.object({
@@ -230,8 +231,10 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving }: BlogFormProps)
                       size="icon"
                       onClick={() => {
                         if (field.value) {
-                          navigator.clipboard.writeText(field.value);
-                          toast.success('Slug copied to clipboard');
+                          navigator.clipboard.writeText(
+                            `${config.preview.domain}/blog/${field.value}`
+                          );
+                          toast.success('URL copied to clipboard');
                         }
                       }}
                       disabled={!field.value}
