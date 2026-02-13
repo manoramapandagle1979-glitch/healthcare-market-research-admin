@@ -218,8 +218,17 @@ export function ReportImagesManager({ reportId, disabled, reportData }: ReportIm
       // Convert base64 to blob
       const blob = await fetch(chart.imageData).then(r => r.blob());
 
-      // Create a file from the blob
-      const file = new File([blob], `${chart.name || 'chart'}.png`, { type: 'image/png' });
+      // Build a unique filename: {title}-{chartType}-{index}.png
+      const sanitizedTitle = (chart.title || chart.name || 'chart')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      const baseName = `${sanitizedTitle}-${chart.chartType}`;
+      const existingCount = images.filter(img =>
+        img.title?.toLowerCase().startsWith((chart.title || chart.name || '').toLowerCase())
+      ).length;
+      const fileName = `${baseName}-${existingCount}.png`;
+      const file = new File([blob], fileName, { type: 'image/png' });
 
       // Upload the image
       const uploadedImage = await uploadReportImage(reportId, file, chart.title || chart.name);
