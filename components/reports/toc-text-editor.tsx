@@ -43,8 +43,8 @@ function parseTextToTOC(text: string): TableOfContentsStructure {
     const leadingSpaces = line.match(/^(\s*)/)?.[1]?.length || 0;
     const trimmedLine = line.trim();
 
-    // Subsection pattern: 1.1.1 Title (with 4+ spaces indent)
-    const subsectionMatch = trimmedLine.match(/^(\d+)\.(\d+)\.(\d+)\s+(.+)$/);
+    // Subsection pattern: 1.1.1 Title or 1.1.1. Title (with 4+ spaces indent)
+    const subsectionMatch = trimmedLine.match(/^(\d+)\.(\d+)\.(\d+)\.?\s+(.+)$/);
     if (subsectionMatch && leadingSpaces >= 4 && currentSection) {
       const [, chapterNum, sectionNum, subsectionNum, title] = subsectionMatch;
       const subsection: TOCSubsection = {
@@ -55,8 +55,8 @@ function parseTextToTOC(text: string): TableOfContentsStructure {
       continue;
     }
 
-    // Section pattern: 1.1 Title (with 2 spaces indent)
-    const sectionMatch = trimmedLine.match(/^(\d+)\.(\d+)\s+(.+)$/);
+    // Section pattern: 1.1 Title or 1.1. Title (with 2 spaces indent)
+    const sectionMatch = trimmedLine.match(/^(\d+)\.(\d+)\.?\s+(.+)$/);
     if (sectionMatch && leadingSpaces >= 2 && leadingSpaces < 4 && currentChapter) {
       const [, chapterNum, sectionNum, title] = sectionMatch;
       currentSection = {

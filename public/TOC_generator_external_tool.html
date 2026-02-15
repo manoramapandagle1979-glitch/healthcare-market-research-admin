@@ -128,6 +128,7 @@
                 transform: translateX(100%);
                 opacity: 0;
             }
+
             to {
                 transform: translateX(0);
                 opacity: 1;
@@ -139,6 +140,7 @@
                 transform: translateX(0);
                 opacity: 1;
             }
+
             to {
                 transform: translateX(100%);
                 opacity: 0;
@@ -167,6 +169,11 @@
     <div class="container">
         <div class="row" id="toc">
             <div class="col-md-12" style="width: 100%;">
+                <div style="text-align: right; padding: 10px 0;">
+                    <button @click="autofillSampleData" style="font-size: 14px; padding: 8px 20px; height: auto;">
+                        ✨ Autofill Sample Data
+                    </button>
+                </div>
                 <ul class="nav nav-tabs nav-tabs-solid" style="width: 100%;">
                     <li class="nav-item"><a href="#colored-justified-tab1" class="nav-link active show"
                             data-toggle="tab">Report Information</a></li>
@@ -272,12 +279,12 @@
                                         <textarea class="form-control full-control" v-model="opportunities"
                                             v-on:change="Format('opportunities')"></textarea>
                                     </div>
-                                    <div class="form-group col-md-6">
+                                    <!-- <div class="form-group col-md-6">
                                         <label for="Chalanges">challengeS <span class="hint">(One at a line OR Coma
                                                 seprated)</span></label>
                                         <textarea class="form-control full-control" v-model="chalanges"
                                             v-on:change="Format('chalanges')"></textarea>
-                                    </div>
+                                    </div> -->
                                 </div>
                             </div>
                         </div>
@@ -462,7 +469,8 @@
                                     <hr>
                                     <h5 style="color:#f2784b;">Table of Content</h5>
                                     <button class="btn btn-dark btn-sm" @click="createTOC()">Generate TOC</button>
-                                    <button class="btn btn-secondary btn-sm" @click="copyTOC()" v-if="dt && dt.length > 0" style="margin-left: 10px;">Copy TOC</button>
+                                    <button class="btn btn-secondary btn-sm" @click="copyTOC()"
+                                        v-if="dt && dt.length > 0" style="margin-left: 10px;">Copy TOC</button>
                                     <div id="toc">
                                         <toc-Template :item="dt" :parentIndx="1" name="toc"
                                             v-if="dt && dt.length > 0" />
@@ -470,7 +478,9 @@
 
                                     <h5>List Of Figures</h5>
                                     <button class="btn btn-light" @click="createListOfFigures()">Generate LOF</button>
-                                    <button class="btn btn-secondary btn-sm" @click="copyLOF()" v-if="listoffigures && listoffigures.length > 0" style="margin-left: 10px;">Copy LOF</button>
+                                    <button class="btn btn-secondary btn-sm" @click="copyLOF()"
+                                        v-if="listoffigures && listoffigures.length > 0" style="margin-left: 10px;">Copy
+                                        LOF</button>
                                     <div id="lof">
                                         <toc-Template :item="listoffigures" name="lof"
                                             v-if="listoffigures && listoffigures.length > 0" />
@@ -478,7 +488,9 @@
 
                                     <h5>List Of Tables</h5>
                                     <button class="btn btn-light" @click="createListOfTables()">Generate LOT</button>
-                                    <button class="btn btn-secondary btn-sm" @click="copyLOT()" v-if="listOfTables && listOfTables.length > 0" style="margin-left: 10px;">Copy LOT</button>
+                                    <button class="btn btn-secondary btn-sm" @click="copyLOT()"
+                                        v-if="listOfTables && listOfTables.length > 0" style="margin-left: 10px;">Copy
+                                        LOT</button>
                                     <div id="lot">
                                         <toc-Template :item="listOfTables" name="lot"
                                             v-if="listOfTables && listOfTables.length > 0" />
@@ -581,6 +593,66 @@
 
             },
             methods: {
+                autofillSampleData: function () {
+                    // Tab 1: Report Information
+                    this.Keyword = 'Precision Fermentation';
+                    this.FromYear = '2022';
+                    this.ToYear = '2035';
+                    this.BaseYear = '2026';
+                    this.IsVolume = false;
+                    this.IsCross = true;
+                    this.Revenue = 'USD Billion';
+
+                    // Tab 2: Factors Affecting Market
+                    this.drivers = 'Driver 1\nDriver 2';
+                    this.restraints = 'Restraint 1\nRestraint 2';
+                    this.opportunities = 'Opportunity 1\nOpportunity 2';
+                    this.chalanges = 'Challenge 1\nChallenge 2';
+
+                    // Process the factors
+                    this.Format('drivers');
+                    this.Format('restraints');
+                    this.Format('opportunities');
+                    this.Format('chalanges');
+
+                    // Tab 3: Report Segmentation
+                    this.Segment.SubSegment = [];
+
+                    // Add Microbe segment
+                    this.Segment.SubSegment.push({
+                        Index: 0,
+                        SegmentName: 'Microbe',
+                        SubSegment: [
+                            { Index: 0, SegmentName: 'Yeast', SubSegment: [] },
+                            { Index: 1, SegmentName: 'Algae', SubSegment: [] },
+                            { Index: 2, SegmentName: 'Fungi', SubSegment: [] },
+                            { Index: 3, SegmentName: 'Bacteria', SubSegment: [] }
+                        ]
+                    });
+
+                    // Add End-use segment
+                    this.Segment.SubSegment.push({
+                        Index: 1,
+                        SegmentName: 'End-use',
+                        SubSegment: [
+                            { Index: 0, SegmentName: 'Food & Beverages', SubSegment: [] },
+                            { Index: 1, SegmentName: 'Pharmaceuticals', SubSegment: [] },
+                            { Index: 2, SegmentName: 'Personal Care & Cosmetics', SubSegment: [] },
+                            { Index: 3, SegmentName: 'Others', SubSegment: [] }
+                        ]
+                    });
+
+                    // Tab 4: Regional Segmentation (use IsGlobal for auto-population)
+                    this.IsGlobal = true;
+                    this.Global();
+
+                    // Tab 5: Companies Profiled
+                    this.Companies = 'Geltor\nCompany 2\nCompany 3';
+                    this.FormatCompany();
+
+                    // Show success message
+                    this.showToast('Sample data loaded successfully!');
+                },
                 showToast: function (message, type = 'success') {
                     const container = document.getElementById('toast-container');
                     const toast = document.createElement('div');
@@ -654,272 +726,388 @@
                 createListOfTables: function () {
                     this.listOfTables = [];
                     let index = 1;
+
+                    // Initial tables
                     this.listOfTables.push({
-                        itemText: `${index++}. Global ${this.Keyword} Market: Snapshot`
+                        itemText: `${index++}. Global ${this.Keyword} Market: Snapshot`,
+                        SubItem: []
                     }, {
-                        itemText: `${index++}. Drivers of the ${this.Keyword} Market: impact analysis`
+                        itemText: `${index++}. Drivers of the ${this.Keyword} Market: impact analysis`,
+                        SubItem: []
                     });
 
-                    this.RC.forEach((r, rIndex) => {
-                        this.Segment.SubSegment.forEach((s, sIndex) => {
+                    // Regional tables
+                    this.RC.forEach((r) => {
+                        // Regional revenue by segment tables
+                        this.Segment.SubSegment.forEach((s) => {
                             this.listOfTables.push({
-                                itemText: `${index++}. ${r.RegionName} ${this.Keyword} Market revenue, By ${s.SegmentName}, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`
+                                itemText: `${index++}. ${r.RegionName} ${this.Keyword} Market revenue, By ${s.SegmentName}, ${this.BaseYear} - ${this.ToYear} (${this.Revenue})`,
+                                SubItem: []
                             });
                         });
 
-                        r.Country.forEach((c, cIndex) => {
-                            this.Segment.SubSegment.forEach((s, sIndex) => {
-                                this.listOfTables.push({
-                                    itemText: `${index++}. ${c.CountryName} ${this.Keyword} Market revenue, By ${s.SegmentName}, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`
-                                });
+                        // Country-level tables
+                        r.Country.forEach((c) => {
+                            this.listOfTables.push({
+                                itemText: `${index++}. ${c.CountryName} ${this.Keyword} Market revenue, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`,
+                                SubItem: []
                             });
-                        })
-
+                        });
                     });
                 },
                 createListOfFigures: function () {
                     this.listoffigures = [];
-                    let index = 5;
+                    let index = 1;
+
+                    // Initial figures
                     this.listoffigures.push({
-                        itemText: '1. Market research Type',
+                        itemText: `${index++}. Market research Type`,
                         SubItem: []
                     }, {
-                        itemText: '2. Market research methodology',
+                        itemText: `${index++}. Market research methodology`,
                         SubItem: []
                     }, {
-                        itemText: `3. Global ${this.Keyword} Market, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`,
+                        itemText: `${index++}. Global ${this.Keyword} Market, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`,
                         SubItem: []
                     }, {
-                        itemText: '4. Porter’s Five Forces Analysis',
+                        itemText: `${index++}. Porter's Five Forces Analysis`,
                         SubItem: []
-                    }, ...this.Segment.SubSegment.map((s, sInex) => {
-                        return {
+                    });
+
+                    // Market attractiveness figures from Chapter 2
+                    this.Segment.SubSegment.forEach((s) => {
+                        this.listoffigures.push({
                             itemText: `${index++}. Global ${this.Keyword} Market attractiveness, By ${s.SegmentName}`,
                             SubItem: []
-                        }
-                    }));
-
-                    let figsegment = [];
-
-                    this.Segment.SubSegment.forEach((s, sIndex) => {
-                        figsegment.push({
-                            itemText: `${index++}. Global ${this.Keyword} Market share by ${s.SegmentName}, ${this.FromYear} and ${this.ToYear} (${this.Revenue})`,
-                            SubItem: []
-                        })
-                        s.SubSegment.forEach((ss, ssIndex) => {
-                            figsegment.push({
-                                itemText: `${index++}. Global ${this.Keyword} Market by ${ss.SegmentName}, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`
-                            })
-                        })
+                        });
                     });
-                    this.listoffigures = [...this.listoffigures, ...figsegment];
+
+                    // Segment chapter figures with new 4-item pattern
+                    this.Segment.SubSegment.forEach((s) => {
+                        // Revenue share figure for the main segment
+                        this.listoffigures.push({
+                            itemText: `${index++}. Global ${this.Keyword} Market share by ${s.SegmentName}, ${this.BaseYear} and ${this.ToYear} (${this.Revenue})`,
+                            SubItem: []
+                        });
+
+                        // For each sub-segment, add figures for the share forecast
+                        s.SubSegment.forEach((ss) => {
+                            this.listoffigures.push({
+                                itemText: `${index++}. ${this.Keyword} Share Forecast by ${ss.SegmentName}, By Region (${this.Revenue})`,
+                                SubItem: []
+                            });
+                        });
+                    });
+
+                    // Regional figures
                     this.listoffigures.push({
-                        itemText: `${index++}. Global ${this.Keyword} Market share, by Region, ${this.FromYear} and ${this.ToYear}`,
+                        itemText: `${index++}. Global ${this.Keyword} Market share, by Region, ${this.BaseYear} and ${this.ToYear}`,
                         SubItem: []
-                    }, ...this.RC.map((r, rIndex) => {
-                        return {
-                            itemText: `${index++}. ${r.RegionName} ${this.Keyword} Market, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`
-                        }
-                    }));
+                    });
+
+                    this.RC.forEach((r) => {
+                        this.listoffigures.push({
+                            itemText: `${index++}. ${r.RegionName} ${this.Keyword} Market, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`,
+                            SubItem: []
+                        });
+                    });
                 },
                 createTOC: function () {
                     this.dt = [];
-                    this.dt.push({
-                        itemText: 'Chapter 1. Preface',
-                        SubItem: [{
-                            itemText: '1.1 Report Description and Scope',
-                            SubItem: []
-                        }, {
-                            itemText: '1.2 Research scope',
-                            SubItem: []
-                        }, {
-                            itemText: '1.3 Research methodology',
-                            SubItem: [{
-                                itemText: '1.3.1 Market Research Type',
-                                SubItem: []
-                            }, {
-                                itemText: '1.3.2 Market research methodology',
-                                SubItem: []
-                            }]
-                        }]
-                    }, {
-                        itemText: 'Chapter 2. Executive Summary',
-                        SubItem: [{
-                            itemText: `2.1 Global  ${this.Keyword} Market, (${this.FromYear} - ${this.ToYear}) (${this.Revenue})`
-                        }, {
-                            itemText: `2.2 Global ${this.Keyword} Market : snapshot`,
-                            SubItem: []
-                        }]
-                    }, {
-                        itemText: `Chapter 3. Global ${this.Keyword}  Market - Industry Analysis`,
-                        SubItem: [{
-                            itemText: `3.1 ${this.Keyword} Market: Market Dynamics`,
-                            SubItem: []
-                        }, {
-                            itemText: '3.2 Market Drivers',
-                            SubItem: this.Drivers.map((d, i) => {
-                                return {
-                                    itemText: `3.2.${(i + 1)} ${d.itemText}`,
-                                    SubItem: []
-                                };
-                            })
-                        }, {
-                            itemText: '3.3 Market Restraints',
-                            SubItem: this.Restraints.map((r, i) => {
-                                return {
-                                    itemText: `3.3.${i + 1}. ${r.itemText}`,
-                                    SubItem: []
-                                }
-                            })
-                        }, {
-                            itemText: '3.4 Market Opportunities',
-                            SubItem: this.Opportunities.map((o, i) => {
-                                return {
-                                    itemText: `3.4.${i + 1}. ${o.itemText}`,
-                                    SubItem: []
-                                }
-                            })
-                        }, {
-                            itemText: '3.5 Market Challenges',
-                            SubItem: this.Opportunities.map((c, i) => {
-                                return {
-                                    itemText: `3.5.${i + 1}. ${c.itemText}`,
-                                    SubItem: []
-                                }
-                            })
-                        }, {
-                            itemText: '3.6 Porter’s Five Forces Analysis',
-                            SubItem: []
-                        }, {
-                            itemText: '3.7 Market Attractiveness Analysis',
-                            SubItem: this.Segment.SubSegment.map((s, i) => {
-                                return {
-                                    itemText: `3.7.${(i + 1)} Market attractiveness analysis By ${s.SegmentName}`,
-                                    SubItem: []
-                                };
-                            })
-                        }]
-                    }, {
-                        itemText: `Chapter 4. Global ${this.Keyword} Market- Competitive Landscape`,
-                        SubItem: [{
-                            itemText: '4.1 Company market share analysis',
-                            SubItem: [{
-                                itemText: `4.1.1 Global ${this.Keyword} Market: company market share, ${this.BaseYear}`
-                            }]
-                        }, {
-                            itemText: '4.2 Strategic development',
-                            SubItem: [{
-                                itemText: '4.2.1 Acquisitions & mergers',
-                                SubItem: [],
-                            }, {
-                                itemText: '4.2.2 New Product launches',
-                                SubItem: []
-                            }, {
-                                itemText: '4.2.3 Agreements, partnerships, cullaborations, and joint ventures',
-                                SubItem: []
-                            }, {
-                                itemText: '4.2.4 Research and development and Regional expansion',
-                                SubItem: []
-                            }]
-                        }, {
-                            itemText: '4.3 Price trend analysis',
-                            SubItem: []
-                        }]
-                    }, ...this.Segment.SubSegment.map((s, i) => {
-                        this.Chapter = (4 + i + 1);
+                    let currentChapter = 1;
+
+                    // Chapter 1: Report Introduction
+                    this.dt.push(this.createChapter1ReportIntroduction());
+                    currentChapter++;
+
+                    // Chapter 2: Market Overview
+                    this.dt.push(this.createChapter2MarketOverview());
+                    currentChapter++;
+
+                    // Chapter 3: Market Dynamics
+                    this.dt.push(this.createChapter3MarketDynamics());
+                    currentChapter++;
+
+                    // Chapters 4+: One chapter per main segment
+                    this.Segment.SubSegment.forEach((segment, index) => {
+                        const isLastSegment = index === this.Segment.SubSegment.length - 1;
+                        this.dt.push(this.createSegmentChapter(segment, currentChapter, isLastSegment));
+                        currentChapter++;
+                    });
+
+                    // Competitive Landscape
+                    this.dt.push(this.createCompetitiveLandscapeChapter(currentChapter));
+                    currentChapter++;
+
+                    // Company Profiles
+                    this.dt.push(this.createCompanyProfilesChapter(currentChapter));
+                    currentChapter++;
+
+                    // Research Methodology
+                    this.dt.push(this.createResearchMethodologyChapter(currentChapter));
+                    currentChapter++;
+
+                    // Standard Report Commercials & Add-ons
+                    this.dt.push(this.createCommercialsChapter(currentChapter));
+                },
+                createChapter1ReportIntroduction: function () {
+                    return {
+                        itemText: 'CHAPTER 1. REPORT INTRODUCTION',
+                        SubItem: [
+                            {
+                                itemText: '1.1. REPORT DESCRIPTION',
+                                SubItem: [
+                                    { itemText: '1.1.1. Purpose of the Report', SubItem: [] },
+                                    { itemText: '1.1.2. USP & Key Offerings', SubItem: [] }
+                                ]
+                            },
+                            { itemText: '1.2. KEY BENEFITS FOR STAKEHOLDERS', SubItem: [] },
+                            { itemText: '1.3. TARGET AUDIENCE', SubItem: [] },
+                            { itemText: '1.4. REPORT SCOPE', SubItem: [] }
+                        ]
+                    };
+                },
+                createChapter2MarketOverview: function () {
+                    let attractivenessAnalysis = this.Segment.SubSegment.map((seg, idx) => {
                         return {
-                            itemText: `Chapter ${this.Chapter}. Global ${this.Keyword} Market - ${s.SegmentName} Analysis`,
-                            SubItem: [{
-                                itemText: `${this.Chapter}.1 Global ${this.Keyword} Market overview: By ${s.SegmentName}`,
-                                SubItem: [{
-                                    itemText: `${this.Chapter}.1.1 Global ${this.Keyword} Market share, By ${s.SegmentName}, ${this.BaseYear} and ${this.ToYear}`
-                                }]
-                            }, ...s.SubSegment.map((ss, i2) => {
-                                return {
-                                    itemText: `${this.Chapter}.${i2 + 2} ${ss.SegmentName}`,
-                                    SubItem: [{
-                                        itemText: `${this.Chapter}.${i2 + 2}.1 Global ${this.Keyword} Market by ${ss.SegmentName}, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`
-                                    }]
-                                };
-                            })]
+                            itemText: `2.2.${idx + 2}. ${this.Keyword} Market Attractiveness Analysis, By ${seg.SegmentName}`,
+                            SubItem: []
                         };
+                    });
 
-                    }));
-
-                    let regionalseg = [];
-                    this.Chapter++;
-
-                    //sub parent index
-                    let subparent = 2;
-
-
-
-                    this.RC.forEach((rc, i) => {
-                        subparent = subparent + 1;
-                        regionalseg.push({
-                            itemText: `${this.Chapter}.${subparent}. ${rc.RegionName}`,
-                            SubItem: [{
-                                itemText: `${this.Chapter}.${subparent}.1 ${rc.RegionName} ${this.Keyword} Market, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`,
-                                SubItem: [{
-                                    itemText: `${this.Chapter}.${subparent}.1.1 ${rc.RegionName} ${this.Keyword} Market, by Country, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`
-                                }]
-                            }]
-                        });
-
-                        this.Segment.SubSegment.forEach((ss, ssi) => {
-                            subparent = subparent + 1;
-                            regionalseg.push({
-                                itemText: `${this.Chapter}.${subparent} ${rc.RegionName} ${this.Keyword} Market, by ${ss.SegmentName}, ${this.FromYear} - ${this.ToYear}`,
-                                SubItem: [{
-                                    itemText: `${this.Chapter}.${subparent}.1 ${rc.RegionName} ${this.Keyword} Market, by ${ss.SegmentName}, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`,
+                    return {
+                        itemText: 'CHAPTER 2. MARKET OVERVIEW',
+                        SubItem: [
+                            {
+                                itemText: '2.1. REPORT SCOPE (SEGMENTS AND KEY PLAYERS)',
+                                SubItem: [
+                                    { itemText: `2.1.1. ${this.Keyword} by Segments`, SubItem: [] },
+                                    { itemText: `2.1.2. ${this.Keyword} by Region`, SubItem: [] }
+                                ]
+                            },
+                            {
+                                itemText: '2.2. EXECUTIVE SUMMARY',
+                                SubItem: [
+                                    { itemText: '2.2.1. Market Size & Forecast', SubItem: [] },
+                                    ...attractivenessAnalysis
+                                ]
+                            }
+                        ]
+                    };
+                },
+                createChapter3MarketDynamics: function () {
+                    return {
+                        itemText: 'CHAPTER 3. MARKET DYNAMICS (DRO)',
+                        SubItem: [
+                            {
+                                itemText: '3.1. MARKET DRIVERS',
+                                SubItem: this.Drivers.map((d, i) => ({
+                                    itemText: `3.1.${i + 1}. ${d.itemText}`,
                                     SubItem: []
-                                }]
+                                }))
+                            },
+                            {
+                                itemText: '3.2. MARKET RESTRAINTS',
+                                SubItem: this.Restraints.map((r, i) => ({
+                                    itemText: `3.2.${i + 1}. ${r.itemText}`,
+                                    SubItem: []
+                                }))
+                            },
+                            {
+                                itemText: '3.3. MARKET OPPORTUNITIES',
+                                SubItem: this.Opportunities.map((o, i) => ({
+                                    itemText: `3.3.${i + 1}. ${o.itemText}`,
+                                    SubItem: []
+                                }))
+                            },
+                            { itemText: '3.5. PESTLE ANALYSIS', SubItem: [] },
+                            { itemText: '3.6. PORTER FORCES ANALYSIS', SubItem: [] },
+                            { itemText: '3.7. TECHNOLOGY ROADMAP', SubItem: [] },
+                            { itemText: '3.8. VALUE CHAIN ANALYSIS', SubItem: [] },
+                            { itemText: '3.9. GOVERNMENT POLICY IMPACT ANALYSIS', SubItem: [] },
+                            { itemText: '3.10. PRICING ANALYSIS', SubItem: [] }
+                        ]
+                    };
+                },
+                createSegmentChapter: function (segment, chapterNumber, isLastSegment) {
+                    let sectionIndex = 2;
+                    let segmentDetails = [
+                        {
+                            itemText: `${chapterNumber}.1.1. ${this.Keyword} Market Revenue Share, By ${segment.SegmentName}, ${this.BaseYear} & ${this.ToYear}`,
+                            SubItem: []
+                        }
+                    ];
+
+                    segment.SubSegment.forEach(subSeg => {
+                        segmentDetails.push(
+                            {
+                                itemText: `${chapterNumber}.1.${sectionIndex++}. ${subSeg.SegmentName}`,
+                                SubItem: []
+                            },
+                            {
+                                itemText: `${chapterNumber}.1.${sectionIndex++}. ${this.Keyword} Share Forecast, By Region (${this.Revenue})`,
+                                SubItem: []
+                            },
+                            {
+                                itemText: `${chapterNumber}.1.${sectionIndex++}. Comparative Revenue Analysis, By Country, ${this.BaseYear} & ${this.ToYear}`,
+                                SubItem: []
+                            },
+                            {
+                                itemText: `${chapterNumber}.1.${sectionIndex++}. Key Market Trends, Growth Factors, & Opportunities`,
+                                SubItem: []
+                            }
+                        );
+                    });
+
+                    let chapterSubItems = [
+                        {
+                            itemText: `${chapterNumber}.1. ${segment.SegmentName.toUpperCase()} MARKET OVERVIEW, BY ${segment.SegmentName.toUpperCase()} SEGMENT`,
+                            SubItem: segmentDetails
+                        }
+                    ];
+
+                    // If this is the last segment, add regional analysis sections
+                    if (isLastSegment) {
+                        chapterSubItems.push(...this.createRegionalAnalysisSections(chapterNumber));
+                    }
+
+                    return {
+                        itemText: `CHAPTER ${chapterNumber}. ${this.Keyword.toUpperCase()} MARKET - BY ${segment.SegmentName.toUpperCase()}`,
+                        SubItem: chapterSubItems
+                    };
+                },
+                createRegionalAnalysisSections: function (chapterNumber) {
+                    let sections = [];
+
+                    // Add regional analysis heading (without numbering)
+                    sections.push({
+                        itemText: `${this.Keyword.toUpperCase()} MARKET - REGIONAL ANALYSIS`,
+                        SubItem: []
+                    });
+
+                    // Global overview section
+                    let overviewSubItems = [
+                        {
+                            itemText: `${chapterNumber}.2.1. Global ${this.Keyword} Market Revenue Share, By Region, ${this.BaseYear} & ${this.ToYear}`,
+                            SubItem: []
+                        },
+                        {
+                            itemText: `${chapterNumber}.2.2. Global ${this.Keyword} Market Revenue, By Region, ${this.BaseYear} - ${this.ToYear} (${this.Revenue})`,
+                            SubItem: []
+                        }
+                    ];
+
+                    this.Segment.SubSegment.forEach((seg, idx) => {
+                        overviewSubItems.push({
+                            itemText: `${chapterNumber}.2.${idx + 3}. Global ${this.Keyword} Market Revenue, By ${seg.SegmentName}, ${this.BaseYear} - ${this.ToYear}`,
+                            SubItem: []
+                        });
+                    });
+
+                    sections.push({
+                        itemText: `${chapterNumber}.2. ${this.Keyword.toUpperCase()} MARKET OVERVIEW, BY REGION SEGMENT`,
+                        SubItem: overviewSubItems
+                    });
+
+                    // Individual region sections
+                    let regionMainIndex = 3;
+
+                    this.RC.forEach((region) => {
+                        let regionSubSections = [
+                            {
+                                itemText: `${chapterNumber}.${regionMainIndex}.1. ${region.RegionName} ${this.Keyword} Market Revenue, By Country, ${this.BaseYear} - ${this.ToYear} (${this.Revenue})`,
+                                SubItem: []
+                            }
+                        ];
+
+                        this.Segment.SubSegment.forEach((seg, segIdx) => {
+                            regionSubSections.push({
+                                itemText: `${chapterNumber}.${regionMainIndex}.${segIdx + 2}. ${region.RegionName} ${this.Keyword} Market Revenue, By ${seg.SegmentName}, ${this.BaseYear} - ${this.ToYear}`,
+                                SubItem: []
                             });
-
                         });
 
+                        let countryStartIndex = 2 + this.Segment.SubSegment.length;
+                        region.Country.forEach((country, cIdx) => {
+                            regionSubSections.push({
+                                itemText: `${chapterNumber}.${regionMainIndex}.${countryStartIndex + cIdx}. ${country.CountryName} ${this.Keyword} Market Revenue, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`,
+                                SubItem: []
+                            });
+                        });
 
+                        sections.push({
+                            itemText: `${chapterNumber}.${regionMainIndex++}. ${region.RegionName.toUpperCase()}`,
+                            SubItem: regionSubSections
+                        });
                     });
 
-                    this.dt.push({
-                        itemText: `Chapter ${this.Chapter}. ${this.Keyword} Market - Regional Analysis`,
-                        SubItem: [{
-                            itemText: `${this.Chapter}.1 Global ${this.Keyword} Market Regional Overview`,
-                            SubItem: []
-                        }, {
-                            itemText: `${this.Chapter}.2 Global ${this.Keyword} Market Share, by Region, ${this.BaseYear} & ${this.ToYear} (${this.Revenue})`,
-                            SubItem: []
-                        }, ...regionalseg]
-                    });
-
-                    //this.dt = [...this.dt, ...regionalseg];
-
-                    this.Chapter += 1;
-
-                    this.dt.push({
-                        itemText: `Chapter ${this.Chapter}. Company Profiles`,
-                        SubItem: this.Company.map((c, i) => {
-                            return {
-                                itemText: `${this.Chapter}.${i + 1} ${c.CompanyName}`,
-                                SubItem: i == 0 ? [{
-                                    itemText: `${this.Chapter}.${i + 1}.1 Overview`,
-                                    SubItem: []
-                                }, {
-                                    itemText: `${this.Chapter}.${i + 1}.2 Financials`,
-                                    SubItem: []
-                                }, {
-                                    itemText: `${this.Chapter}.${i + 1}.3 Product Portfolio`,
-                                    SubItem: []
-                                }, {
-                                    itemText: `${this.Chapter}.${i + 1}.4 Business Strategy`,
-                                    SubItem: []
-                                }, {
-                                    itemText: `${this.Chapter}.${i + 1}.5 Recent Developments`,
-                                    SubItem: []
-                                }] : []
-                            };
-                        })
-                    });
+                    return sections;
+                },
+                createCompetitiveLandscapeChapter: function (chapterNumber) {
+                    return {
+                        itemText: `CHAPTER ${chapterNumber}. COMPETITIVE LANDSCAPE`,
+                        SubItem: [
+                            {
+                                itemText: `${chapterNumber}.1. COMPANY MARKET SHARE ANALYSIS - ${this.BaseYear}`,
+                                SubItem: [
+                                    {
+                                        itemText: `${chapterNumber}.1.1. Global ${this.Keyword} Market: Company Market Share, ${this.BaseYear}`,
+                                        SubItem: []
+                                    }
+                                ]
+                            },
+                            {
+                                itemText: `${chapterNumber}.2. GLOBAL ${this.Keyword.toUpperCase()} MARKET COMPANY MARKET SHARE, ${parseInt(this.BaseYear) - 1}`,
+                                SubItem: []
+                            }
+                        ]
+                    };
+                },
+                createCompanyProfilesChapter: function (chapterNumber) {
+                    return {
+                        itemText: `CHAPTER ${chapterNumber}. COMPANY PROFILES`,
+                        SubItem: this.Company.map((c, i) => ({
+                            itemText: `${chapterNumber}.${i + 1}. ${c.CompanyName.toUpperCase()}`,
+                            SubItem: i === 0 ? [
+                                { itemText: `${chapterNumber}.${i + 1}.1. Company Overview`, SubItem: [] },
+                                { itemText: `${chapterNumber}.${i + 1}.2. Key Executives`, SubItem: [] },
+                                { itemText: `${chapterNumber}.${i + 1}.3. Product Portfolio`, SubItem: [] },
+                                { itemText: `${chapterNumber}.${i + 1}.4. Financial Overview`, SubItem: [] },
+                                { itemText: `${chapterNumber}.${i + 1}.5. Operating Business Segments`, SubItem: [] },
+                                { itemText: `${chapterNumber}.${i + 1}.6. Business Performance`, SubItem: [] },
+                                { itemText: `${chapterNumber}.${i + 1}.7. Recent Developments`, SubItem: [] }
+                            ] : []
+                        }))
+                    };
+                },
+                createResearchMethodologyChapter: function (chapterNumber) {
+                    return {
+                        itemText: `CHAPTER ${chapterNumber}. RESEARCH METHODOLOGY`,
+                        SubItem: [
+                            { itemText: `${chapterNumber}.1. RESEARCH METHODOLOGY`, SubItem: [] },
+                            { itemText: `${chapterNumber}.2. SECONDARY RESEARCH`, SubItem: [] },
+                            {
+                                itemText: `${chapterNumber}.3. PRIMARY RESEARCH`,
+                                SubItem: [
+                                    { itemText: `${chapterNumber}.3.1. Analyst Tools and Models`, SubItem: [] }
+                                ]
+                            },
+                            { itemText: `${chapterNumber}.4. RESEARCH LIMITATIONS`, SubItem: [] },
+                            { itemText: `${chapterNumber}.5. ASSUMPTIONS`, SubItem: [] },
+                            { itemText: `${chapterNumber}.6. INSIGHTS FROM PRIMARY RESPONDENTS`, SubItem: [] },
+                            { itemText: `${chapterNumber}.7. WHY CUSTOM MARKET INSIGHTS`, SubItem: [] }
+                        ]
+                    };
+                },
+                createCommercialsChapter: function (chapterNumber) {
+                    return {
+                        itemText: `CHAPTER ${chapterNumber}. STANDARD REPORT COMMERCIALS & ADD-ONS`,
+                        SubItem: [
+                            { itemText: `${chapterNumber}.1. CUSTOMIZATION OPTIONS`, SubItem: [] },
+                            { itemText: `${chapterNumber}.2. SUBSCRIPTION MODULE FOR MARKET RESEARCH REPORTS`, SubItem: [] },
+                            { itemText: `${chapterNumber}.3. CLIENT TESTIMONIALS`, SubItem: [] }
+                        ]
+                    };
                 },
                 AddSegment: function () {
                     if (vm.SegmentType == 1) {
@@ -988,6 +1176,12 @@
                             }, {
                                 Index: 1,
                                 CountryName: 'Canada'
+                            }, {
+                                Index: 2,
+                                CountryName: 'Mexico'
+                            }, {
+                                Index: 3,
+                                CountryName: 'Rest of North America'
                             }],
                             isFirstRegion: true
                         });
@@ -1005,12 +1199,18 @@
                                 CountryName: 'U.K.'
                             }, {
                                 Index: 3,
-                                CountryName: 'Italy'
+                                CountryName: 'Russia'
                             }, {
                                 Index: 4,
-                                CountryName: 'Spain'
+                                CountryName: 'Italy'
                             }, {
                                 Index: 5,
+                                CountryName: 'Spain'
+                            }, {
+                                Index: 6,
+                                CountryName: 'Netherlands'
+                            }, {
+                                Index: 7,
                                 CountryName: 'Rest of Europe'
                             }],
                             isFirstRegion: false
@@ -1025,49 +1225,64 @@
                                 Index: 1,
                                 CountryName: 'Japan'
                             }, {
-                                Index: 3,
+                                Index: 2,
                                 CountryName: 'India'
                             }, {
+                                Index: 3,
+                                CountryName: 'New Zealand'
+                            }, {
                                 Index: 4,
-                                CountryName: 'South  Korea'
+                                CountryName: 'Australia'
                             }, {
                                 Index: 5,
-                                CountryName: 'South-East Asia'
+                                CountryName: 'South Korea'
                             }, {
                                 Index: 6,
+                                CountryName: 'Taiwan'
+                            }, {
+                                Index: 7,
                                 CountryName: 'Rest of Asia Pacific'
-                            },],
+                            }],
                             isFirstRegion: false
                         });
 
                         vm.RC.push({
                             Index: 3,
-                            RegionName: 'Latin America',
+                            RegionName: 'The Middle-East and Africa',
                             Country: [{
                                 Index: 0,
-                                CountryName: 'Brazil'
+                                CountryName: 'Saudi Arabia'
                             }, {
                                 Index: 1,
-                                CountryName: 'Mexico'
+                                CountryName: 'UAE'
                             }, {
                                 Index: 2,
-                                CountryName: 'Rest of Latin America'
+                                CountryName: 'Egypt'
+                            }, {
+                                Index: 3,
+                                CountryName: 'Kuwait'
+                            }, {
+                                Index: 4,
+                                CountryName: 'South Africa'
+                            }, {
+                                Index: 5,
+                                CountryName: 'Rest of the Middle East & Africa'
                             }],
                             isFirstRegion: false
                         });
 
                         vm.RC.push({
                             Index: 4,
-                            RegionName: 'The Middle-East and Africa',
+                            RegionName: 'Latin America',
                             Country: [{
                                 Index: 0,
-                                CountryName: 'GCC Countries'
+                                CountryName: 'Brazil'
                             }, {
                                 Index: 1,
-                                CountryName: 'South Africa'
+                                CountryName: 'Argentina'
                             }, {
                                 Index: 2,
-                                CountryName: 'Rest of Middle-East Africa'
+                                CountryName: 'Rest of Latin America'
                             }],
                             isFirstRegion: false
                         });
@@ -1098,45 +1313,49 @@
                     var ds = [];
                     switch (t) {
                         case 'drivers':
+                            vm.Drivers = []; // Clear existing
                             ds = this.drivers.indexOf('\n') > -1 ? this.drivers.split('\n') : this.drivers.split(',');
                             for (var i = 0; i < ds.length; i++) {
                                 if (ds[i].trim() != '') {
                                     vm.Drivers.push({
                                         itemText: ds[i].trim(),
-                                        isFirstDriver: ds.length === 0
+                                        isFirstDriver: vm.Drivers.length === 0
                                     });
                                 }
                             }
                             break;
                         case 'restraints':
+                            vm.Restraints = []; // Clear existing
                             ds = this.restraints.indexOf('\n') > -1 ? this.restraints.split('\n') : this.restraints.split(',');
                             for (var i = 0; i < ds.length; i++) {
                                 if (ds[i].trim() != '') {
                                     vm.Restraints.push({
                                         itemText: ds[i].trim(),
-                                        isFirstRestraint: ds.length === 0
+                                        isFirstRestraint: vm.Restraints.length === 0
                                     });
                                 }
                             }
                             break;
                         case 'opportunities':
+                            vm.Opportunities = []; // Clear existing
                             ds = this.opportunities.indexOf('\n') > -1 ? this.opportunities.split('\n') : this.opportunities.split(',');
                             for (var i = 0; i < ds.length; i++) {
                                 if (ds[i].trim() != '') {
                                     vm.Opportunities.push({
                                         itemText: ds[i].trim(),
-                                        isFirstOppurtunity: ds.length === 0
+                                        isFirstOppurtunity: vm.Opportunities.length === 0
                                     });
                                 }
                             }
                             break;
                         case 'chalanges':
+                            vm.Chalanges = []; // Clear existing
                             ds = this.chalanges.indexOf('\n') > -1 ? this.chalanges.split('\n') : this.chalanges.split(',');
                             for (var i = 0; i < ds.length; i++) {
                                 if (ds[i].trim() != '') {
                                     vm.Chalanges.push({
                                         itemText: ds[i].trim(),
-                                        isFirstChalange: ds.length === 0
+                                        isFirstChalange: vm.Chalanges.length === 0
                                     });
                                 }
                             }
