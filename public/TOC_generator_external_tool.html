@@ -961,7 +961,7 @@
 
                     let chapterSubItems = [
                         {
-                            itemText: `${chapterNumber}.1. ${segment.SegmentName.toUpperCase()} Market Overview, By ${segment.SegmentName.toUpperCase()} Segment`,
+                            itemText: `${chapterNumber}.1. ${segment.SegmentName} Market Overview, By ${segment.SegmentName} Segment`,
                             SubItem: segmentDetails
                         }
                     ];
@@ -972,7 +972,7 @@
                     }
 
                     return {
-                        itemText: `Chapter ${chapterNumber}. ${this.Keyword.toUpperCase()} Market - By ${segment.SegmentName.toUpperCase()}`,
+                        itemText: `Chapter ${chapterNumber}. ${this.Keyword} Market - By ${segment.SegmentName}`,
                         SubItem: chapterSubItems
                     };
                 },
@@ -981,7 +981,7 @@
 
                     // Add regional analysis heading (without numbering)
                     sections.push({
-                        itemText: `${this.Keyword.toUpperCase()} Market - Regional Analysis`,
+                        itemText: `${this.Keyword} Market - Regional Analysis`,
                         SubItem: []
                     });
 
@@ -1005,7 +1005,7 @@
                     });
 
                     sections.push({
-                        itemText: `${chapterNumber}.2. ${this.Keyword.toUpperCase()} Market Overview, By Region Segment`,
+                        itemText: `${chapterNumber}.2. ${this.Keyword} Market Overview, By Region Segment`,
                         SubItem: overviewSubItems
                     });
 
@@ -1036,7 +1036,7 @@
                         });
 
                         sections.push({
-                            itemText: `${chapterNumber}.${regionMainIndex++}. ${region.RegionName.toUpperCase()}`,
+                            itemText: `${chapterNumber}.${regionMainIndex++}. ${region.RegionName}`,
                             SubItem: regionSubSections
                         });
                     });
@@ -1057,7 +1057,7 @@
                                 ]
                             },
                             {
-                                itemText: `${chapterNumber}.2. Global ${this.Keyword.toUpperCase()} Market Company Market Share, ${parseInt(this.BaseYear) - 1}`,
+                                itemText: `${chapterNumber}.2. Global ${this.Keyword} Market Company Market Share, ${parseInt(this.BaseYear) - 1}`,
                                 SubItem: []
                             }
                         ]
@@ -1067,7 +1067,7 @@
                     return {
                         itemText: `Chapter ${chapterNumber}. Company Profiles`,
                         SubItem: this.Company.map((c, i) => ({
-                            itemText: `${chapterNumber}.${i + 1}. ${c.CompanyName.toUpperCase()}`,
+                            itemText: `${chapterNumber}.${i + 1}. ${c.CompanyName}`,
                             SubItem: i === 0 ? [
                                 { itemText: `${chapterNumber}.${i + 1}.1. Company Overview`, SubItem: [] },
                                 { itemText: `${chapterNumber}.${i + 1}.2. Key Executives`, SubItem: [] },
