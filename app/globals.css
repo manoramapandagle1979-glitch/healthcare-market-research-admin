@@ -162,6 +162,13 @@
     box-sizing: border-box;
     position: relative;
     min-width: 1em;
+    width: auto !important; /* Override any fixed pixel widths */
+  }
+
+  /* Ensure colgroup columns use percentage widths */
+  table colgroup col {
+    width: auto !important;
+    min-width: 0 !important;
   }
 
   table th {
@@ -182,15 +189,7 @@
     pointer-events: none;
   }
 
-  table .column-resize-handle {
-    position: absolute;
-    right: -2px;
-    top: 0;
-    bottom: -2px;
-    width: 4px;
-    background-color: hsl(var(--primary));
-    pointer-events: none;
-  }
+  /* Column resize handle removed - resizing is disabled for percentage-based widths */
 
   table p {
     margin: 0;

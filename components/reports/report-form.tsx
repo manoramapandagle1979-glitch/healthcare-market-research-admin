@@ -40,6 +40,7 @@ import { SEO_LIMITS } from '@/lib/config/seo';
 import { measureTextWidth } from '@/lib/utils/text-measurement';
 import { toast } from 'sonner';
 import { config } from '@/lib/config';
+import { generateSlug } from '@/lib/utils/slug';
 
 interface ReportFormProps {
   report?: Report;
@@ -164,12 +165,7 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
                         // Auto-generate slug from title if slug is empty
                         const currentSlug = form.getValues('slug');
                         if (!currentSlug || !report) {
-                          const slug = e.target.value
-                            .toLowerCase()
-                            .replace(/[^a-z0-9\s-]/g, '')
-                            .replace(/\s+/g, '-')
-                            .replace(/-+/g, '-')
-                            .trim();
+                          const slug = generateSlug(e.target.value);
                           form.setValue('slug', slug);
                         }
                       }}

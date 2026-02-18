@@ -42,6 +42,7 @@ import { SEO_LIMITS } from '@/lib/config/seo';
 import { measureTextWidth } from '@/lib/utils/text-measurement';
 import { toast } from 'sonner';
 import { config } from '@/lib/config';
+import { generateSlug } from '@/lib/utils/slug';
 
 // Validation schema
 const blogFormSchema = z.object({
@@ -230,6 +231,23 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving }: BlogFormProps)
                       variant="outline"
                       size="icon"
                       onClick={() => {
+                        const title = form.getValues('title');
+                        if (title) {
+                          const slug = generateSlug(title);
+                          form.setValue('slug', slug);
+                          toast.success('Slug generated from title');
+                        }
+                      }}
+                      disabled={!form.watch('title')}
+                      title="Generate from title"
+                    >
+                      <Wand2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => {
                         if (field.value) {
                           navigator.clipboard.writeText(
                             `${config.preview.domain}/blog/${field.value}`
@@ -238,6 +256,7 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving }: BlogFormProps)
                         }
                       }}
                       disabled={!field.value}
+                      title="Copy URL"
                     >
                       <Copy className="h-4 w-4" />
                     </Button>

@@ -852,18 +852,18 @@
                 },
                 createChapter1ReportIntroduction: function () {
                     return {
-                        itemText: 'CHAPTER 1. REPORT INTRODUCTION',
+                        itemText: 'Chapter 1. Report Introduction',
                         SubItem: [
                             {
-                                itemText: '1.1. REPORT DESCRIPTION',
+                                itemText: '1.1. Report Description',
                                 SubItem: [
                                     { itemText: '1.1.1. Purpose of the Report', SubItem: [] },
                                     { itemText: '1.1.2. USP & Key Offerings', SubItem: [] }
                                 ]
                             },
-                            { itemText: '1.2. KEY BENEFITS FOR STAKEHOLDERS', SubItem: [] },
-                            { itemText: '1.3. TARGET AUDIENCE', SubItem: [] },
-                            { itemText: '1.4. REPORT SCOPE', SubItem: [] }
+                            { itemText: '1.2. Key Benefits For Stakeholders', SubItem: [] },
+                            { itemText: '1.3. Target Audience', SubItem: [] },
+                            { itemText: '1.4. Report Scope', SubItem: [] }
                         ]
                     };
                 },
@@ -876,17 +876,17 @@
                     });
 
                     return {
-                        itemText: 'CHAPTER 2. MARKET OVERVIEW',
+                        itemText: 'Chapter 2. Market Overview',
                         SubItem: [
                             {
-                                itemText: '2.1. REPORT SCOPE (SEGMENTS AND KEY PLAYERS)',
+                                itemText: '2.1. Report Scope (Segments And Key Players)',
                                 SubItem: [
                                     { itemText: `2.1.1. ${this.Keyword} by Segments`, SubItem: [] },
                                     { itemText: `2.1.2. ${this.Keyword} by Region`, SubItem: [] }
                                 ]
                             },
                             {
-                                itemText: '2.2. EXECUTIVE SUMMARY',
+                                itemText: '2.2. Executive Summary',
                                 SubItem: [
                                     { itemText: '2.2.1. Market Size & Forecast', SubItem: [] },
                                     ...attractivenessAnalysis
@@ -897,35 +897,35 @@
                 },
                 createChapter3MarketDynamics: function () {
                     return {
-                        itemText: 'CHAPTER 3. MARKET DYNAMICS (DRO)',
+                        itemText: 'Chapter 3. Market Dynamics (DRO)',
                         SubItem: [
                             {
-                                itemText: '3.1. MARKET DRIVERS',
+                                itemText: '3.1. Market Drivers',
                                 SubItem: this.Drivers.map((d, i) => ({
                                     itemText: `3.1.${i + 1}. ${d.itemText}`,
                                     SubItem: []
                                 }))
                             },
                             {
-                                itemText: '3.2. MARKET RESTRAINTS',
+                                itemText: '3.2. Market Restraints',
                                 SubItem: this.Restraints.map((r, i) => ({
                                     itemText: `3.2.${i + 1}. ${r.itemText}`,
                                     SubItem: []
                                 }))
                             },
                             {
-                                itemText: '3.3. MARKET OPPORTUNITIES',
+                                itemText: '3.3. Market Opportunities',
                                 SubItem: this.Opportunities.map((o, i) => ({
                                     itemText: `3.3.${i + 1}. ${o.itemText}`,
                                     SubItem: []
                                 }))
                             },
-                            { itemText: '3.5. PESTLE ANALYSIS', SubItem: [] },
-                            { itemText: '3.6. PORTER FORCES ANALYSIS', SubItem: [] },
-                            { itemText: '3.7. TECHNOLOGY ROADMAP', SubItem: [] },
-                            { itemText: '3.8. VALUE CHAIN ANALYSIS', SubItem: [] },
-                            { itemText: '3.9. GOVERNMENT POLICY IMPACT ANALYSIS', SubItem: [] },
-                            { itemText: '3.10. PRICING ANALYSIS', SubItem: [] }
+                            { itemText: '3.5. Pestle Analysis', SubItem: [] },
+                            { itemText: '3.6. Porter Forces Analysis', SubItem: [] },
+                            { itemText: '3.7. Technology Roadmap', SubItem: [] },
+                            { itemText: '3.8. Value Chain Analysis', SubItem: [] },
+                            { itemText: '3.9. Government Policy Impact Analysis', SubItem: [] },
+                            { itemText: '3.10. Pricing Analysis', SubItem: [] }
                         ]
                     };
                 },
@@ -961,7 +961,7 @@
 
                     let chapterSubItems = [
                         {
-                            itemText: `${chapterNumber}.1. ${segment.SegmentName.toUpperCase()} MARKET OVERVIEW, BY ${segment.SegmentName.toUpperCase()} SEGMENT`,
+                            itemText: `${chapterNumber}.1. ${segment.SegmentName.toUpperCase()} Market Overview, By ${segment.SegmentName.toUpperCase()} Segment`,
                             SubItem: segmentDetails
                         }
                     ];
@@ -972,7 +972,7 @@
                     }
 
                     return {
-                        itemText: `CHAPTER ${chapterNumber}. ${this.Keyword.toUpperCase()} MARKET - BY ${segment.SegmentName.toUpperCase()}`,
+                        itemText: `Chapter ${chapterNumber}. ${this.Keyword.toUpperCase()} Market - By ${segment.SegmentName.toUpperCase()}`,
                         SubItem: chapterSubItems
                     };
                 },
@@ -981,7 +981,7 @@
 
                     // Add regional analysis heading (without numbering)
                     sections.push({
-                        itemText: `${this.Keyword.toUpperCase()} MARKET - REGIONAL ANALYSIS`,
+                        itemText: `${this.Keyword.toUpperCase()} Market - Regional Analysis`,
                         SubItem: []
                     });
 
@@ -1005,7 +1005,7 @@
                     });
 
                     sections.push({
-                        itemText: `${chapterNumber}.2. ${this.Keyword.toUpperCase()} MARKET OVERVIEW, BY REGION SEGMENT`,
+                        itemText: `${chapterNumber}.2. ${this.Keyword.toUpperCase()} Market Overview, By Region Segment`,
                         SubItem: overviewSubItems
                     });
 
@@ -1045,10 +1045,10 @@
                 },
                 createCompetitiveLandscapeChapter: function (chapterNumber) {
                     return {
-                        itemText: `CHAPTER ${chapterNumber}. COMPETITIVE LANDSCAPE`,
+                        itemText: `Chapter ${chapterNumber}. Competitive Landscape`,
                         SubItem: [
                             {
-                                itemText: `${chapterNumber}.1. COMPANY MARKET SHARE ANALYSIS - ${this.BaseYear}`,
+                                itemText: `${chapterNumber}.1. Company Market Share Analysis - ${this.BaseYear}`,
                                 SubItem: [
                                     {
                                         itemText: `${chapterNumber}.1.1. Global ${this.Keyword} Market: Company Market Share, ${this.BaseYear}`,
@@ -1057,7 +1057,7 @@
                                 ]
                             },
                             {
-                                itemText: `${chapterNumber}.2. GLOBAL ${this.Keyword.toUpperCase()} MARKET COMPANY MARKET SHARE, ${parseInt(this.BaseYear) - 1}`,
+                                itemText: `${chapterNumber}.2. Global ${this.Keyword.toUpperCase()} Market Company Market Share, ${parseInt(this.BaseYear) - 1}`,
                                 SubItem: []
                             }
                         ]
@@ -1065,7 +1065,7 @@
                 },
                 createCompanyProfilesChapter: function (chapterNumber) {
                     return {
-                        itemText: `CHAPTER ${chapterNumber}. COMPANY PROFILES`,
+                        itemText: `Chapter ${chapterNumber}. Company Profiles`,
                         SubItem: this.Company.map((c, i) => ({
                             itemText: `${chapterNumber}.${i + 1}. ${c.CompanyName.toUpperCase()}`,
                             SubItem: i === 0 ? [
@@ -1082,30 +1082,30 @@
                 },
                 createResearchMethodologyChapter: function (chapterNumber) {
                     return {
-                        itemText: `CHAPTER ${chapterNumber}. RESEARCH METHODOLOGY`,
+                        itemText: `Chapter ${chapterNumber}. Research Methodology`,
                         SubItem: [
-                            { itemText: `${chapterNumber}.1. RESEARCH METHODOLOGY`, SubItem: [] },
-                            { itemText: `${chapterNumber}.2. SECONDARY RESEARCH`, SubItem: [] },
+                            { itemText: `${chapterNumber}.1. Research Methodology`, SubItem: [] },
+                            { itemText: `${chapterNumber}.2. Secondary Research`, SubItem: [] },
                             {
-                                itemText: `${chapterNumber}.3. PRIMARY RESEARCH`,
+                                itemText: `${chapterNumber}.3. Primary Research`,
                                 SubItem: [
                                     { itemText: `${chapterNumber}.3.1. Analyst Tools and Models`, SubItem: [] }
                                 ]
                             },
-                            { itemText: `${chapterNumber}.4. RESEARCH LIMITATIONS`, SubItem: [] },
-                            { itemText: `${chapterNumber}.5. ASSUMPTIONS`, SubItem: [] },
-                            { itemText: `${chapterNumber}.6. INSIGHTS FROM PRIMARY RESPONDENTS`, SubItem: [] },
-                            { itemText: `${chapterNumber}.7. WHY CUSTOM MARKET INSIGHTS`, SubItem: [] }
+                            { itemText: `${chapterNumber}.4. Research Limitations`, SubItem: [] },
+                            { itemText: `${chapterNumber}.5. Assumptions`, SubItem: [] },
+                            { itemText: `${chapterNumber}.6. Insights From Primary Respondents`, SubItem: [] },
+                            { itemText: `${chapterNumber}.7. Why Custom Market Insights`, SubItem: [] }
                         ]
                     };
                 },
                 createCommercialsChapter: function (chapterNumber) {
                     return {
-                        itemText: `CHAPTER ${chapterNumber}. STANDARD REPORT COMMERCIALS & ADD-ONS`,
+                        itemText: `Chapter ${chapterNumber}. Standard Report Commercials & Add-Ons`,
                         SubItem: [
-                            { itemText: `${chapterNumber}.1. CUSTOMIZATION OPTIONS`, SubItem: [] },
-                            { itemText: `${chapterNumber}.2. SUBSCRIPTION MODULE FOR MARKET RESEARCH REPORTS`, SubItem: [] },
-                            { itemText: `${chapterNumber}.3. CLIENT TESTIMONIALS`, SubItem: [] }
+                            { itemText: `${chapterNumber}.1. Customization Options`, SubItem: [] },
+                            { itemText: `${chapterNumber}.2. Subscription Module For Market Research Reports`, SubItem: [] },
+                            { itemText: `${chapterNumber}.3. Client Testimonials`, SubItem: [] }
                         ]
                     };
                 },
