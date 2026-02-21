@@ -1126,7 +1126,7 @@
                             SubSegment: []
                         });
                     } else {
-                        let s3 = Segment.SubSegment[this.Segment.SubSegment.length - 1].SubSegment[vm.Segment.SubSegment[this.Segment.SubSegment.length - 1].SubSegment.length - 1].SubSegment.length;
+                        let s3 = vm.Segment.SubSegment[this.Segment.SubSegment.length - 1].SubSegment[vm.Segment.SubSegment[this.Segment.SubSegment.length - 1].SubSegment.length - 1].SubSegment.length;
                         vm.Segment.SubSegment[this.Segment.SubSegment.length - 1].SubSegment[vm.Segment.SubSegment[this.Segment.SubSegment.length - 1].SubSegment.length - 1].SubSegment.push({
                             Index: s3 > 0 ? s3 : 0,
                             SegmentName: this.SegmentName,
@@ -1136,9 +1136,9 @@
                 },
                 Remove: function (parentIndex, childIndex) {
                     if (childIndex > -1) {
-                        vm.Segment[parentIndex].SubSegment.splice(childIndex, 1);
+                        vm.Segment.SubSegment[parentIndex].SubSegment.splice(childIndex, 1);
                     } else {
-                        vm.Segment.splice(parentIndex, 1);
+                        vm.Segment.SubSegment.splice(parentIndex, 1);
                     }
                 },
                 AddRegion: function () {
@@ -1153,7 +1153,7 @@
                         vm.RC[this.RC.length - 1].Country.push({
                             Index: this.RC[this.RC.length - 1].Country.length > 0 ? this.RC[this.RC.length - 1].Country.length - 1 : 0,
                             CountryName: this.Region,
-                            isFirstCountry: this.RC.Country.length === 0
+                            isFirstCountry: this.RC[this.RC.length - 1].Country.length === 0
                         });
                     }
                 },
