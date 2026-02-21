@@ -162,7 +162,7 @@
     box-sizing: border-box;
     position: relative;
     min-width: 1em;
-    width: auto !important; /* Override any fixed pixel widths */
+    width: 50% !important; /* Force 50% width for 2-column tables */
   }
 
   /* Ensure colgroup columns use percentage widths */

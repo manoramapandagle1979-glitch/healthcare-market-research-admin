@@ -7,6 +7,7 @@ import {
   MessageSquare,
   Megaphone,
   Trash2,
+  Tag,
 } from 'lucide-react';
 
 export type UserRole = 'admin' | 'editor' | 'viewer';
@@ -139,6 +140,12 @@ export const navigationItems: NavigationItem[] = [
     href: '/authors',
     icon: Users,
     roles: ['admin', 'editor'],
+  },
+  {
+    title: 'Categories',
+    href: '/categories',
+    icon: Tag,
+    roles: ['admin', 'editor', 'viewer'],
   },
   // {
   //   title: 'Chart Generator POC',

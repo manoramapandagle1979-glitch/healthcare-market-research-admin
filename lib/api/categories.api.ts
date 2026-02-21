@@ -31,3 +31,16 @@ export async function fetchCategoryBySlug(slug: string): Promise<ApiCategoryDeta
     requiresAuth: false, // Public endpoint
   });
 }
+
+/**
+ * POST /api/v1/categories/{id}/image — multipart/form-data
+ * Upload or replace the feature image for a category
+ */
+export async function uploadCategoryImage(
+  id: number,
+  file: File
+): Promise<ApiCategoryDetailResponse> {
+  const formData = new FormData();
+  formData.append('file', file);
+  return apiClient.upload<ApiCategoryDetailResponse>(`/v1/categories/${id}/image`, formData);
+}

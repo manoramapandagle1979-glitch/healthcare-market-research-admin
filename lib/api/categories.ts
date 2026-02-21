@@ -81,3 +81,21 @@ export async function fetchCategoryBySlug(slug: string): Promise<CategoryRespons
     category: convertApiCategoryToCategory(response.data),
   };
 }
+
+/**
+ * Uploads or replaces the feature image for a category
+ */
+export async function uploadCategoryImage(
+  id: number,
+  file: File
+): Promise<CategoryResponse> {
+  const response = await categoriesApi.uploadCategoryImage(id, file);
+
+  if (!response.success || !response.data) {
+    throw new Error(response.error || 'Failed to upload category image');
+  }
+
+  return {
+    category: convertApiCategoryToCategory(response.data),
+  };
+}

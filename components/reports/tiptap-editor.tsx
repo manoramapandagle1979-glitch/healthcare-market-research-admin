@@ -257,7 +257,7 @@ export function TiptapEditor({
   };
 
   const insertTable = () => {
-    editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+    editor.chain().focus().insertTable({ rows: 3, cols: 2, withHeaderRow: true }).run();
   };
 
   const insertImage = (image: ReportImage) => {
