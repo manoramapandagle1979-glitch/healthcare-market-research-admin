@@ -291,6 +291,7 @@ export interface FormSubmissionMetadata {
   ipAddress?: string;
   userAgent?: string;
   referrer?: string;
+  pageURL?: string;
 }
 
 export interface ApiFormSubmission {

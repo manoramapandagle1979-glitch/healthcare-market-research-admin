@@ -302,6 +302,12 @@ export function LeadsList({ submissions, onDelete, onStatusUpdate }: LeadsListPr
                       {viewSubmission.metadata.referrer}
                     </div>
                   )}
+                  {viewSubmission.metadata.pageURL && (
+                    <div className="col-span-2">
+                      <span className="text-muted-foreground">Page URL:</span>{' '}
+                      <span className="break-all">{viewSubmission.metadata.pageURL}</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
