@@ -8,6 +8,8 @@ import {
   Megaphone,
   Trash2,
   Tag,
+  Search,
+  ArrowRightLeft,
 } from 'lucide-react';
 
 export type UserRole = 'admin' | 'editor' | 'viewer';
@@ -117,6 +119,26 @@ export const navigationItems: NavigationItem[] = [
   //   icon: Image,
   //   roles: ['admin', 'editor'],
   // },
+  {
+    title: 'SEO',
+    href: '/seo',
+    icon: Search,
+    roles: ['admin', 'editor'],
+    children: [
+      {
+        title: 'Overview',
+        href: '/seo',
+        icon: Search,
+        roles: ['admin', 'editor'],
+      },
+      {
+        title: 'Redirects',
+        href: '/seo/redirects',
+        icon: ArrowRightLeft,
+        roles: ['admin', 'editor'],
+      },
+    ],
+  },
   {
     title: 'Leads',
     href: '/leads',
