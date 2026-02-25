@@ -183,4 +183,4 @@ This is an internal admin panel. Please follow the coding standards enforced by 
 
 ## License
 
-Proprietary - All rights reserved
+Proprietary - All rights reserved.
