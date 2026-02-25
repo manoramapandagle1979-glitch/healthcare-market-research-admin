@@ -11,8 +11,9 @@ import { useBlog } from '@/hooks/use-blog';
 import { useAuth } from '@/contexts/auth-context';
 import { FormSkeleton } from '@/components/ui/skeletons/form-skeleton';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function EditBlogPage() {
   const params = useParams();
@@ -104,10 +105,19 @@ export default function EditBlogPage() {
             }}
             onPreview={() => router.push(`/blog/${blogId}/preview`)}
             isSaving={isSaving}
+            formId="blog-edit-form"
           />
         </div>
 
         <div className="space-y-6">
+          <Card>
+            <CardContent className="pt-6">
+              <Button type="submit" form="blog-edit-form" disabled={isSaving} className="w-full">
+                <Save className="h-4 w-4 mr-2" />
+                {isSaving ? 'Saving...' : 'Save Blog Post'}
+              </Button>
+            </CardContent>
+          </Card>
           <WorkflowStatus
             currentStatus={blog.status}
             onStatusChange={handleStatusChange}

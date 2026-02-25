@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
@@ -39,13 +39,12 @@ function parseTextToTOC(text: string): TableOfContentsStructure {
   for (const line of lines) {
     if (!line.trim()) continue;
 
-    // Count leading spaces to determine indentation level
-    const leadingSpaces = line.match(/^(\s*)/)?.[1]?.length || 0;
     const trimmedLine = line.trim();
 
-    // Subsection pattern: 1.1.1 Title or 1.1.1. Title (with 4+ spaces indent)
+    // Subsection pattern: 1.1.1 Title or 1.1.1. Title
+    // Checked first so it takes priority over the section pattern
     const subsectionMatch = trimmedLine.match(/^(\d+)\.(\d+)\.(\d+)\.?\s+(.+)$/);
-    if (subsectionMatch && leadingSpaces >= 4 && currentSection) {
+    if (subsectionMatch && currentSection) {
       const [, chapterNum, sectionNum, subsectionNum, title] = subsectionMatch;
       const subsection: TOCSubsection = {
         id: generateId(`subsection-${chapterNum}-${sectionNum}-${subsectionNum}`),
@@ -55,9 +54,10 @@ function parseTextToTOC(text: string): TableOfContentsStructure {
       continue;
     }
 
-    // Section pattern: 1.1 Title or 1.1. Title (with 2 spaces indent)
+    // Section pattern: 1.1 Title or 1.1. Title
+    // The regex cannot match 3-number patterns (e.g. 1.1.1.) so subsections won't fall through here
     const sectionMatch = trimmedLine.match(/^(\d+)\.(\d+)\.?\s+(.+)$/);
-    if (sectionMatch && leadingSpaces >= 2 && leadingSpaces < 4 && currentChapter) {
+    if (sectionMatch && currentChapter) {
       const [, chapterNum, sectionNum, title] = sectionMatch;
       currentSection = {
         id: generateId(`section-${chapterNum}-${sectionNum}`),
@@ -68,9 +68,10 @@ function parseTextToTOC(text: string): TableOfContentsStructure {
       continue;
     }
 
-    // Chapter pattern: Chapter 1. Title or 1. Title (no indent)
-    const chapterMatch = trimmedLine.match(/^(?:Chapter\s+)?(\d+)\.\s*(.+)$/i);
-    if (chapterMatch && leadingSpaces === 0) {
+    // Chapter pattern: Chapter 1. Title or 1. Title
+    // Negative lookahead (?!\d) prevents matching section patterns like "1.1. Title"
+    const chapterMatch = trimmedLine.match(/^(?:Chapter\s+)?(\d+)\.(?!\d)\s*(.+)$/i);
+    if (chapterMatch) {
       const [, chapterNum, title] = chapterMatch;
       currentChapter = {
         id: generateId(`chapter-${chapterNum}`),
@@ -117,10 +118,21 @@ export function TOCTextEditor({ value, onChange }: TOCTextEditorProps) {
   const [textValue, setTextValue] = useState(() => tocToText(value));
   const [parseError, setParseError] = useState<string | null>(null);
 
-  // Ensure client-side only rendering
+  // Track the last TOC structure we pushed via onChange so we can distinguish
+  // between our own updates and external changes (e.g. "Generate from Template")
+  const lastPushedTOC = useRef<string>(JSON.stringify(value));
+
   useEffect(() => {
     setIsMounted(true);
-    setTextValue(tocToText(value));
+  }, []);
+
+  // Only sync text from the prop when the value was changed externally
+  useEffect(() => {
+    const incoming = JSON.stringify(value);
+    if (incoming !== lastPushedTOC.current) {
+      lastPushedTOC.current = incoming;
+      setTextValue(tocToText(value));
+    }
   }, [value]);
 
   if (!isMounted) {
@@ -137,6 +149,8 @@ export function TOCTextEditor({ value, onChange }: TOCTextEditorProps) {
     // Real-time parsing and validation
     try {
       const parsed = parseTextToTOC(newText);
+      // Record what we're pushing so the effect doesn't echo it back
+      lastPushedTOC.current = JSON.stringify(parsed);
       onChange(parsed);
       setParseError(null);
     } catch (error) {
@@ -162,11 +176,11 @@ export function TOCTextEditor({ value, onChange }: TOCTextEditorProps) {
             <code className="bg-background px-1 rounded">1. Title</code> (no indentation)
           </li>
           <li>
-            Sections: <code className="bg-background px-1 rounded"> 1.1 Section Title</code> (2
+            Sections: <code className="bg-background px-1 rounded">1.1 Section Title</code> (2
             spaces indent)
           </li>
           <li>
-            Subsections: <code className="bg-background px-1 rounded"> 1.1.1 Subsection Title</code>{' '}
+            Subsections: <code className="bg-background px-1 rounded">1.1.1 Subsection Title</code>{' '}
             (4 spaces indent)
           </li>
         </ul>

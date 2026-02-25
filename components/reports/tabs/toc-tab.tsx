@@ -10,7 +10,6 @@ import { TOCViewer } from '../toc-viewer';
 import { TOCEditor } from '../toc-editor';
 import { TOCTextEditor } from '../toc-text-editor';
 import { TOCGeneratorDialog } from '../toc-generator-dialog';
-import { TOCWizardDialog } from '../toc-wizard-dialog';
 import type { UseFormReturn } from 'react-hook-form';
 import type { ReportFormData } from '@/lib/types/reports';
 
@@ -24,7 +23,6 @@ interface TOCTabProps {
 
 export function TOCTab({ form, onSaveTab, isSaving }: TOCTabProps) {
   const [tocDialogOpen, setTocDialogOpen] = useState(false);
-  const [tocWizardOpen, setTocWizardOpen] = useState(false);
   const [showValidationError, setShowValidationError] = useState(false);
   const [tocMode, setTocMode] = useState<TOCMode>('text-edit');
 
@@ -104,7 +102,7 @@ export function TOCTab({ form, onSaveTab, isSaving }: TOCTabProps) {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setTocWizardOpen(true)}
+                onClick={() => window.open('/TOC_generator_external_tool.html', '_blank')}
               >
                 <Wand2 className="h-4 w-4 mr-2" />
                 TOC Wizard
@@ -164,7 +162,6 @@ export function TOCTab({ form, onSaveTab, isSaving }: TOCTabProps) {
               setTocDialogOpen(false);
             }}
           />
-          <TOCWizardDialog open={tocWizardOpen} onOpenChange={setTocWizardOpen} />
         </CardContent>
       </Card>
 

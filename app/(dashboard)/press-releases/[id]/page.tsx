@@ -13,8 +13,9 @@ import { usePressRelease } from '@/hooks/use-press-release';
 import { useAuth } from '@/contexts/auth-context';
 import { FormSkeleton } from '@/components/ui/skeletons/form-skeleton';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function EditPressReleasePage() {
   const params = useParams();
@@ -107,10 +108,24 @@ export default function EditPressReleasePage() {
             }}
             onPreview={() => router.push(`/press-releases/${pressReleaseId}/preview`)}
             isSaving={isSaving}
+            formId="press-release-edit-form"
           />
         </div>
 
         <div className="space-y-6">
+          <Card>
+            <CardContent className="pt-6">
+              <Button
+                type="submit"
+                form="press-release-edit-form"
+                disabled={isSaving}
+                className="w-full"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {isSaving ? 'Saving...' : 'Save Press Release'}
+              </Button>
+            </CardContent>
+          </Card>
           <WorkflowStatus
             currentStatus={pressRelease.status}
             onStatusChange={handleStatusChange}

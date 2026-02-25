@@ -84,9 +84,10 @@ interface BlogFormProps {
   onSubmit: (data: BlogFormData) => Promise<void>;
   onPreview?: () => void;
   isSaving: boolean;
+  formId?: string;
 }
 
-export function BlogForm({ blog, onSubmit, onPreview, isSaving }: BlogFormProps) {
+export function BlogForm({ blog, onSubmit, onPreview, isSaving, formId }: BlogFormProps) {
   const [keywordInput, setKeywordInput] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
@@ -183,7 +184,7 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving }: BlogFormProps)
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+      <form id={formId} onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
         {/* Basic Information */}
         <Card>
           <CardHeader>
@@ -520,24 +521,28 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving }: BlogFormProps)
         </Card>
 
         {/* Actions */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex justify-between">
-              <div className="flex gap-2">
-                <Button type="submit" disabled={isSaving}>
-                  <Save className="h-4 w-4 mr-2" />
-                  {isSaving ? 'Saving...' : 'Save Blog Post'}
-                </Button>
-                {onPreview && (
-                  <Button type="button" variant="outline" onClick={onPreview}>
-                    <Eye className="h-4 w-4 mr-2" />
-                    Preview
+        {(onPreview || !formId) && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex justify-between">
+                <div>
+                  {onPreview && (
+                    <Button type="button" variant="outline" onClick={onPreview}>
+                      <Eye className="h-4 w-4 mr-2" />
+                      Preview
+                    </Button>
+                  )}
+                </div>
+                {!formId && (
+                  <Button type="submit" disabled={isSaving}>
+                    <Save className="h-4 w-4 mr-2" />
+                    {isSaving ? 'Saving...' : 'Save Blog Post'}
                   </Button>
                 )}
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </form>
     </Form>
   );
