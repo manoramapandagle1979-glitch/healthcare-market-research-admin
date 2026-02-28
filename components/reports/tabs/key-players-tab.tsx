@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormField, FormItem, FormMessage, FormDescription } from '@/components/ui/form';
@@ -15,6 +16,8 @@ interface KeyPlayersTabProps {
 }
 
 export function KeyPlayersTab({ form, onSaveTab, isSaving }: KeyPlayersTabProps) {
+  const playerInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
   const handleSaveTab = async () => {
     const values = form.getValues();
     if (onSaveTab) {
@@ -62,6 +65,9 @@ export function KeyPlayersTab({ form, onSaveTab, isSaving }: KeyPlayersTabProps)
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                           <Input
+                            ref={el => {
+                              playerInputRefs.current[index] = el;
+                            }}
                             placeholder="Company Name"
                             value={player.name}
                             onChange={e => {
@@ -90,6 +96,10 @@ export function KeyPlayersTab({ form, onSaveTab, isSaving }: KeyPlayersTabProps)
                   onClick={() => {
                     const updated = [...(field.value || []), { name: '', marketShare: 'XX' }];
                     field.onChange(updated);
+                    const newIndex = updated.length - 1;
+                    setTimeout(() => {
+                      playerInputRefs.current[newIndex]?.focus();
+                    }, 0);
                   }}
                   className="w-full mt-2"
                 >

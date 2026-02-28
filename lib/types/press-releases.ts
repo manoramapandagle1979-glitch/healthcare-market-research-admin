@@ -55,6 +55,7 @@ export interface ApiPressRelease {
   publishDate: string;
   scheduledPublishEnabled?: boolean;
   location?: string;
+  reportUrl?: string;
   metadata: PressReleaseMetadata;
   createdAt: string;
   updatedAt: string;
@@ -88,6 +89,7 @@ export interface PressRelease {
   publishDate: string;
   scheduledPublishEnabled?: boolean;
   location?: string;
+  reportUrl?: string;
   metadata: PressReleaseMetadata;
   createdAt: string;
   updatedAt: string;
@@ -134,6 +136,7 @@ export interface CreatePressReleaseData {
   publishDate: string;
   scheduledPublishEnabled?: boolean;
   location?: string;
+  reportUrl?: string;
   metadata?: PressReleaseMetadata;
 }
 
@@ -150,6 +153,7 @@ export interface UpdatePressReleaseData {
   publishDate?: string;
   scheduledPublishEnabled?: boolean;
   location?: string;
+  reportUrl?: string;
   metadata?: PressReleaseMetadata;
 }
 
@@ -166,6 +170,7 @@ export interface PressReleaseFormData {
   publishDate: string;
   scheduledPublishEnabled?: boolean;
   location?: string;
+  reportUrl?: string;
   metadata?: PressReleaseMetadata;
 }
 

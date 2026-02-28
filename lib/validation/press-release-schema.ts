@@ -48,6 +48,7 @@ export const pressReleaseFormSchema = z.object({
   status: z.enum(['draft', 'review', 'published']),
   publishDate: z.string(),
   location: z.string().optional(),
+  reportUrl: z.string().url('Must be a valid URL').optional().or(z.literal('')),
   metadata: z
     .object({
       metaTitle: z.string().optional(),

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,6 +26,8 @@ interface ContentTabProps {
 
 export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
   const [showValidationError, setShowValidationError] = useState(false);
+  const playerInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const faqInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleSaveTab = async () => {
     if (onSaveTab) {
@@ -117,6 +119,9 @@ export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
                       <div className="grid grid-cols-3 gap-3">
                         <div className="col-span-2">
                           <Input
+                            ref={el => {
+                              playerInputRefs.current[index] = el;
+                            }}
                             placeholder="Company Name"
                             value={player.name}
                             onChange={e => {
@@ -164,6 +169,10 @@ export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
                       { name: '', marketShare: 'XX', rank: undefined },
                     ];
                     field.onChange(updated);
+                    const newIndex = updated.length - 1;
+                    setTimeout(() => {
+                      playerInputRefs.current[newIndex]?.focus();
+                    }, 0);
                   }}
                   className="w-full mt-2"
                 >
@@ -218,6 +227,9 @@ export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
                         </div>
                         <div className="space-y-2">
                           <Input
+                            ref={el => {
+                              faqInputRefs.current[index] = el;
+                            }}
                             placeholder="Enter your question..."
                             value={faq.question}
                             onChange={e => {
@@ -247,6 +259,10 @@ export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
                   onClick={() => {
                     const updated = [...(field.value || []), { question: '', answer: '' }];
                     field.onChange(updated);
+                    const newIndex = updated.length - 1;
+                    setTimeout(() => {
+                      faqInputRefs.current[newIndex]?.focus();
+                    }, 0);
                   }}
                   className="w-full mt-2"
                 >

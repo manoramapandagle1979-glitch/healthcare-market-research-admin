@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { TableSkeleton } from '@/components/ui/skeletons/table-skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import type { PressRelease, PressReleaseStatus } from '@/lib/types/press-releases';
-import { formatRelativeTime } from '@/lib/utils/date';
+import { formatDate } from '@/lib/utils/date';
 import { Edit, Eye, Trash2, ExternalLink, RotateCcw } from 'lucide-react';
 import { PRESS_RELEASE_STATUS_CONFIG } from '@/lib/config/press-releases';
 import { config } from '@/lib/config';
@@ -113,15 +113,22 @@ export function PressReleaseList({
                   {pressRelease.location || '-'}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={getStatusBadgeVariant(pressRelease.status)}>
-                    {PRESS_RELEASE_STATUS_CONFIG[pressRelease.status].label}
-                  </Badge>
+                  {pressRelease.status === 'draft' &&
+                  pressRelease.scheduledPublishEnabled &&
+                  pressRelease.publishDate &&
+                  new Date(pressRelease.publishDate) > new Date() ? (
+                    <Badge variant="outline">Scheduled</Badge>
+                  ) : (
+                    <Badge variant={getStatusBadgeVariant(pressRelease.status)}>
+                      {PRESS_RELEASE_STATUS_CONFIG[pressRelease.status].label}
+                    </Badge>
+                  )}
                 </TableCell>
                 <TableCell>
                   <span className="text-xs text-muted-foreground">-</span>
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">
-                  {formatRelativeTime(pressRelease.updatedAt)}
+                  {formatDate(pressRelease.updatedAt)}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">

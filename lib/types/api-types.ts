@@ -369,3 +369,72 @@ export interface BulkDeleteResponse extends ApiResponse {
   deletedCount: number;
   deletedIds: string[];
 }
+
+// ============ Order Types ============
+
+export type OrderStatus =
+  | 'pending_payment'
+  | 'payment_received'
+  | 'processing'
+  | 'delivered'
+  | 'cancelled'
+  | 'refunded';
+
+export interface ApiOrder {
+  id: number;
+  customer_name: string;
+  customer_email: string;
+  customer_company?: string;
+  customer_phone?: string;
+  customer_country?: string;
+  report_id: number;
+  report_title: string;
+  report_slug: string;
+  amount: number;
+  currency: string;
+  paypal_order_id?: string;
+  paypal_capture_id?: string;
+  status: OrderStatus;
+  fulfilled_at?: string;
+  fulfilled_by?: number;
+  admin_notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OrderFilters {
+  status?: OrderStatus | '';
+  search?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: 'createdAt' | 'amount' | 'status';
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface OrdersListResponse extends ApiResponse<ApiOrder[]> {
+  data: ApiOrder[];
+  meta: ApiMeta;
+}
+
+export interface OrderDetailResponse extends ApiResponse<ApiOrder> {
+  data: ApiOrder;
+}
+
+export interface OrderStats {
+  total: number;
+  total_revenue: number;
+  by_status: Record<string, number>;
+  recent_count: number;
+  recent_revenue: number;
+}
+
+export interface OrderStatsResponse extends ApiResponse<OrderStats> {
+  data: OrderStats;
+}
+
+export interface UpdateOrderStatusRequest {
+  status: OrderStatus;
+  admin_notes?: string;
+}

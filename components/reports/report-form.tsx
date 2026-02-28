@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
@@ -53,6 +53,7 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
   const [keywordInput, setKeywordInput] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const faqInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
     loadCategories();
@@ -110,7 +111,7 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
             forecastYear: new Date().getFullYear() + 7,
             cagr: '',
             cagrStartYear: new Date().getFullYear(),
-            cagrEndYear: new Date().getFullYear() + 7,
+            cagrEndYear: 2035,
           },
           authorIds: [],
           sections: {
@@ -673,6 +674,9 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
                           <div className="space-y-2">
                             <div>
                               <Input
+                                ref={el => {
+                                  faqInputRefs.current[index] = el;
+                                }}
                                 placeholder="Enter your question... *"
                                 value={faq.question}
                                 onChange={e => {
@@ -723,6 +727,10 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
                     onClick={() => {
                       const updated = [...(field.value || []), { question: '', answer: '' }];
                       field.onChange(updated);
+                      const newIndex = updated.length - 1;
+                      setTimeout(() => {
+                        faqInputRefs.current[newIndex]?.focus();
+                      }, 0);
                     }}
                     className="w-full mt-2"
                   >

@@ -90,6 +90,7 @@ export function PressReleaseForm({
           status: pressRelease.status,
           publishDate: pressRelease.publishDate,
           location: pressRelease.location || '',
+          reportUrl: pressRelease.reportUrl || '',
           metadata: {
             metaTitle: pressRelease.metadata?.metaTitle || '',
             metaDescription: pressRelease.metadata?.metaDescription || '',
@@ -107,6 +108,7 @@ export function PressReleaseForm({
           status: 'draft',
           publishDate: new Date().toISOString(),
           location: '',
+          reportUrl: '',
           metadata: {
             metaTitle: '',
             metaDescription: '',
@@ -343,6 +345,24 @@ export function PressReleaseForm({
                     <Input placeholder="Enter location (e.g., New York, USA)" {...field} />
                   </FormControl>
                   <FormDescription>Optional location field for the press release</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="reportUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Report URL</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://example.com/reports/report-slug" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Link to the related report. The &quot;Read Report&quot; button on the press
+                    release page will navigate here.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

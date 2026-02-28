@@ -280,7 +280,7 @@ export const ReportFormTabs = forwardRef<ReportFormTabsRef, ReportFormTabsProps>
               forecastYear: 2035,
               cagr: '',
               cagrStartYear: new Date().getFullYear(),
-              cagrEndYear: new Date().getFullYear() + 7,
+              cagrEndYear: 2035,
             },
             authorIds: [],
             sections: {

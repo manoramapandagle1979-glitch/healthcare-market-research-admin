@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { TableSkeleton } from '@/components/ui/skeletons/table-skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import type { Blog, BlogStatus } from '@/lib/types/blogs';
-import { formatRelativeTime } from '@/lib/utils/date';
+import { formatDate } from '@/lib/utils/date';
 import { Edit, Eye, Trash2, Clock, ExternalLink, RotateCcw } from 'lucide-react';
 import { BLOG_STATUS_CONFIG } from '@/lib/config/blogs';
 import { config } from '@/lib/config';
@@ -110,9 +110,16 @@ export function BlogList({
                 {blog.location || '-'}
               </TableCell>
               <TableCell>
-                <Badge variant={getStatusBadgeVariant(blog.status)}>
-                  {BLOG_STATUS_CONFIG[blog.status].label}
-                </Badge>
+                {blog.status === 'draft' &&
+                blog.scheduledPublishEnabled &&
+                blog.publishDate &&
+                new Date(blog.publishDate) > new Date() ? (
+                  <Badge variant="outline">Scheduled</Badge>
+                ) : (
+                  <Badge variant={getStatusBadgeVariant(blog.status)}>
+                    {BLOG_STATUS_CONFIG[blog.status].label}
+                  </Badge>
+                )}
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -121,7 +128,7 @@ export function BlogList({
                 </div>
               </TableCell>
               <TableCell className="text-sm text-muted-foreground">
-                {formatRelativeTime(blog.updatedAt)}
+                {formatDate(blog.updatedAt)}
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">

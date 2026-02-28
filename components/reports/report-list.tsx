@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TableSkeleton } from '@/components/ui/skeletons/table-skeleton';
 import type { Report } from '@/lib/types/reports';
-import { formatRelativeTime } from '@/lib/utils/date';
+import { formatDate } from '@/lib/utils/date';
 import { formatCurrency } from '@/lib/utils/format';
 import { Edit, Eye, Trash2, ExternalLink, RotateCcw } from 'lucide-react';
 import { config } from '@/lib/config';
@@ -74,13 +74,20 @@ export function ReportList({
               <TableCell className="font-medium max-w-xs truncate">{report.title}</TableCell>
               <TableCell>{report.category}</TableCell>
               <TableCell>
-                <Badge variant={report.status === 'published' ? 'default' : 'secondary'}>
-                  {report.status}
-                </Badge>
+                {report.status === 'draft' &&
+                report.scheduled_publish_enabled &&
+                report.publishDate &&
+                new Date(report.publishDate) > new Date() ? (
+                  <Badge variant="outline">Scheduled</Badge>
+                ) : (
+                  <Badge variant={report.status === 'published' ? 'default' : 'secondary'}>
+                    {report.status}
+                  </Badge>
+                )}
               </TableCell>
               <TableCell>{formatCurrency(report.price)}</TableCell>
               <TableCell className="text-sm text-muted-foreground">
-                {formatRelativeTime(report.updatedAt)}
+                {formatDate(report.updatedAt)}
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">

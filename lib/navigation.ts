@@ -10,6 +10,7 @@ import {
   Tag,
   Search,
   ArrowRightLeft,
+  ShoppingCart,
 } from 'lucide-react';
 
 export type UserRole = 'admin' | 'editor' | 'viewer';
@@ -138,6 +139,12 @@ export const navigationItems: NavigationItem[] = [
         roles: ['admin', 'editor'],
       },
     ],
+  },
+  {
+    title: 'Orders',
+    href: '/orders',
+    icon: ShoppingCart,
+    roles: ['admin', 'editor'],
   },
   {
     title: 'Leads',

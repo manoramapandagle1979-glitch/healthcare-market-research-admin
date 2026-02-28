@@ -49,6 +49,8 @@ import {
   Search,
   Code,
   Eye,
+  IndentIncrease,
+  IndentDecrease,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ImagePickerDialog } from './image-picker-dialog';
@@ -75,9 +77,8 @@ export function TiptapEditor({
   const [isFindReplaceOpen, setIsFindReplaceOpen] = useState(false);
   const [showHtmlCode, setShowHtmlCode] = useState(false);
   const [htmlCode, setHtmlCode] = useState('');
-  const [showFloatingMenu, setShowFloatingMenu] = useState(false);
-  const [floatingMenuPosition, setFloatingMenuPosition] = useState({ top: 0, left: 0 });
-  const floatingMenuRef = useRef<HTMLDivElement>(null);
+  const [htmlScrollTarget, setHtmlScrollTarget] = useState('');
+  const htmlTextareaRef = useRef<HTMLTextAreaElement>(null);
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -201,49 +202,22 @@ export function TiptapEditor({
     }
   }, [editor, content]);
 
-  // Handle floating menu visibility and positioning
+  // Scroll HTML textarea to match cursor position when switching to code view
   useEffect(() => {
-    if (!editor) return;
-
-    const updateFloatingMenu = () => {
-      const { selection } = editor.state;
-      const { from, to } = selection;
-
-      // Only show menu if there's a text selection (not just cursor position)
-      if (from === to) {
-        setShowFloatingMenu(false);
-        return;
+    if (showHtmlCode && htmlScrollTarget && htmlTextareaRef.current) {
+      const textarea = htmlTextareaRef.current;
+      const content = textarea.value;
+      const idx = content.indexOf(htmlScrollTarget);
+      if (idx !== -1) {
+        textarea.focus();
+        textarea.setSelectionRange(idx, idx + htmlScrollTarget.length);
+        const lineCount = content.substring(0, idx).split('\n').length;
+        const lineHeight = 18;
+        textarea.scrollTop = Math.max(0, (lineCount - 3) * lineHeight);
       }
-
-      // Get the coordinates of the selection
-      const { view } = editor;
-      const start = view.coordsAtPos(from);
-      const end = view.coordsAtPos(to);
-
-      // Calculate position (centered above selection)
-      const left = (start.left + end.left) / 2;
-      const top = start.top;
-
-      // Position the menu above the selection
-      setFloatingMenuPosition({
-        top: top - 50, // Offset above the selection
-        left: left,
-      });
-      setShowFloatingMenu(true);
-    };
-
-    // Update on selection change
-    editor.on('selectionUpdate', updateFloatingMenu);
-    editor.on('blur', () => {
-      // Delay hiding to allow clicking menu buttons
-      setTimeout(() => setShowFloatingMenu(false), 200);
-    });
-
-    return () => {
-      editor.off('selectionUpdate', updateFloatingMenu);
-      editor.off('blur');
-    };
-  }, [editor]);
+      setHtmlScrollTarget('');
+    }
+  }, [showHtmlCode, htmlScrollTarget]);
 
   if (!editor) {
     return null;
@@ -334,6 +308,18 @@ export function TiptapEditor({
       const rawHtml = editor.getHTML();
       const beautifiedHtml = beautifyHtml(rawHtml);
       setHtmlCode(beautifiedHtml);
+
+      // Capture the current node's text to sync cursor position
+      try {
+        const { from } = editor.state.selection;
+        const resolvedPos = editor.state.doc.resolve(from);
+        const currentNode = resolvedPos.node();
+        if (currentNode?.textContent) {
+          setHtmlScrollTarget(currentNode.textContent.trim().substring(0, 30));
+        }
+      } catch {
+        // ignore
+      }
     } else {
       // Switching back to visual view - minify HTML and update editor
       const minifiedHtml = minifyHtml(htmlCode);
@@ -350,14 +336,14 @@ export function TiptapEditor({
   return (
     <div className={cn('border rounded-md', className)}>
       {/* Toolbar */}
-      <div className="sticky top-0 z-10 border-b p-2 flex flex-wrap gap-1 bg-muted/50">
+      <div className="sticky top-0 z-10 border-b p-2 flex flex-wrap gap-1 bg-muted">
         {/* Text formatting */}
         <Button
           type="button"
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleBold().run()}
-          className={editor.isActive('bold') ? 'bg-muted' : ''}
+          className={editor.isActive('bold') ? 'bg-background' : ''}
         >
           <Bold className="h-4 w-4" />
         </Button>
@@ -367,7 +353,7 @@ export function TiptapEditor({
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={editor.isActive('italic') ? 'bg-muted' : ''}
+          className={editor.isActive('italic') ? 'bg-background' : ''}
         >
           <Italic className="h-4 w-4" />
         </Button>
@@ -377,7 +363,7 @@ export function TiptapEditor({
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleUnderline().run()}
-          className={editor.isActive('underline') ? 'bg-muted' : ''}
+          className={editor.isActive('underline') ? 'bg-background' : ''}
         >
           <UnderlineIcon className="h-4 w-4" />
         </Button>
@@ -390,7 +376,7 @@ export function TiptapEditor({
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-          className={editor.isActive('heading', { level: 1 }) ? 'bg-muted' : ''}
+          className={editor.isActive('heading', { level: 1 }) ? 'bg-background' : ''}
         >
           <Heading1 className="h-4 w-4" />
         </Button>
@@ -400,7 +386,7 @@ export function TiptapEditor({
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={editor.isActive('heading', { level: 2 }) ? 'bg-muted' : ''}
+          className={editor.isActive('heading', { level: 2 }) ? 'bg-background' : ''}
         >
           <Heading2 className="h-4 w-4" />
         </Button>
@@ -410,7 +396,7 @@ export function TiptapEditor({
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          className={editor.isActive('heading', { level: 3 }) ? 'bg-muted' : ''}
+          className={editor.isActive('heading', { level: 3 }) ? 'bg-background' : ''}
         >
           <Heading3 className="h-4 w-4" />
         </Button>
@@ -420,7 +406,7 @@ export function TiptapEditor({
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
-          className={editor.isActive('heading', { level: 4 }) ? 'bg-muted' : ''}
+          className={editor.isActive('heading', { level: 4 }) ? 'bg-background' : ''}
         >
           <Heading4 className="h-4 w-4" />
         </Button>
@@ -430,7 +416,7 @@ export function TiptapEditor({
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleHeading({ level: 5 }).run()}
-          className={editor.isActive('heading', { level: 5 }) ? 'bg-muted' : ''}
+          className={editor.isActive('heading', { level: 5 }) ? 'bg-background' : ''}
         >
           <Heading5 className="h-4 w-4" />
         </Button>
@@ -443,7 +429,7 @@ export function TiptapEditor({
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={editor.isActive('bulletList') ? 'bg-muted' : ''}
+          className={editor.isActive('bulletList') ? 'bg-background' : ''}
         >
           <List className="h-4 w-4" />
         </Button>
@@ -453,9 +439,31 @@ export function TiptapEditor({
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={editor.isActive('orderedList') ? 'bg-muted' : ''}
+          className={editor.isActive('orderedList') ? 'bg-background' : ''}
         >
           <ListOrdered className="h-4 w-4" />
+        </Button>
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().sinkListItem('listItem').run()}
+          disabled={!editor.can().sinkListItem('listItem')}
+          title="Increase indent"
+        >
+          <IndentIncrease className="h-4 w-4" />
+        </Button>
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().liftListItem('listItem').run()}
+          disabled={!editor.can().liftListItem('listItem')}
+          title="Decrease indent"
+        >
+          <IndentDecrease className="h-4 w-4" />
         </Button>
 
         <Separator orientation="vertical" className="h-8" />
@@ -466,7 +474,7 @@ export function TiptapEditor({
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().setTextAlign('left').run()}
-          className={editor.isActive({ textAlign: 'left' }) ? 'bg-muted' : ''}
+          className={editor.isActive({ textAlign: 'left' }) ? 'bg-background' : ''}
         >
           <AlignLeft className="h-4 w-4" />
         </Button>
@@ -476,7 +484,7 @@ export function TiptapEditor({
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().setTextAlign('center').run()}
-          className={editor.isActive({ textAlign: 'center' }) ? 'bg-muted' : ''}
+          className={editor.isActive({ textAlign: 'center' }) ? 'bg-background' : ''}
         >
           <AlignCenter className="h-4 w-4" />
         </Button>
@@ -486,7 +494,7 @@ export function TiptapEditor({
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().setTextAlign('right').run()}
-          className={editor.isActive({ textAlign: 'right' }) ? 'bg-muted' : ''}
+          className={editor.isActive({ textAlign: 'right' }) ? 'bg-background' : ''}
         >
           <AlignRight className="h-4 w-4" />
         </Button>
@@ -496,7 +504,7 @@ export function TiptapEditor({
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().setTextAlign('justify').run()}
-          className={editor.isActive({ textAlign: 'justify' }) ? 'bg-muted' : ''}
+          className={editor.isActive({ textAlign: 'justify' }) ? 'bg-background' : ''}
         >
           <AlignJustify className="h-4 w-4" />
         </Button>
@@ -509,7 +517,7 @@ export function TiptapEditor({
           variant="ghost"
           size="sm"
           onClick={addLink}
-          className={editor.isActive('link') ? 'bg-muted' : ''}
+          className={editor.isActive('link') ? 'bg-background' : ''}
         >
           <LinkIcon className="h-4 w-4" />
         </Button>
@@ -548,7 +556,7 @@ export function TiptapEditor({
           variant="ghost"
           size="sm"
           onClick={toggleHtmlView}
-          className={showHtmlCode ? 'bg-muted' : ''}
+          className={showHtmlCode ? 'bg-background' : ''}
           title={showHtmlCode ? 'Switch to visual editor' : 'View HTML code'}
         >
           {showHtmlCode ? <Eye className="h-4 w-4" /> : <Code className="h-4 w-4" />}
@@ -759,107 +767,11 @@ export function TiptapEditor({
         </Button>
       </div>
 
-      {/* Floating Menu - appears near selected text */}
-      {showFloatingMenu && (
-        <div
-          ref={floatingMenuRef}
-          className="fixed z-50 flex items-center gap-1 p-1 bg-popover border rounded-md shadow-lg"
-          style={{
-            top: `${floatingMenuPosition.top}px`,
-            left: `${floatingMenuPosition.left}px`,
-            transform: 'translateX(-50%)',
-          }}
-          onMouseDown={e => e.preventDefault()} // Prevent blur when clicking menu
-        >
-          {/* Quick formatting options */}
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().toggleBold().run()}
-            className={editor.isActive('bold') ? 'bg-muted' : ''}
-          >
-            <Bold className="h-4 w-4" />
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().toggleItalic().run()}
-            className={editor.isActive('italic') ? 'bg-muted' : ''}
-          >
-            <Italic className="h-4 w-4" />
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().toggleUnderline().run()}
-            className={editor.isActive('underline') ? 'bg-muted' : ''}
-          >
-            <UnderlineIcon className="h-4 w-4" />
-          </Button>
-
-          <Separator orientation="vertical" className="h-6 mx-1" />
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-            className={editor.isActive('heading', { level: 1 }) ? 'bg-muted' : ''}
-          >
-            <Heading1 className="h-4 w-4" />
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-            className={editor.isActive('heading', { level: 2 }) ? 'bg-muted' : ''}
-          >
-            <Heading2 className="h-4 w-4" />
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-            className={editor.isActive('heading', { level: 3 }) ? 'bg-muted' : ''}
-          >
-            <Heading3 className="h-4 w-4" />
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
-            className={editor.isActive('heading', { level: 4 }) ? 'bg-muted' : ''}
-          >
-            <Heading4 className="h-4 w-4" />
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().toggleHeading({ level: 5 }).run()}
-            className={editor.isActive('heading', { level: 5 }) ? 'bg-muted' : ''}
-          >
-            <Heading5 className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-
       {/* Editor content */}
       {showHtmlCode ? (
         <div className="relative">
           <textarea
+            ref={htmlTextareaRef}
             value={htmlCode}
             onChange={handleHtmlCodeChange}
             className="w-full min-h-[300px] max-h-[600px] p-4 font-mono text-sm focus:outline-none resize-y bg-muted/30 border-0"
