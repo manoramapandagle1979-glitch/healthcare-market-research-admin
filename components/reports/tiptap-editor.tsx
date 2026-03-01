@@ -1,7 +1,8 @@
 'use client';
 
 import { useEditor, EditorContent } from '@tiptap/react';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
+import { DOMSerializer } from '@tiptap/pm/model';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
@@ -58,6 +59,8 @@ import { FindReplaceDialog } from './find-replace-dialog';
 import { ReportImage } from '@/lib/types/reports';
 import { beautifyHtml, minifyHtml } from '@/lib/utils/html-beautifier';
 
+const CURSOR_MARKER = '___CURSOR_MARKER_8x7z___';
+
 interface TiptapEditorProps {
   content: string;
   onChange: (html: string) => void;
@@ -77,7 +80,7 @@ export function TiptapEditor({
   const [isFindReplaceOpen, setIsFindReplaceOpen] = useState(false);
   const [showHtmlCode, setShowHtmlCode] = useState(false);
   const [htmlCode, setHtmlCode] = useState('');
-  const [htmlScrollTarget, setHtmlScrollTarget] = useState('');
+  const [htmlCursorPos, setHtmlCursorPos] = useState(-1);
   const htmlTextareaRef = useRef<HTMLTextAreaElement>(null);
   const editor = useEditor({
     immediatelyRender: false,
@@ -202,22 +205,91 @@ export function TiptapEditor({
     }
   }, [editor, content]);
 
-  // Scroll HTML textarea to match cursor position when switching to code view
+  // Place cursor and scroll textarea when switching to code view
   useEffect(() => {
-    if (showHtmlCode && htmlScrollTarget && htmlTextareaRef.current) {
+    if (showHtmlCode && htmlCursorPos >= 0 && htmlTextareaRef.current) {
       const textarea = htmlTextareaRef.current;
-      const content = textarea.value;
-      const idx = content.indexOf(htmlScrollTarget);
-      if (idx !== -1) {
-        textarea.focus();
-        textarea.setSelectionRange(idx, idx + htmlScrollTarget.length);
-        const lineCount = content.substring(0, idx).split('\n').length;
-        const lineHeight = 18;
-        textarea.scrollTop = Math.max(0, (lineCount - 3) * lineHeight);
-      }
-      setHtmlScrollTarget('');
+      textarea.focus();
+      const pos = Math.min(htmlCursorPos, textarea.value.length);
+      textarea.setSelectionRange(pos, pos);
+
+      // Scroll to make cursor visible - compute line number and scroll
+      const textBeforeCursor = textarea.value.substring(0, pos);
+      const lineCount = textBeforeCursor.split('\n').length;
+      const lineHeight = parseFloat(getComputedStyle(textarea).lineHeight) || 18;
+      const visibleLines = Math.floor(textarea.clientHeight / lineHeight);
+      textarea.scrollTop = Math.max(0, (lineCount - Math.floor(visibleLines / 2)) * lineHeight);
+
+      setHtmlCursorPos(-1);
     }
-  }, [showHtmlCode, htmlScrollTarget]);
+  }, [showHtmlCode, htmlCursorPos]);
+
+  // Serialize a ProseMirror doc fragment to HTML string
+  const serializeFragment = useCallback(
+    (fragment: any) => {
+      if (!editor) return '';
+      const serializer = DOMSerializer.fromSchema(editor.schema);
+      const div = document.createElement('div');
+      div.appendChild(serializer.serializeFragment(fragment));
+      return div.innerHTML;
+    },
+    [editor]
+  );
+
+  // Count text characters (excluding HTML tags) before a position in an HTML string
+  const countTextCharsBeforePos = useCallback((html: string, pos: number): number => {
+    let count = 0;
+    let inTag = false;
+    for (let i = 0; i < pos && i < html.length; i++) {
+      if (html[i] === '<') {
+        inTag = true;
+        continue;
+      }
+      if (html[i] === '>') {
+        inTag = false;
+        continue;
+      }
+      if (!inTag) count++;
+    }
+    return count;
+  }, []);
+
+  // Convert a text character offset into a ProseMirror document position
+  const textOffsetToPmPos = useCallback((doc: any, textOffset: number): number => {
+    let result = 1;
+    let textCount = 0;
+    let found = false;
+
+    doc.descendants((node: any, pos: number) => {
+      if (found) return false;
+      if (node.isText) {
+        const len = node.text!.length;
+        if (textCount + len >= textOffset) {
+          result = pos + (textOffset - textCount);
+          found = true;
+          return false;
+        }
+        textCount += len;
+      }
+    });
+
+    return result;
+  }, []);
+
+  // Snap cursor position out of an HTML tag if it's between < and >
+  const snapOutOfTag = useCallback((html: string, pos: number): number => {
+    let i = pos - 1;
+    while (i >= 0) {
+      if (html[i] === '>') break;
+      if (html[i] === '<') {
+        let j = pos;
+        while (j < html.length && html[j] !== '>') j++;
+        return j < html.length ? j + 1 : pos;
+      }
+      i--;
+    }
+    return pos;
+  }, []);
 
   if (!editor) {
     return null;
@@ -304,27 +376,54 @@ export function TiptapEditor({
 
   const toggleHtmlView = () => {
     if (!showHtmlCode) {
-      // Switching to HTML view - get current HTML from editor and beautify it
-      const rawHtml = editor.getHTML();
-      const beautifiedHtml = beautifyHtml(rawHtml);
-      setHtmlCode(beautifiedHtml);
-
-      // Capture the current node's text to sync cursor position
+      // Switching to HTML view - inject marker at cursor, serialize, beautify, find marker
       try {
         const { from } = editor.state.selection;
-        const resolvedPos = editor.state.doc.resolve(from);
-        const currentNode = resolvedPos.node();
-        if (currentNode?.textContent) {
-          setHtmlScrollTarget(currentNode.textContent.trim().substring(0, 30));
-        }
+        const tempTr = editor.state.tr.insertText(CURSOR_MARKER, from);
+        const tempDoc = editor.state.apply(tempTr).doc;
+        const htmlWithMarker = serializeFragment(tempDoc.content);
+        const beautifiedWithMarker = beautifyHtml(htmlWithMarker);
+        const markerIdx = beautifiedWithMarker.indexOf(CURSOR_MARKER);
+        const beautified = beautifiedWithMarker.replace(CURSOR_MARKER, '');
+
+        setHtmlCode(beautified);
+        setHtmlCursorPos(markerIdx >= 0 ? markerIdx : 0);
       } catch {
-        // ignore
+        // Fallback: just beautify without cursor positioning
+        setHtmlCode(beautifyHtml(editor.getHTML()));
+        setHtmlCursorPos(0);
       }
     } else {
-      // Switching back to visual view - minify HTML and update editor
-      const minifiedHtml = minifyHtml(htmlCode);
-      editor.commands.setContent(minifiedHtml);
-      onChange(minifiedHtml);
+      // Switching back to visual view - map textarea cursor back to ProseMirror position
+      const textarea = htmlTextareaRef.current;
+      const cursorPos = textarea ? textarea.selectionStart : 0;
+
+      // Snap cursor out of any HTML tag
+      const safeCursorPos = snapOutOfTag(htmlCode, cursorPos);
+
+      // Insert marker at cursor position in beautified HTML
+      const htmlWithMarker =
+        htmlCode.slice(0, safeCursorPos) + CURSOR_MARKER + htmlCode.slice(safeCursorPos);
+
+      // Minify and set content (without marker)
+      const minifiedClean = minifyHtml(htmlCode);
+      editor.commands.setContent(minifiedClean);
+      onChange(minifiedClean);
+
+      // Find ProseMirror position from the marker's location
+      try {
+        const minifiedWithMarker = minifyHtml(htmlWithMarker);
+        const markerInMinified = minifiedWithMarker.indexOf(CURSOR_MARKER);
+        if (markerInMinified >= 0) {
+          const htmlBefore = minifiedWithMarker.slice(0, markerInMinified);
+          // Count actual text characters (not tags) before marker
+          const textOffset = countTextCharsBeforePos(htmlBefore, htmlBefore.length);
+          const pmPos = textOffsetToPmPos(editor.state.doc, textOffset);
+          editor.commands.setTextSelection(pmPos);
+        }
+      } catch {
+        // Cursor positioning failed, editor content is still set correctly
+      }
     }
     setShowHtmlCode(!showHtmlCode);
   };

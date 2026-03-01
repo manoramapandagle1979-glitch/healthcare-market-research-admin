@@ -15,7 +15,9 @@ export function AdminLayout({ children, userRole = 'admin' }: AdminLayoutProps) 
       <Sidebar userRole={userRole} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-y-auto bg-muted/10 p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto bg-muted/10">
+          <div className="p-6">{children}</div>
+        </main>
       </div>
     </div>
   );
