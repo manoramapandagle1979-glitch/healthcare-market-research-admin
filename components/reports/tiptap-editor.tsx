@@ -1,6 +1,7 @@
 'use client';
 
 import { useEditor, EditorContent } from '@tiptap/react';
+import { Extension } from '@tiptap/core';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { DOMSerializer } from '@tiptap/pm/model';
 import StarterKit from '@tiptap/starter-kit';
@@ -60,6 +61,87 @@ import { ReportImage } from '@/lib/types/reports';
 import { beautifyHtml, minifyHtml } from '@/lib/utils/html-beautifier';
 
 const CURSOR_MARKER = '___CURSOR_MARKER_8x7z___';
+
+const INDENT_SIZE = 40; // px per indent level
+const MAX_INDENT = 8;
+
+const IndentExtension = Extension.create({
+  name: 'indent',
+
+  addGlobalAttributes() {
+    return [
+      {
+        types: ['paragraph', 'heading'],
+        attributes: {
+          indent: {
+            default: 0,
+            parseHTML: (element: HTMLElement) => {
+              const ml = element.style.marginLeft;
+              if (ml) {
+                const val = parseInt(ml, 10);
+                if (!isNaN(val) && val > 0) return Math.round(val / INDENT_SIZE);
+              }
+              return 0;
+            },
+            renderHTML: (attributes: Record<string, unknown>) => {
+              const indent = attributes.indent as number;
+              if (!indent) return {};
+              return { style: `margin-left: ${indent * INDENT_SIZE}px` };
+            },
+          },
+        },
+      },
+    ];
+  },
+
+  addCommands() {
+    return {
+      increaseIndent:
+        () =>
+        ({ tr, state, dispatch }: any) => {
+          const { from, to } = state.selection;
+          state.doc.nodesBetween(from, to, (node: any, pos: number) => {
+            if (['paragraph', 'heading'].includes(node.type.name)) {
+              const indent = Math.min((node.attrs.indent || 0) + 1, MAX_INDENT);
+              tr.setNodeMarkup(pos, undefined, { ...node.attrs, indent });
+            }
+          });
+          if (dispatch) dispatch(tr);
+          return true;
+        },
+      decreaseIndent:
+        () =>
+        ({ tr, state, dispatch }: any) => {
+          const { from, to } = state.selection;
+          state.doc.nodesBetween(from, to, (node: any, pos: number) => {
+            if (['paragraph', 'heading'].includes(node.type.name)) {
+              const indent = Math.max((node.attrs.indent || 0) - 1, 0);
+              tr.setNodeMarkup(pos, undefined, { ...node.attrs, indent });
+            }
+          });
+          if (dispatch) dispatch(tr);
+          return true;
+        },
+    } as any;
+  },
+
+  addKeyboardShortcuts() {
+    return {
+      Tab: () => {
+        if (this.editor.isActive('listItem')) {
+          return this.editor.commands.sinkListItem('listItem');
+        }
+        return (this.editor.commands as any).increaseIndent();
+      },
+      'Shift-Tab': () => {
+        if (this.editor.isActive('listItem')) {
+          return this.editor.commands.liftListItem('listItem');
+        }
+        return (this.editor.commands as any).decreaseIndent();
+      },
+    };
+  },
+});
 
 interface TiptapEditorProps {
   content: string;
@@ -131,6 +213,7 @@ export function TiptapEditor({
       Placeholder.configure({
         placeholder,
       }),
+      IndentExtension,
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -547,8 +630,14 @@ export function TiptapEditor({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().sinkListItem('listItem').run()}
-          disabled={!editor.can().sinkListItem('listItem')}
+          onClick={() => {
+            if (editor.isActive('listItem')) {
+              editor.chain().focus().sinkListItem('listItem').run();
+            } else {
+              (editor.chain().focus() as any).increaseIndent().run();
+            }
+          }}
+          disabled={editor.isActive('listItem') && !editor.can().sinkListItem('listItem')}
           title="Increase indent"
         >
           <IndentIncrease className="h-4 w-4" />
@@ -558,8 +647,14 @@ export function TiptapEditor({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().liftListItem('listItem').run()}
-          disabled={!editor.can().liftListItem('listItem')}
+          onClick={() => {
+            if (editor.isActive('listItem')) {
+              editor.chain().focus().liftListItem('listItem').run();
+            } else {
+              (editor.chain().focus() as any).decreaseIndent().run();
+            }
+          }}
+          disabled={editor.isActive('listItem') && !editor.can().liftListItem('listItem')}
           title="Decrease indent"
         >
           <IndentDecrease className="h-4 w-4" />

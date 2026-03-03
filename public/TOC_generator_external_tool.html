@@ -15,6 +15,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
         integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
         crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
     <style type="text/css">
         body {
             font-family: calibri;
@@ -329,8 +330,11 @@
                                                             <i class="fa fa-trash-o remove"
                                                                 v-on:click="Remove(parentIndex, childIndex)"></i>
                                                             <ul v-if="ss.SubSegment">
-                                                                <li v-for="(sss, index) in ss.SubSegment" :key="index">
-                                                                    {{sss.SegmentName}}</li>
+                                                                <li v-for="(sss, grandchildIndex) in ss.SubSegment" :key="grandchildIndex">
+                                                                    {{sss.SegmentName}}
+                                                                    <i class="fa fa-trash-o remove"
+                                                                        v-on:click="Remove(parentIndex, childIndex, grandchildIndex)"></i>
+                                                                </li>
                                                             </ul>
                                                         </li>
                                                     </ul>
@@ -741,7 +745,7 @@
                         // Regional revenue by segment tables
                         this.Segment.SubSegment.forEach((s) => {
                             this.listOfTables.push({
-                                itemText: `${index++}. ${r.RegionName} ${this.Keyword} Market revenue, By ${s.SegmentName}, ${this.BaseYear} - ${this.ToYear} (${this.Revenue})`,
+                                itemText: `${index++}. ${r.RegionName} ${this.Keyword} Market revenue, By ${s.SegmentName}, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`,
                                 SubItem: []
                             });
                         });
@@ -796,6 +800,15 @@
                                 itemText: `${index++}. ${this.Keyword} Share Forecast by ${ss.SegmentName}, By Region (${this.Revenue})`,
                                 SubItem: []
                             });
+                            // Add figures for child segments
+                            if (ss.SubSegment && ss.SubSegment.length > 0) {
+                                ss.SubSegment.forEach((sss) => {
+                                    this.listoffigures.push({
+                                        itemText: `${index++}. ${this.Keyword} Share Forecast by ${sss.SegmentName}, By Region (${this.Revenue})`,
+                                        SubItem: []
+                                    });
+                                });
+                            }
                         });
                     });
 
@@ -829,11 +842,14 @@
                     currentChapter++;
 
                     // Chapters 4+: One chapter per main segment
-                    this.Segment.SubSegment.forEach((segment, index) => {
-                        const isLastSegment = index === this.Segment.SubSegment.length - 1;
-                        this.dt.push(this.createSegmentChapter(segment, currentChapter, isLastSegment));
+                    this.Segment.SubSegment.forEach((segment) => {
+                        this.dt.push(this.createSegmentChapter(segment, currentChapter));
                         currentChapter++;
                     });
+
+                    // Regional Analysis chapter
+                    this.dt.push(this.createRegionalAnalysisChapter(currentChapter));
+                    currentChapter++;
 
                     // Competitive Landscape
                     this.dt.push(this.createCompetitiveLandscapeChapter(currentChapter));
@@ -929,7 +945,7 @@
                         ]
                     };
                 },
-                createSegmentChapter: function (segment, chapterNumber, isLastSegment) {
+                createSegmentChapter: function (segment, chapterNumber) {
                     let sectionIndex = 2;
                     let segmentDetails = [
                         {
@@ -939,10 +955,20 @@
                     ];
 
                     segment.SubSegment.forEach(subSeg => {
+                        const subSegSectionIndex = sectionIndex;
+
+                        console.log('[createSegmentChapter] subSeg:', subSeg.SegmentName, 'children:', subSeg.SubSegment ? subSeg.SubSegment.length : 'NO SubSegment prop');
+                        const childItems = (subSeg.SubSegment && subSeg.SubSegment.length > 0)
+                            ? subSeg.SubSegment.map((childSeg, childIdx) => ({
+                                itemText: `${chapterNumber}.1.${subSegSectionIndex}.${childIdx + 1}. ${childSeg.SegmentName}`,
+                                SubItem: []
+                              }))
+                            : [];
+
                         segmentDetails.push(
                             {
                                 itemText: `${chapterNumber}.1.${sectionIndex++}. ${subSeg.SegmentName}`,
-                                SubItem: []
+                                SubItem: childItems
                             },
                             {
                                 itemText: `${chapterNumber}.1.${sectionIndex++}. ${this.Keyword} Share Forecast, By Region (${this.Revenue})`,
@@ -966,63 +992,52 @@
                         }
                     ];
 
-                    // If this is the last segment, add regional analysis sections
-                    if (isLastSegment) {
-                        chapterSubItems.push(...this.createRegionalAnalysisSections(chapterNumber));
-                    }
-
                     return {
                         itemText: `Chapter ${chapterNumber}. ${this.Keyword} Market - By ${segment.SegmentName}`,
                         SubItem: chapterSubItems
                     };
                 },
-                createRegionalAnalysisSections: function (chapterNumber) {
-                    let sections = [];
-
-                    // Add regional analysis heading (without numbering)
-                    sections.push({
-                        itemText: `${this.Keyword} Market - Regional Analysis`,
-                        SubItem: []
-                    });
+                createRegionalAnalysisChapter: function (chapterNumber) {
+                    let subItems = [];
 
                     // Global overview section
                     let overviewSubItems = [
                         {
-                            itemText: `${chapterNumber}.2.1. Global ${this.Keyword} Market Revenue Share, By Region, ${this.BaseYear} & ${this.ToYear}`,
+                            itemText: `${chapterNumber}.1.1. Global ${this.Keyword} Market Revenue Share, By Region, ${this.BaseYear} & ${this.ToYear}`,
                             SubItem: []
                         },
                         {
-                            itemText: `${chapterNumber}.2.2. Global ${this.Keyword} Market Revenue, By Region, ${this.BaseYear} - ${this.ToYear} (${this.Revenue})`,
+                            itemText: `${chapterNumber}.1.2. Global ${this.Keyword} Market Revenue, By Region, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`,
                             SubItem: []
                         }
                     ];
 
                     this.Segment.SubSegment.forEach((seg, idx) => {
                         overviewSubItems.push({
-                            itemText: `${chapterNumber}.2.${idx + 3}. Global ${this.Keyword} Market Revenue, By ${seg.SegmentName}, ${this.BaseYear} - ${this.ToYear}`,
+                            itemText: `${chapterNumber}.1.${idx + 3}. Global ${this.Keyword} Market Revenue, By ${seg.SegmentName}, ${this.FromYear} - ${this.ToYear}`,
                             SubItem: []
                         });
                     });
 
-                    sections.push({
-                        itemText: `${chapterNumber}.2. ${this.Keyword} Market Overview, By Region Segment`,
+                    subItems.push({
+                        itemText: `${chapterNumber}.1. ${this.Keyword} Market Overview, By Region Segment`,
                         SubItem: overviewSubItems
                     });
 
                     // Individual region sections
-                    let regionMainIndex = 3;
+                    let regionMainIndex = 2;
 
                     this.RC.forEach((region) => {
                         let regionSubSections = [
                             {
-                                itemText: `${chapterNumber}.${regionMainIndex}.1. ${region.RegionName} ${this.Keyword} Market Revenue, By Country, ${this.BaseYear} - ${this.ToYear} (${this.Revenue})`,
+                                itemText: `${chapterNumber}.${regionMainIndex}.1. ${region.RegionName} ${this.Keyword} Market Revenue, By Country, ${this.FromYear} - ${this.ToYear} (${this.Revenue})`,
                                 SubItem: []
                             }
                         ];
 
                         this.Segment.SubSegment.forEach((seg, segIdx) => {
                             regionSubSections.push({
-                                itemText: `${chapterNumber}.${regionMainIndex}.${segIdx + 2}. ${region.RegionName} ${this.Keyword} Market Revenue, By ${seg.SegmentName}, ${this.BaseYear} - ${this.ToYear}`,
+                                itemText: `${chapterNumber}.${regionMainIndex}.${segIdx + 2}. ${region.RegionName} ${this.Keyword} Market Revenue, By ${seg.SegmentName}, ${this.FromYear} - ${this.ToYear}`,
                                 SubItem: []
                             });
                         });
@@ -1035,13 +1050,16 @@
                             });
                         });
 
-                        sections.push({
+                        subItems.push({
                             itemText: `${chapterNumber}.${regionMainIndex++}. ${region.RegionName}`,
                             SubItem: regionSubSections
                         });
                     });
 
-                    return sections;
+                    return {
+                        itemText: `Chapter ${chapterNumber}. ${this.Keyword} Market - Regional Analysis`,
+                        SubItem: subItems
+                    };
                 },
                 createCompetitiveLandscapeChapter: function (chapterNumber) {
                     return {
@@ -1134,8 +1152,15 @@
                         });
                     }
                 },
-                Remove: function (parentIndex, childIndex) {
-                    if (childIndex > -1) {
+                Remove: function (parentIndex, childIndex, grandchildIndex) {
+                    console.log('[Remove] parentIndex:', parentIndex, 'childIndex:', childIndex, 'grandchildIndex:', grandchildIndex);
+                    if (grandchildIndex !== undefined && grandchildIndex > -1) {
+                        var target = vm.Segment.SubSegment[parentIndex] &&
+                                     vm.Segment.SubSegment[parentIndex].SubSegment[childIndex] &&
+                                     vm.Segment.SubSegment[parentIndex].SubSegment[childIndex].SubSegment;
+                        console.log('[Remove] target array:', target);
+                        if (target) { target.splice(grandchildIndex, 1); }
+                    } else if (childIndex > -1) {
                         vm.Segment.SubSegment[parentIndex].SubSegment.splice(childIndex, 1);
                     } else {
                         vm.Segment.SubSegment.splice(parentIndex, 1);
