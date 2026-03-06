@@ -68,8 +68,23 @@ export function LeadsList({ submissions, onDelete, onStatusUpdate }: LeadsListPr
         return 'default';
       case 'request-sample':
         return 'secondary';
+      case 'request-customization':
+        return 'outline';
       default:
         return 'outline';
+    }
+  };
+
+  const getCategoryLabel = (category: string) => {
+    switch (category) {
+      case 'contact':
+        return 'Contact';
+      case 'request-sample':
+        return 'Request Sample';
+      case 'request-customization':
+        return 'Request Customization';
+      default:
+        return category;
     }
   };
 
@@ -139,7 +154,7 @@ export function LeadsList({ submissions, onDelete, onStatusUpdate }: LeadsListPr
               <TableCell>{getSubmissionCountry(submission)}</TableCell>
               <TableCell>
                 <Badge variant={getCategoryBadgeVariant(submission.category)}>
-                  {submission.category === 'contact' ? 'Contact' : 'Request Sample'}
+                  {getCategoryLabel(submission.category)}
                 </Badge>
               </TableCell>
               <TableCell>
@@ -205,7 +220,11 @@ export function LeadsList({ submissions, onDelete, onStatusUpdate }: LeadsListPr
           <DialogHeader>
             <DialogTitle>Submission Details</DialogTitle>
             <DialogDescription>
-              {viewSubmission?.category === 'contact' ? 'Contact Form' : 'Request Sample Form'}
+              {viewSubmission?.category === 'contact'
+                ? 'Contact Form'
+                : viewSubmission?.category === 'request-customization'
+                  ? 'Request Customization Form'
+                  : 'Request Sample Form'}
             </DialogDescription>
           </DialogHeader>
           {viewSubmission && (
@@ -227,7 +246,8 @@ export function LeadsList({ submissions, onDelete, onStatusUpdate }: LeadsListPr
                   <p className="text-sm font-medium text-muted-foreground">Country</p>
                   <p className="text-sm">{getSubmissionCountry(viewSubmission)}</p>
                 </div>
-                {viewSubmission.category === 'request-sample' && (
+                {(viewSubmission.category === 'request-sample' ||
+                  viewSubmission.category === 'request-customization') && (
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Job Title</p>
                     <p className="text-sm">
@@ -264,7 +284,8 @@ export function LeadsList({ submissions, onDelete, onStatusUpdate }: LeadsListPr
                 </>
               )}
 
-              {viewSubmission.category === 'request-sample' && (
+              {(viewSubmission.category === 'request-sample' ||
+                viewSubmission.category === 'request-customization') && (
                 <>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Report Title</p>

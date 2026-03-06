@@ -126,12 +126,12 @@ export const navigationItems: NavigationItem[] = [
     icon: Search,
     roles: ['admin', 'editor'],
     children: [
-      {
-        title: 'Overview',
-        href: '/seo',
-        icon: Search,
-        roles: ['admin', 'editor'],
-      },
+      // {
+      //   title: 'Overview',
+      //   href: '/seo',
+      //   icon: Search,
+      //   roles: ['admin', 'editor'],
+      // },
       {
         title: 'Redirects',
         href: '/seo/redirects',

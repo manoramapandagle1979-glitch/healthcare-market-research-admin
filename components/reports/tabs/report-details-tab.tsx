@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Save, TrendingUp, AlertCircle, Copy } from 'lucide-react';
+import { Save, TrendingUp, AlertCircle, Copy, X, Plus } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { GEOGRAPHIES, REPORT_FORMATS } from '@/lib/config/reports';
 import { fetchCategories, type Category } from '@/lib/api/categories';
@@ -29,6 +29,18 @@ import type { UseFormReturn } from 'react-hook-form';
 import type { ReportFormData } from '@/lib/types/reports';
 import { toast } from 'sonner';
 import { config } from '@/lib/config';
+
+const ORIGINAL_PRICE_OPTIONS = [
+  { label: 'Global', value: '3490' },
+  { label: 'Regional', value: '2990' },
+  { label: 'Country', value: '2790' },
+] as const;
+
+const DISCOUNTED_PRICE_OPTIONS = [
+  { label: 'Global', value: '3090' },
+  { label: 'Regional', value: '2890' },
+  { label: 'Country', value: '2690' },
+] as const;
 
 interface ReportDetailsTabProps {
   form: UseFormReturn<ReportFormData>;
@@ -46,6 +58,17 @@ export function ReportDetailsTab({
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [showValidationError, setShowValidationError] = useState(false);
+  const [customGeoInput, setCustomGeoInput] = useState('');
+  const [priceMode, setPriceMode] = useState(() => {
+    const price = form.getValues('price') ?? 0;
+    return ORIGINAL_PRICE_OPTIONS.some(o => o.value === String(price)) ? String(price) : 'custom';
+  });
+  const [discountedPriceMode, setDiscountedPriceMode] = useState(() => {
+    const discounted = form.getValues('discountedPrice') ?? 0;
+    return DISCOUNTED_PRICE_OPTIONS.some(o => o.value === String(discounted))
+      ? String(discounted)
+      : 'custom';
+  });
 
   useEffect(() => {
     loadCategories();
@@ -265,32 +288,103 @@ export function ReportDetailsTab({
             <FormField
               control={form.control}
               name="geography"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-1">
-                    Geography
-                    <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <div className="grid grid-cols-2 gap-2 pt-2">
-                    {GEOGRAPHIES.map(geo => (
-                      <div key={geo} className="flex items-center space-x-2">
-                        <Checkbox
-                          checked={field.value?.includes(geo)}
-                          onCheckedChange={checked => {
-                            const updated = checked
-                              ? [...field.value, geo]
-                              : field.value.filter((g: string) => g !== geo);
-                            field.onChange(updated);
-                          }}
-                        />
-                        <label className="text-sm">{geo}</label>
+              render={({ field }) => {
+                const customGeos = (field.value ?? []).filter(
+                  (g: string) => !(GEOGRAPHIES as readonly string[]).includes(g)
+                );
+
+                const addCustomGeo = () => {
+                  const trimmed = customGeoInput.trim();
+                  if (!trimmed) return;
+                  if ((field.value ?? []).includes(trimmed)) {
+                    toast.error('Geography already added');
+                    return;
+                  }
+                  field.onChange([...(field.value ?? []), trimmed]);
+                  setCustomGeoInput('');
+                };
+
+                return (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-1">
+                      Geography
+                      <span className="text-destructive">*</span>
+                    </FormLabel>
+
+                    {/* Predefined geographies */}
+                    <div className="grid grid-cols-2 gap-2 pt-2">
+                      {GEOGRAPHIES.map(geo => (
+                        <div key={geo} className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={(field.value ?? []).includes(geo)}
+                            onCheckedChange={checked => {
+                              const updated = checked
+                                ? [...(field.value ?? []), geo]
+                                : (field.value ?? []).filter((g: string) => g !== geo);
+                              field.onChange(updated);
+                            }}
+                          />
+                          <label className="text-sm">{geo}</label>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Custom geographies */}
+                    {customGeos.length > 0 && (
+                      <div className="flex flex-wrap gap-2 pt-2">
+                        {customGeos.map((geo: string) => (
+                          <span
+                            key={geo}
+                            className="inline-flex items-center gap-1 rounded-md border bg-muted px-2 py-1 text-sm"
+                          >
+                            {geo}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                field.onChange((field.value ?? []).filter((g: string) => g !== geo))
+                              }
+                              className="ml-1 text-muted-foreground hover:text-destructive"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </span>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                  <FormDescription>Select at least one geography</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+                    )}
+
+                    {/* Add custom geography input */}
+                    <div className="flex gap-2 pt-2">
+                      <Input
+                        placeholder="Add custom geography…"
+                        value={customGeoInput}
+                        onChange={e => setCustomGeoInput(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            addCustomGeo();
+                          }
+                        }}
+                        className="max-w-64"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={addCustomGeo}
+                        disabled={!customGeoInput.trim()}
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add
+                      </Button>
+                    </div>
+
+                    <FormDescription>
+                      Select at least one geography. Use the input to add custom regions.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
           </div>
 
@@ -365,15 +459,36 @@ export function ReportDetailsTab({
               name="price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Price (USD)</FormLabel>
-                  <FormControl>
+                  <FormLabel>Original Price (USD)</FormLabel>
+                  <Select
+                    value={priceMode}
+                    onValueChange={value => {
+                      setPriceMode(value);
+                      if (value !== 'custom') field.onChange(parseInt(value));
+                    }}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select price" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {ORIGINAL_PRICE_OPTIONS.map(o => (
+                        <SelectItem key={o.value} value={o.value}>
+                          {o.label} — ${parseInt(o.value).toLocaleString()}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="custom">Custom</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {priceMode === 'custom' && (
                     <Input
                       type="number"
-                      placeholder="3490"
-                      {...field}
+                      placeholder="Enter price"
+                      value={field.value || ''}
                       onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
                     />
-                  </FormControl>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
@@ -385,14 +500,35 @@ export function ReportDetailsTab({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Discounted Price (USD)</FormLabel>
-                  <FormControl>
+                  <Select
+                    value={discountedPriceMode}
+                    onValueChange={value => {
+                      setDiscountedPriceMode(value);
+                      if (value !== 'custom') field.onChange(parseInt(value));
+                    }}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select price" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {DISCOUNTED_PRICE_OPTIONS.map(o => (
+                        <SelectItem key={o.value} value={o.value}>
+                          {o.label} — ${parseInt(o.value).toLocaleString()}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="custom">Custom</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {discountedPriceMode === 'custom' && (
                     <Input
                       type="number"
-                      placeholder="3090"
-                      {...field}
+                      placeholder="Enter discounted price"
+                      value={field.value || ''}
                       onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
                     />
-                  </FormControl>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}

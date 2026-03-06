@@ -107,7 +107,7 @@ export function PressReleaseForm({
           authorId: 0,
           status: 'draft',
           publishDate: new Date().toISOString(),
-          location: '',
+          location: 'Austin, TX, USA',
           reportUrl: '',
           metadata: {
             metaTitle: '',

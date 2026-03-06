@@ -56,6 +56,7 @@ export function LeadsFilters({ filters, onFilterChange }: LeadsFiltersProps) {
             <SelectItem value="all">All Categories</SelectItem>
             <SelectItem value="contact">Contact Form</SelectItem>
             <SelectItem value="request-sample">Request Sample</SelectItem>
+            <SelectItem value="request-customization">Request Customization</SelectItem>
           </SelectContent>
         </Select>
       </div>

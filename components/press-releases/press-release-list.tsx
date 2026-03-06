@@ -108,7 +108,7 @@ export function PressReleaseList({
                     </span>
                   </div>
                 </TableCell>
-                <TableCell>Category #{pressRelease.categoryId}</TableCell>
+                <TableCell>{pressRelease.category?.name || 'Uncategorized'}</TableCell>
                 <TableCell className="text-sm text-muted-foreground">
                   {pressRelease.location || '-'}
                 </TableCell>

@@ -262,7 +262,7 @@ export function hasApiData<T>(
 }
 
 // ============ Form Submission Types ============
-export type FormCategory = 'contact' | 'request-sample';
+export type FormCategory = 'contact' | 'request-sample' | 'request-customization';
 export type FormStatus = 'pending' | 'processed' | 'archived';
 
 export interface ContactFormData {
@@ -344,6 +344,7 @@ export interface FormSubmissionStats {
   byCategory: {
     contact: number;
     'request-sample': number;
+    'request-customization': number;
   };
   byStatus: {
     pending: number;
