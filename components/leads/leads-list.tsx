@@ -16,6 +16,7 @@ import type {
   ApiFormSubmission,
   ContactFormData,
   RequestSampleFormData,
+  ScheduleDemoFormData,
 } from '@/lib/types/api-types';
 import {
   AlertDialog,
@@ -70,6 +71,8 @@ export function LeadsList({ submissions, onDelete, onStatusUpdate }: LeadsListPr
         return 'secondary';
       case 'request-customization':
         return 'outline';
+      case 'schedule-demo':
+        return 'secondary';
       default:
         return 'outline';
     }
@@ -83,6 +86,8 @@ export function LeadsList({ submissions, onDelete, onStatusUpdate }: LeadsListPr
         return 'Request Sample';
       case 'request-customization':
         return 'Request Customization';
+      case 'schedule-demo':
+        return 'Schedule Demo';
       default:
         return category;
     }
@@ -224,7 +229,9 @@ export function LeadsList({ submissions, onDelete, onStatusUpdate }: LeadsListPr
                 ? 'Contact Form'
                 : viewSubmission?.category === 'request-customization'
                   ? 'Request Customization Form'
-                  : 'Request Sample Form'}
+                  : viewSubmission?.category === 'schedule-demo'
+                    ? 'Schedule Demo Request'
+                    : 'Request Sample Form'}
             </DialogDescription>
           </DialogHeader>
           {viewSubmission && (
@@ -303,6 +310,96 @@ export function LeadsList({ submissions, onDelete, onStatusUpdate }: LeadsListPr
                   )}
                 </>
               )}
+
+              {viewSubmission.category === 'schedule-demo' &&
+                (() => {
+                  const d = viewSubmission.data as ScheduleDemoFormData;
+                  return (
+                    <div className="space-y-3">
+                      {d.preferredDateTimeUTC &&
+                        (() => {
+                          const adminTZAbbr =
+                            new Intl.DateTimeFormat('en-US', { timeZoneName: 'short' })
+                              .formatToParts(new Date())
+                              .find(p => p.type === 'timeZoneName')?.value ?? '';
+
+                          const adminDateTime = new Intl.DateTimeFormat('en-US', {
+                            weekday: 'short',
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true,
+                          }).format(new Date(d.preferredDateTimeUTC));
+
+                          return (
+                            <div className="rounded-lg border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-950/40 p-3 space-y-2">
+                              <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide">
+                                Requested Schedule
+                              </p>
+                              <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                <div>
+                                  <p className="text-xs text-blue-500 dark:text-blue-400 font-medium">
+                                    Your Time{adminTZAbbr ? ` (${adminTZAbbr})` : ''}
+                                  </p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                    {adminDateTime}
+                                  </p>
+                                </div>
+                                {d.preferredTimeLocal && (
+                                  <div>
+                                    <p className="text-xs text-blue-500 dark:text-blue-400 font-medium">
+                                      Client&apos;s Time
+                                    </p>
+                                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                      {d.preferredTimeLocal}
+                                    </p>
+                                  </div>
+                                )}
+                                {d.userTimezone && (
+                                  <div className="col-span-2">
+                                    <p className="text-xs text-blue-500 dark:text-blue-400 font-medium">
+                                      Client&apos;s Timezone
+                                    </p>
+                                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                      {d.userTimezone}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      <div className="grid grid-cols-2 gap-3">
+                        {d.companySize && (
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">
+                              Company Size
+                            </p>
+                            <p className="text-sm">{d.companySize}</p>
+                          </div>
+                        )}
+                        {d.interests && (
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">
+                              Interest Area
+                            </p>
+                            <p className="text-sm">{d.interests}</p>
+                          </div>
+                        )}
+                      </div>
+                      {d.additionalInfo && (
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">
+                            Additional Info
+                          </p>
+                          <p className="text-sm whitespace-pre-wrap">{d.additionalInfo}</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
 
               <div className="pt-4 border-t">
                 <p className="text-sm font-medium text-muted-foreground mb-2">Metadata</p>

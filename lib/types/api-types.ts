@@ -262,7 +262,7 @@ export function hasApiData<T>(
 }
 
 // ============ Form Submission Types ============
-export type FormCategory = 'contact' | 'request-sample' | 'request-customization';
+export type FormCategory = 'contact' | 'request-sample' | 'request-customization' | 'schedule-demo';
 export type FormStatus = 'pending' | 'processed' | 'archived';
 
 export interface ContactFormData {
@@ -286,6 +286,20 @@ export interface RequestSampleFormData {
   additionalInfo?: string;
 }
 
+export interface ScheduleDemoFormData {
+  fullName: string;
+  email: string;
+  company: string;
+  jobTitle?: string;
+  phone?: string;
+  companySize?: string;
+  interests?: string;
+  preferredDateTimeUTC?: string; // ISO UTC string of the selected slot
+  userTimezone?: string; // IANA timezone name (client's TZ)
+  preferredTimeLocal?: string; // formatted in client's TZ, e.g. "7:30 PM IST"
+  additionalInfo?: string;
+}
+
 export interface FormSubmissionMetadata {
   submittedAt: string;
   ipAddress?: string;
@@ -298,7 +312,7 @@ export interface ApiFormSubmission {
   id: string;
   category: FormCategory;
   status: FormStatus;
-  data: ContactFormData | RequestSampleFormData;
+  data: ContactFormData | RequestSampleFormData | ScheduleDemoFormData;
   metadata: FormSubmissionMetadata;
   processedAt?: string;
   processedBy?: string;
@@ -309,7 +323,7 @@ export interface ApiFormSubmission {
 
 export interface CreateFormSubmissionRequest {
   category: FormCategory;
-  data: ContactFormData | RequestSampleFormData;
+  data: ContactFormData | RequestSampleFormData | ScheduleDemoFormData;
   metadata: FormSubmissionMetadata;
 }
 
