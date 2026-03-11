@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { PressReleaseFiltersComponent } from '@/components/press-releases/press-release-filters';
 import { PressReleaseList } from '@/components/press-releases/press-release-list';
@@ -27,10 +28,15 @@ import {
 import { toast } from 'sonner';
 import { fetchAuthors } from '@/lib/api/authors';
 import type { ReportAuthor } from '@/lib/types/reports';
+import type { PressReleaseFilters } from '@/lib/types/press-releases';
 
 export default function PressReleasesPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
-  const [filters, setFilters] = useState({});
+  const initialPage = Number(searchParams.get('page')) > 0 ? Number(searchParams.get('page')) : 1;
+  const [filters, setFilters] = useState<PressReleaseFilters>({ page: initialPage });
   const [authors, setAuthors] = useState<ReportAuthor[]>([]);
   const {
     pressReleases,
@@ -50,6 +56,19 @@ export default function PressReleasesPage() {
     pressReleaseId: null,
   });
 
+  const syncPageParam = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', String(page));
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  const applyFilters = (nextFilters: PressReleaseFilters) => {
+    const normalizedFilters = { ...nextFilters, page: nextFilters.page ?? 1 };
+    setFilters(normalizedFilters);
+    updateFilters(normalizedFilters);
+    syncPageParam(normalizedFilters.page);
+  };
+
   const loadAuthors = async () => {
     try {
       const { data: authors } = await fetchAuthors();
@@ -62,6 +81,22 @@ export default function PressReleasesPage() {
   useEffect(() => {
     loadAuthors();
   }, []);
+
+  useEffect(() => {
+    const pageParam = searchParams.get('page');
+
+    if (!pageParam) {
+      syncPageParam(1);
+    }
+  }, [pathname, router, searchParams]);
+
+  useEffect(() => {
+    const pageParam = Number(searchParams.get('page'));
+
+    if (currentPage > 0 && currentPage !== pageParam) {
+      syncPageParam(currentPage);
+    }
+  }, [currentPage, pathname, router, searchParams]);
 
   const handleDelete = async () => {
     if (!deleteDialog.pressReleaseId) return;
@@ -113,8 +148,7 @@ export default function PressReleasesPage() {
       <PressReleaseFiltersComponent
         filters={filters}
         onFiltersChange={newFilters => {
-          setFilters(newFilters);
-          updateFilters(newFilters);
+          applyFilters(newFilters);
         }}
         authors={authors}
       />
@@ -137,7 +171,7 @@ export default function PressReleasesPage() {
                 href="#"
                 onClick={e => {
                   e.preventDefault();
-                  if (currentPage > 1) updateFilters({ ...filters, page: currentPage - 1 });
+                  if (currentPage > 1) applyFilters({ ...filters, page: currentPage - 1 });
                 }}
                 aria-disabled={currentPage <= 1}
               />
@@ -150,7 +184,7 @@ export default function PressReleasesPage() {
                   isActive={page === currentPage}
                   onClick={e => {
                     e.preventDefault();
-                    if (page !== currentPage) updateFilters({ ...filters, page });
+                    if (page !== currentPage) applyFilters({ ...filters, page });
                   }}
                 >
                   {page}
@@ -163,8 +197,7 @@ export default function PressReleasesPage() {
                 href="#"
                 onClick={e => {
                   e.preventDefault();
-                  if (currentPage < totalPages)
-                    updateFilters({ ...filters, page: currentPage + 1 });
+                  if (currentPage < totalPages) applyFilters({ ...filters, page: currentPage + 1 });
                 }}
                 aria-disabled={currentPage >= totalPages}
               />

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ReportFiltersComponent } from '@/components/reports/report-filters';
 import { ReportList } from '@/components/reports/report-list';
@@ -19,11 +19,15 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import type { ReportFilters } from '@/lib/types/reports';
 
 export default function ReportsPage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
-  const [filters, setFilters] = useState({});
+  const initialPage = Number(searchParams.get('page')) > 0 ? Number(searchParams.get('page')) : 1;
+  const [filters, setFilters] = useState<ReportFilters>({ page: initialPage });
   const {
     reports,
     total,
@@ -41,6 +45,35 @@ export default function ReportsPage() {
     open: false,
     reportId: null,
   });
+
+  const syncPageParam = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', String(page));
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  const applyFilters = (nextFilters: ReportFilters) => {
+    const normalizedFilters = { ...nextFilters, page: nextFilters.page ?? 1 };
+    setFilters(normalizedFilters);
+    updateFilters(normalizedFilters);
+    syncPageParam(normalizedFilters.page);
+  };
+
+  useEffect(() => {
+    const pageParam = searchParams.get('page');
+
+    if (!pageParam) {
+      syncPageParam(1);
+    }
+  }, [pathname, router, searchParams]);
+
+  useEffect(() => {
+    const pageParam = Number(searchParams.get('page'));
+
+    if (currentPage > 0 && currentPage !== pageParam) {
+      syncPageParam(currentPage);
+    }
+  }, [currentPage, pathname, router, searchParams]);
 
   const handleDelete = async () => {
     if (!deleteDialog.reportId) return;
@@ -92,8 +125,7 @@ export default function ReportsPage() {
       <ReportFiltersComponent
         filters={filters}
         onFiltersChange={newFilters => {
-          setFilters(newFilters);
-          updateFilters(newFilters);
+          applyFilters(newFilters);
         }}
       />
 
@@ -112,7 +144,7 @@ export default function ReportsPage() {
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          onPageChange={page => updateFilters({ ...filters, page })}
+          onPageChange={page => applyFilters({ ...filters, page })}
         />
       )}
 

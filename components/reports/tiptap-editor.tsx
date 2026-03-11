@@ -223,6 +223,14 @@ export function TiptapEditor({
       attributes: {
         class: 'focus:outline-none min-h-[300px] p-4',
       },
+      handleClick: (_view, _pos, event) => {
+        const target = event.target as HTMLElement | null;
+        if (target?.closest('a')) {
+          event.preventDefault();
+          return true;
+        }
+        return false;
+      },
       handlePaste: (view, event) => {
         const clipboardData = event.clipboardData;
         if (!clipboardData) return false;
@@ -379,6 +387,11 @@ export function TiptapEditor({
   }
 
   const addLink = () => {
+    if (editor.isActive('link')) {
+      editor.chain().focus().unsetLink().run();
+      return;
+    }
+
     const url = window.prompt('Enter URL:');
     if (url) {
       editor.chain().focus().setLink({ href: url }).run();
