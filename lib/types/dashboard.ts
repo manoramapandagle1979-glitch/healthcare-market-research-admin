@@ -11,13 +11,16 @@ export type ActivityType =
   | 'press_release_created'
   | 'press_release_updated'
   | 'press_release_deleted'
-  | 'user.create'
-  | 'user.update'
+  | 'user_created'
+  | 'user_updated'
+  | 'user_deleted'
+  | 'user_role_changed'
   | 'lead_received'
   | 'lead_processed'
-  | 'auth.login'
-  | 'auth.logout'
-  | 'auth.token_refresh';
+  | 'auth_login'
+  | 'auth_login_failed'
+  | 'auth_logout'
+  | 'auth_token_refresh';
 
 export interface Activity {
   id: number;
