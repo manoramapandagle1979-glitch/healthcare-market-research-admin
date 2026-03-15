@@ -330,7 +330,8 @@
                                                             <i class="fa fa-trash-o remove"
                                                                 v-on:click="Remove(parentIndex, childIndex)"></i>
                                                             <ul v-if="ss.SubSegment">
-                                                                <li v-for="(sss, grandchildIndex) in ss.SubSegment" :key="grandchildIndex">
+                                                                <li v-for="(sss, grandchildIndex) in ss.SubSegment"
+                                                                    :key="grandchildIndex">
                                                                     {{sss.SegmentName}}
                                                                     <i class="fa fa-trash-o remove"
                                                                         v-on:click="Remove(parentIndex, childIndex, grandchildIndex)"></i>
@@ -962,7 +963,7 @@
                             ? subSeg.SubSegment.map((childSeg, childIdx) => ({
                                 itemText: `${chapterNumber}.1.${subSegSectionIndex}.${childIdx + 1}. ${childSeg.SegmentName}`,
                                 SubItem: []
-                              }))
+                            }))
                             : [];
 
                         segmentDetails.push(
@@ -1113,7 +1114,7 @@
                             { itemText: `${chapterNumber}.4. Research Limitations`, SubItem: [] },
                             { itemText: `${chapterNumber}.5. Assumptions`, SubItem: [] },
                             { itemText: `${chapterNumber}.6. Insights From Primary Respondents`, SubItem: [] },
-                            { itemText: `${chapterNumber}.7. Why Custom Market Insights`, SubItem: [] }
+                            { itemText: `${chapterNumber}.7. Why Healthcare Foresights`, SubItem: [] }
                         ]
                     };
                 },
@@ -1156,8 +1157,8 @@
                     console.log('[Remove] parentIndex:', parentIndex, 'childIndex:', childIndex, 'grandchildIndex:', grandchildIndex);
                     if (grandchildIndex !== undefined && grandchildIndex > -1) {
                         var target = vm.Segment.SubSegment[parentIndex] &&
-                                     vm.Segment.SubSegment[parentIndex].SubSegment[childIndex] &&
-                                     vm.Segment.SubSegment[parentIndex].SubSegment[childIndex].SubSegment;
+                            vm.Segment.SubSegment[parentIndex].SubSegment[childIndex] &&
+                            vm.Segment.SubSegment[parentIndex].SubSegment[childIndex].SubSegment;
                         console.log('[Remove] target array:', target);
                         if (target) { target.splice(grandchildIndex, 1); }
                     } else if (childIndex > -1) {

@@ -123,30 +123,30 @@ const IndentExtension = Extension.create({
     return {
       increaseIndent:
         () =>
-          ({ tr, state, dispatch }: any) => {
-            const { from, to } = state.selection;
-            state.doc.nodesBetween(from, to, (node: any, pos: number) => {
-              if (['paragraph', 'heading'].includes(node.type.name)) {
-                const indent = Math.min((node.attrs.indent || 0) + 1, MAX_INDENT);
-                tr.setNodeMarkup(pos, undefined, { ...node.attrs, indent });
-              }
-            });
-            if (dispatch) dispatch(tr);
-            return true;
-          },
+        ({ tr, state, dispatch }: any) => {
+          const { from, to } = state.selection;
+          state.doc.nodesBetween(from, to, (node: any, pos: number) => {
+            if (['paragraph', 'heading'].includes(node.type.name)) {
+              const indent = Math.min((node.attrs.indent || 0) + 1, MAX_INDENT);
+              tr.setNodeMarkup(pos, undefined, { ...node.attrs, indent });
+            }
+          });
+          if (dispatch) dispatch(tr);
+          return true;
+        },
       decreaseIndent:
         () =>
-          ({ tr, state, dispatch }: any) => {
-            const { from, to } = state.selection;
-            state.doc.nodesBetween(from, to, (node: any, pos: number) => {
-              if (['paragraph', 'heading'].includes(node.type.name)) {
-                const indent = Math.max((node.attrs.indent || 0) - 1, 0);
-                tr.setNodeMarkup(pos, undefined, { ...node.attrs, indent });
-              }
-            });
-            if (dispatch) dispatch(tr);
-            return true;
-          },
+        ({ tr, state, dispatch }: any) => {
+          const { from, to } = state.selection;
+          state.doc.nodesBetween(from, to, (node: any, pos: number) => {
+            if (['paragraph', 'heading'].includes(node.type.name)) {
+              const indent = Math.max((node.attrs.indent || 0) - 1, 0);
+              tr.setNodeMarkup(pos, undefined, { ...node.attrs, indent });
+            }
+          });
+          if (dispatch) dispatch(tr);
+          return true;
+        },
     } as any;
   },
 
