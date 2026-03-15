@@ -1,7 +1,7 @@
 'use client';
 
 import { useEditor, EditorContent } from '@tiptap/react';
-import { Extension } from '@tiptap/core';
+import { Extension, mergeAttributes } from '@tiptap/core';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { DOMSerializer } from '@tiptap/pm/model';
 import StarterKit from '@tiptap/starter-kit';
@@ -62,6 +62,31 @@ import { beautifyHtml, minifyHtml } from '@/lib/utils/html-beautifier';
 
 const CURSOR_MARKER = '___CURSOR_MARKER_8x7z___';
 
+// const isInternalLink = (href: string): boolean => {
+//   if (!href) return false;
+//   if (href.startsWith('#') || href.startsWith('/') || href.startsWith('./') || href.startsWith('../')) {
+//     return true;
+//   }
+//   try {
+//     const url = new URL(href);
+//     if (typeof window !== 'undefined') {
+//       return url.hostname === window.location.hostname;
+//     }
+//   } catch {
+//     return true;
+//   }
+//   return false;
+// };
+
+const CustomLink = Link.extend({
+  renderHTML({ HTMLAttributes }) {
+    // const href = HTMLAttributes.href || '';
+    // const rel = isInternalLink(href) ? 'dofollow' : 'nofollow noopener noreferrer';
+    const rel = 'dofollow';
+    return ['a', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, { rel }), 0];
+  },
+});
+
 const INDENT_SIZE = 40; // px per indent level
 const MAX_INDENT = 8;
 
@@ -98,30 +123,30 @@ const IndentExtension = Extension.create({
     return {
       increaseIndent:
         () =>
-        ({ tr, state, dispatch }: any) => {
-          const { from, to } = state.selection;
-          state.doc.nodesBetween(from, to, (node: any, pos: number) => {
-            if (['paragraph', 'heading'].includes(node.type.name)) {
-              const indent = Math.min((node.attrs.indent || 0) + 1, MAX_INDENT);
-              tr.setNodeMarkup(pos, undefined, { ...node.attrs, indent });
-            }
-          });
-          if (dispatch) dispatch(tr);
-          return true;
-        },
+          ({ tr, state, dispatch }: any) => {
+            const { from, to } = state.selection;
+            state.doc.nodesBetween(from, to, (node: any, pos: number) => {
+              if (['paragraph', 'heading'].includes(node.type.name)) {
+                const indent = Math.min((node.attrs.indent || 0) + 1, MAX_INDENT);
+                tr.setNodeMarkup(pos, undefined, { ...node.attrs, indent });
+              }
+            });
+            if (dispatch) dispatch(tr);
+            return true;
+          },
       decreaseIndent:
         () =>
-        ({ tr, state, dispatch }: any) => {
-          const { from, to } = state.selection;
-          state.doc.nodesBetween(from, to, (node: any, pos: number) => {
-            if (['paragraph', 'heading'].includes(node.type.name)) {
-              const indent = Math.max((node.attrs.indent || 0) - 1, 0);
-              tr.setNodeMarkup(pos, undefined, { ...node.attrs, indent });
-            }
-          });
-          if (dispatch) dispatch(tr);
-          return true;
-        },
+          ({ tr, state, dispatch }: any) => {
+            const { from, to } = state.selection;
+            state.doc.nodesBetween(from, to, (node: any, pos: number) => {
+              if (['paragraph', 'heading'].includes(node.type.name)) {
+                const indent = Math.max((node.attrs.indent || 0) - 1, 0);
+                tr.setNodeMarkup(pos, undefined, { ...node.attrs, indent });
+              }
+            });
+            if (dispatch) dispatch(tr);
+            return true;
+          },
     } as any;
   },
 
@@ -172,7 +197,7 @@ export function TiptapEditor({
           levels: [1, 2, 3, 4, 5],
         },
       }),
-      Link.configure({
+      CustomLink.configure({
         openOnClick: false,
         HTMLAttributes: {
           class: 'text-primary underline',
