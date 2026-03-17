@@ -142,7 +142,7 @@ export function PressReleaseList({
                         {config.preview.domain && (
                           <Button variant="ghost" size="sm" asChild title="Preview on public site">
                             <Link
-                              href={`${config.preview.domain}/press-releases/${pressRelease.slug}`}
+                              href={`${config.preview.domain}/press-release/${pressRelease.slug}`}
                               target="_blank"
                               rel="noopener noreferrer"
                             >

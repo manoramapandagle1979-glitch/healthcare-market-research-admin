@@ -221,7 +221,7 @@ export function PressReleaseForm({
                       onClick={() => {
                         if (field.value) {
                           navigator.clipboard.writeText(
-                            `${config.preview.domain}/press-releases/${field.value}`
+                            `${config.preview.domain}/press-release/${field.value}`
                           );
                           toast.success('URL copied to clipboard');
                         }
