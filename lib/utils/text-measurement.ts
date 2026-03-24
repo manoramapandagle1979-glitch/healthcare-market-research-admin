@@ -6,15 +6,21 @@ let canvas: HTMLCanvasElement | null = null;
 let context: CanvasRenderingContext2D | null = null;
 
 /**
+ * Google SERP font specifications
+ * Google uses Arial for rendering search results
+ */
+export const SERP_FONTS = {
+  title: '20px Arial, sans-serif',
+  description: '14px Arial, sans-serif',
+} as const;
+
+/**
  * Measures the pixel width of text using the specified font
  * @param text - The text to measure
- * @param font - CSS font specification (e.g., "14px system-ui")
+ * @param font - CSS font specification (e.g., "20px Arial, sans-serif")
  * @returns The width in pixels
  */
-export function measureTextWidth(
-  text: string,
-  font: string = '14px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
-): number {
+export function measureTextWidth(text: string, font: string = SERP_FONTS.description): number {
   // Return 0 for empty text
   if (!text) return 0;
 

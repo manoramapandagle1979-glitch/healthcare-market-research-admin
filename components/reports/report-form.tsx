@@ -37,7 +37,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { CharacterCounter } from '@/components/seo/character-counter';
 import { SEO_LIMITS } from '@/lib/config/seo';
-import { measureTextWidth } from '@/lib/utils/text-measurement';
+import { measureTextWidth, SERP_FONTS } from '@/lib/utils/text-measurement';
 import { toast } from 'sonner';
 import { config } from '@/lib/config';
 import { generateSlug } from '@/lib/utils/slug';
@@ -764,7 +764,7 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
                         max={SEO_LIMITS.metaTitle.max}
                         optimal={SEO_LIMITS.metaTitle.optimal}
                         pixelWidth={{
-                          current: measureTextWidth(field.value || '', '14px system-ui'),
+                          current: measureTextWidth(field.value || '', SERP_FONTS.title),
                           max: SEO_LIMITS.metaTitle.pixelWidth.max,
                         }}
                         variant="inline"
@@ -791,7 +791,7 @@ export function ReportForm({ report, onSubmit, onPreview, isSaving }: ReportForm
                         max={SEO_LIMITS.metaDescription.max}
                         optimal={SEO_LIMITS.metaDescription.optimal}
                         pixelWidth={{
-                          current: measureTextWidth(field.value || '', '14px system-ui'),
+                          current: measureTextWidth(field.value || '', SERP_FONTS.description),
                           max: SEO_LIMITS.metaDescription.pixelWidth.max,
                         }}
                       />

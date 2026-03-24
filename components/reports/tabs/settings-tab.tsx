@@ -20,7 +20,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { MultiSelectAuthorDropdown } from '../multi-select-author-dropdown';
 import { CharacterCounter } from '@/components/seo/character-counter';
 import { SEO_LIMITS } from '@/lib/config/seo';
-import { measureTextWidth } from '@/lib/utils/text-measurement';
+import { measureTextWidth, SERP_FONTS } from '@/lib/utils/text-measurement';
 import { format } from 'date-fns';
 import type { UseFormReturn } from 'react-hook-form';
 import type { ReportFormData } from '@/lib/types/reports';
@@ -187,7 +187,7 @@ export function SettingsTab({
                       max={SEO_LIMITS.metaTitle.max}
                       optimal={SEO_LIMITS.metaTitle.optimal}
                       pixelWidth={{
-                        current: measureTextWidth(field.value || '', '14px system-ui'),
+                        current: measureTextWidth(field.value || '', SERP_FONTS.title),
                         max: SEO_LIMITS.metaTitle.pixelWidth.max,
                       }}
                       variant="inline"
@@ -214,7 +214,7 @@ export function SettingsTab({
                       max={SEO_LIMITS.metaDescription.max}
                       optimal={SEO_LIMITS.metaDescription.optimal}
                       pixelWidth={{
-                        current: measureTextWidth(field.value || '', '14px system-ui'),
+                        current: measureTextWidth(field.value || '', SERP_FONTS.description),
                         max: SEO_LIMITS.metaDescription.pixelWidth.max,
                       }}
                       variant="inline"
