@@ -11,6 +11,7 @@ import {
   Search,
   ArrowRightLeft,
   ShoppingCart,
+  ScrollText,
 } from 'lucide-react';
 
 export type UserRole = 'admin' | 'editor' | 'viewer';
@@ -162,6 +163,12 @@ export const navigationItems: NavigationItem[] = [
     title: 'User Management',
     href: '/users',
     icon: UserCog,
+    roles: ['admin'],
+  },
+  {
+    title: 'Activity Logs',
+    href: '/activity-logs',
+    icon: ScrollText,
     roles: ['admin'],
   },
   {

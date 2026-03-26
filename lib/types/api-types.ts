@@ -453,3 +453,88 @@ export interface UpdateOrderStatusRequest {
   status: OrderStatus;
   admin_notes?: string;
 }
+
+// ============ Audit Log Types ============
+
+export type AuditLogAction =
+  | 'auth.login'
+  | 'auth.login_failed'
+  | 'auth.logout'
+  | 'auth.token_refresh'
+  | 'user.create'
+  | 'user.update'
+  | 'user.delete'
+  | 'user.role_change'
+  | 'report.create'
+  | 'report.update'
+  | 'report.delete'
+  | 'report.publish'
+  | 'category.create'
+  | 'category.update'
+  | 'category.delete'
+  | 'author.create'
+  | 'author.update'
+  | 'author.delete'
+  | 'blog.create'
+  | 'blog.update'
+  | 'blog.delete'
+  | 'blog.publish'
+  | 'press_release.create'
+  | 'press_release.update'
+  | 'press_release.delete'
+  | 'press_release.publish';
+
+export type AuditLogEntityType =
+  | 'user'
+  | 'report'
+  | 'category'
+  | 'author'
+  | 'blog'
+  | 'press_release';
+
+export type AuditLogStatus = 'success' | 'failure';
+
+export interface AuditLogFieldChange {
+  old: unknown;
+  new: unknown;
+}
+
+export interface ApiAuditLog {
+  id: number;
+  user_id?: number;
+  user_email: string;
+  user_role: string;
+  action: string;
+  entity_type?: string;
+  entity_id?: number;
+  ip_address: string;
+  user_agent: string;
+  request_id: string;
+  changes?: Record<string, AuditLogFieldChange>;
+  status: AuditLogStatus;
+  error_message?: string;
+  created_at: string;
+}
+
+export interface AuditLogFilters {
+  page?: number;
+  limit?: number;
+  user_id?: number;
+  action?: AuditLogAction | '';
+  action_prefix?: string;
+  entity_type?: AuditLogEntityType | '';
+  entity_id?: number;
+  status?: AuditLogStatus | '';
+  start_date?: string;
+  end_date?: string;
+  ip_address?: string;
+}
+
+export interface AuditLogsListResponse extends ApiResponse<ApiAuditLog[]> {
+  data: ApiAuditLog[];
+  meta: ApiMeta;
+}
+
+export interface AuditLogDetailResponse extends ApiResponse<ApiAuditLog> {
+  data: ApiAuditLog;
+}

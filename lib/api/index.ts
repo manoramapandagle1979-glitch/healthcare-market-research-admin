@@ -8,6 +8,7 @@ export * from './auth.api';
 export * from './reports.api';
 export * from './categories.api';
 export * from './orders';
+export * from './audit-logs';
 
 // Re-export API client and types
 export { apiClient, ApiError } from './client';
