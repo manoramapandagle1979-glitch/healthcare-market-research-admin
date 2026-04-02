@@ -205,6 +205,14 @@ export interface ApiReport {
   sub_category_id?: number;
   market_segment_id?: number;
   internal_notes?: string; // Admin-only notes
+  internal_links?: Array<{
+    keyword: string;
+    targetId: number;
+    targetTitle: string;
+    targetType: 'report' | 'blog' | 'press-release';
+    targetUrl: string;
+    linkedCount: number;
+  }>;
 }
 
 export interface ApiReportWithRelations extends ApiReport {

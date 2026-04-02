@@ -4,21 +4,32 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TiptapEditor } from './tiptap-editor';
+import { InternalLinkPanel } from '@/components/editor/internal-link-panel';
 import { REPORT_SECTIONS } from '@/lib/config/reports';
-import type { ReportSections, ReportSectionKey } from '@/lib/types/reports';
+import type { ReportSectionKey, InternalLinkEntry } from '@/lib/types/reports';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import type { TiptapEditorLike } from '@/hooks/use-internal-link-keywords';
 
 interface SectionEditorProps {
   sections: any;
   onChange: (sections: any) => void;
   reportId?: number | string;
+  onInternalLinksChange?: (links: InternalLinkEntry[]) => void;
+  initialLinks?: InternalLinkEntry[];
 }
 
-export function SectionEditor({ sections, onChange, reportId }: SectionEditorProps) {
+export function SectionEditor({
+  sections,
+  onChange,
+  reportId,
+  onInternalLinksChange,
+  initialLinks,
+}: SectionEditorProps) {
   const [expandedSections, setExpandedSections] = useState<Set<ReportSectionKey>>(
     new Set(REPORT_SECTIONS.map(section => section.key))
   );
+  const [marketDetailsEditor, setMarketDetailsEditor] = useState<TiptapEditorLike | null>(null);
 
   const toggleSection = (key: ReportSectionKey) => {
     setExpandedSections(prev => {
@@ -78,7 +89,20 @@ export function SectionEditor({ sections, onChange, reportId }: SectionEditorPro
                   onChange={content => handleSectionChange(section.key, content)}
                   placeholder={section.placeholder}
                   reportId={reportId}
+                  onEditorReady={
+                    section.key === 'marketDetails'
+                      ? ed => setMarketDetailsEditor(ed as TiptapEditorLike | null)
+                      : undefined
+                  }
                 />
+                {section.key === 'marketDetails' && (
+                  <InternalLinkPanel
+                    editor={marketDetailsEditor}
+                    onContentChange={content => handleSectionChange('marketDetails', content)}
+                    onLinksChange={onInternalLinksChange}
+                    initialLinks={initialLinks}
+                  />
+                )}
               </CardContent>
             )}
           </Card>

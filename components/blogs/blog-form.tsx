@@ -33,7 +33,7 @@ import {
   EXCERPT_MAX_LENGTH,
   CONTENT_MIN_LENGTH,
 } from '@/lib/config/blogs';
-import type { BlogFormData, Blog } from '@/lib/types/blogs';
+import type { BlogFormData, Blog, InternalLinkEntry } from '@/lib/types/blogs';
 import { Save, Eye, Wand2, Copy } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { fetchCategories, type Category } from '@/lib/api/categories';
@@ -43,6 +43,8 @@ import { measureTextWidth, SERP_FONTS } from '@/lib/utils/text-measurement';
 import { toast } from 'sonner';
 import { config } from '@/lib/config';
 import { generateSlug } from '@/lib/utils/slug';
+import { InternalLinkPanel } from '@/components/editor/internal-link-panel';
+import type { TiptapEditorLike } from '@/hooks/use-internal-link-keywords';
 
 // Validation schema
 const blogFormSchema = z.object({
@@ -90,7 +92,11 @@ interface BlogFormProps {
 export function BlogForm({ blog, onSubmit, onPreview, isSaving, formId }: BlogFormProps) {
   const [keywordInput, setKeywordInput] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
+  const [contentEditor, setContentEditor] = useState<TiptapEditorLike | null>(null);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [internalLinks, setInternalLinks] = useState<InternalLinkEntry[]>(
+    blog?.internalLinks ?? []
+  );
 
   useEffect(() => {
     loadCategories();
@@ -148,7 +154,7 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving, formId }: BlogFo
   });
 
   const handleFormSubmit = async (data: BlogFormSchema) => {
-    await onSubmit(data as BlogFormData);
+    await onSubmit({ ...(data as BlogFormData), internalLinks });
   };
 
   const fillSampleData = () => {
@@ -395,6 +401,7 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving, formId }: BlogFo
                       content={field.value}
                       onChange={field.onChange}
                       placeholder="Start writing your blog post..."
+                      onEditorReady={ed => setContentEditor(ed as TiptapEditorLike | null)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -403,6 +410,13 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving, formId }: BlogFo
             />
           </CardContent>
         </Card>
+
+        <InternalLinkPanel
+          editor={contentEditor}
+          onContentChange={html => form.setValue('content', html, { shouldDirty: true })}
+          onLinksChange={setInternalLinks}
+          initialLinks={blog?.internalLinks ?? []}
+        />
 
         {/* SEO Metadata */}
         <Card>

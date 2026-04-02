@@ -157,6 +157,25 @@ export async function fetchReportsByCategory(
   });
 }
 
+// ============ Internal Linking ============
+
+export interface LinkSuggestionItem {
+  id: number;
+  title: string;
+  slug: string;
+  meta_keywords: string;
+}
+
+/**
+ * GET /api/v1/reports/link-suggestions
+ * Get lightweight list of published reports for internal linking
+ */
+export async function fetchLinkSuggestions(): Promise<ApiResponse<LinkSuggestionItem[]>> {
+  return apiClient.get<ApiResponse<LinkSuggestionItem[]>>('/v1/reports/link-suggestions', {
+    requiresAuth: true,
+  });
+}
+
 // ============ Helper Functions ============
 
 /**

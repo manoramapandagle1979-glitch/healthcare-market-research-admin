@@ -1,5 +1,6 @@
 // Re-use UserReference and ReportAuthor from reports
-import type { UserReference, ReportAuthor } from './reports';
+import type { UserReference, ReportAuthor, InternalLinkEntry } from './reports';
+export type { InternalLinkEntry };
 
 // Press Release status enum with workflow states
 export type PressReleaseStatus = 'draft' | 'review' | 'published';
@@ -91,6 +92,7 @@ export interface PressRelease {
   location?: string;
   reportUrl?: string;
   metadata: PressReleaseMetadata;
+  internalLinks?: InternalLinkEntry[];
   createdAt: string;
   updatedAt: string;
   reviewedBy?: number;
@@ -155,6 +157,7 @@ export interface UpdatePressReleaseData {
   location?: string;
   reportUrl?: string;
   metadata?: PressReleaseMetadata;
+  internalLinks?: InternalLinkEntry[];
 }
 
 // UI Form data (what the form uses before sending to API)
@@ -172,6 +175,7 @@ export interface PressReleaseFormData {
   location?: string;
   reportUrl?: string;
   metadata?: PressReleaseMetadata;
+  internalLinks?: InternalLinkEntry[];
 }
 
 // Category type

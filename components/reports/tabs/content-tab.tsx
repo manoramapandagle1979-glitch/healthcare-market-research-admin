@@ -22,9 +22,10 @@ interface ContentTabProps {
   form: UseFormReturn<ReportFormData>;
   onSaveTab?: (tabKey: string, data: Partial<ReportFormData>) => Promise<void>;
   isSaving: boolean;
+  reportId?: number | string;
 }
 
-export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
+export function ContentTab({ form, onSaveTab, isSaving, reportId }: ContentTabProps) {
   const [showValidationError, setShowValidationError] = useState(false);
   const playerInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const faqInputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -89,7 +90,17 @@ export function ContentTab({ form, onSaveTab, isSaving }: ContentTabProps) {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <SectionEditor sections={field.value} onChange={field.onChange} />
+                  <SectionEditor
+                    sections={field.value}
+                    onChange={field.onChange}
+                    reportId={reportId}
+                    onInternalLinksChange={links =>
+                      form.setValue('internalLinks', links as ReportFormData['internalLinks'])
+                    }
+                    initialLinks={
+                      form.getValues('internalLinks') as ReportFormData['internalLinks']
+                    }
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

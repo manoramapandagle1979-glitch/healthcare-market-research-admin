@@ -139,6 +139,7 @@ function convertApiReportToLegacy(apiReport: ApiReport): Report {
     thumbnailUrl: apiReport.thumbnail_url,
     isFeatured: apiReport.is_featured,
     internalNotes: apiReport.internal_notes,
+    internalLinks: apiReport.internal_links,
     createdAt: apiReport.created_at,
     updatedAt: apiReport.updated_at,
     deletedAt: apiReport.deleted_at,
@@ -244,6 +245,7 @@ export async function createReport(data: ReportFormData): Promise<ReportResponse
     metadata: data.metadata,
     is_featured: data.isFeatured,
     internal_notes: data.internalNotes,
+    internal_links: data.internalLinks,
 
     // Legacy SEO fields (mapped from metadata object)
     meta_title: data.metadata?.metaTitle,
@@ -307,6 +309,7 @@ export async function updateReport(
   if (data.thumbnailUrl !== undefined) apiData.thumbnail_url = data.thumbnailUrl;
   if (data.isFeatured !== undefined) apiData.is_featured = data.isFeatured;
   if (data.internalNotes !== undefined) apiData.internal_notes = data.internalNotes;
+  if (data.internalLinks !== undefined) apiData.internal_links = data.internalLinks;
 
   const response = await reportsApi.updateReport(Number(id), apiData);
 
@@ -402,4 +405,15 @@ export async function cancelScheduledPublish(id: string | number): Promise<{ rep
   );
   const report = convertApiReportToLegacy(response.report);
   return { report };
+}
+
+/**
+ * Fetch lightweight report data for internal link suggestions
+ */
+export async function fetchLinkSuggestions(): Promise<reportsApi.LinkSuggestionItem[]> {
+  const response = await reportsApi.fetchLinkSuggestions();
+  if (!response.success || !response.data) {
+    throw new Error(response.error || 'Failed to fetch link suggestions');
+  }
+  return response.data;
 }

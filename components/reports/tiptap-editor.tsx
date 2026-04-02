@@ -174,6 +174,7 @@ interface TiptapEditorProps {
   placeholder?: string;
   className?: string;
   reportId?: number | string;
+  onEditorReady?: (editor: import('@tiptap/react').Editor | null) => void;
 }
 
 export function TiptapEditor({
@@ -182,6 +183,7 @@ export function TiptapEditor({
   placeholder = 'Start writing...',
   className,
   reportId,
+  onEditorReady,
 }: TiptapEditorProps) {
   const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
   const [isFindReplaceOpen, setIsFindReplaceOpen] = useState(false);
@@ -306,6 +308,11 @@ export function TiptapEditor({
       },
     },
   });
+
+  // Expose editor instance to parent
+  useEffect(() => {
+    onEditorReady?.(editor);
+  }, [editor, onEditorReady]);
 
   // Sync editor content when the content prop changes from outside
   useEffect(() => {

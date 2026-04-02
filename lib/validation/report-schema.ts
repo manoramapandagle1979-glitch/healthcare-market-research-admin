@@ -130,10 +130,7 @@ export const reportSectionsSchema = z.object({
 export const reportFormSchema = z
   .object({
     // ============ MANDATORY FIELDS ============
-    title: z
-      .string()
-      .min(1, 'Title is required')
-      .min(10, 'Title must be at least 10 characters'),
+    title: z.string().min(1, 'Title is required').min(10, 'Title must be at least 10 characters'),
     slug: z
       .string()
       .min(1, 'Slug is required')
@@ -181,6 +178,21 @@ export const reportFormSchema = z
 
     // Admin Notes
     internalNotes: z.string().optional(),
+
+    // Internal links (managed by InternalLinkPanel, not directly editable)
+    internalLinks: z
+      .array(
+        z.object({
+          keyword: z.string(),
+          targetId: z.number(),
+          targetTitle: z.string(),
+          targetType: z.enum(['report', 'blog', 'press-release']),
+          targetUrl: z.string(),
+          linkedCount: z.number(),
+        })
+      )
+      .optional()
+      .default([]),
   })
   .refine(
     data => {

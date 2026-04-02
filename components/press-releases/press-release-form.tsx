@@ -30,7 +30,11 @@ import {
   PRESS_RELEASE_TITLE_MAX_LENGTH,
   PRESS_RELEASE_EXCERPT_MAX_LENGTH,
 } from '@/lib/config/press-releases';
-import type { PressReleaseFormData, PressRelease } from '@/lib/types/press-releases';
+import type {
+  PressReleaseFormData,
+  PressRelease,
+  InternalLinkEntry,
+} from '@/lib/types/press-releases';
 import { pressReleaseFormSchema } from '@/lib/validation/press-release-schema';
 import { Save, Eye, Wand2, Copy } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -40,6 +44,8 @@ import { measureTextWidth, SERP_FONTS } from '@/lib/utils/text-measurement';
 import { toast } from 'sonner';
 import { config } from '@/lib/config';
 import { generateSlug } from '@/lib/utils/slug';
+import { InternalLinkPanel } from '@/components/editor/internal-link-panel';
+import type { TiptapEditorLike } from '@/hooks/use-internal-link-keywords';
 
 interface PressReleaseFormProps {
   pressRelease?: PressRelease;
@@ -59,6 +65,10 @@ export function PressReleaseForm({
   const [keywordInput, setKeywordInput] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [contentEditor, setContentEditor] = useState<TiptapEditorLike | null>(null);
+  const [internalLinks, setInternalLinks] = useState<InternalLinkEntry[]>(
+    pressRelease?.internalLinks ?? []
+  );
 
   useEffect(() => {
     loadCategories();
@@ -149,7 +159,7 @@ export function PressReleaseForm({
   };
 
   const handleFormSubmit = async (data: PressReleaseFormData) => {
-    await onSubmit(data);
+    await onSubmit({ ...data, internalLinks });
   };
 
   return (
@@ -386,6 +396,7 @@ export function PressReleaseForm({
                       content={field.value}
                       onChange={field.onChange}
                       placeholder="Start writing your press release..."
+                      onEditorReady={ed => setContentEditor(ed as TiptapEditorLike | null)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -394,6 +405,13 @@ export function PressReleaseForm({
             />
           </CardContent>
         </Card>
+
+        <InternalLinkPanel
+          editor={contentEditor}
+          onContentChange={html => form.setValue('content', html, { shouldDirty: true })}
+          onLinksChange={setInternalLinks}
+          initialLinks={pressRelease?.internalLinks ?? []}
+        />
 
         {/* SEO Metadata */}
         <Card>

@@ -331,6 +331,7 @@ export function formDataToUpdateRequest(formData: Partial<BlogFormData>): Update
   if (formData.publishDate !== undefined) request.publishDate = formData.publishDate;
   if (formData.location !== undefined) request.location = formData.location;
   if (formData.metadata !== undefined) request.metadata = formData.metadata;
+  if (formData.internalLinks !== undefined) request.internalLinks = formData.internalLinks;
 
   return request;
 }

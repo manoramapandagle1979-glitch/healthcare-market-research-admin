@@ -258,6 +258,7 @@ export const ReportFormTabs = forwardRef<ReportFormTabsRef, ReportFormTabsProps>
             thumbnailUrl: report.thumbnailUrl,
             isFeatured: report.isFeatured,
             internalNotes: report.internalNotes,
+            internalLinks: report.internalLinks || [],
           }
         : {
             title: '',
@@ -341,7 +342,12 @@ export const ReportFormTabs = forwardRef<ReportFormTabsRef, ReportFormTabsProps>
           </TabsContent>
 
           <TabsContent value="content">
-            <ContentTab form={form} onSaveTab={onSaveTab} isSaving={isSaving} />
+            <ContentTab
+              form={form}
+              onSaveTab={onSaveTab}
+              isSaving={isSaving}
+              reportId={report?.id}
+            />
           </TabsContent>
 
           <TabsContent value="toc">

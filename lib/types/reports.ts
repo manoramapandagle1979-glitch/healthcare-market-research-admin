@@ -21,6 +21,16 @@ export interface UserReference {
   name?: string;
 }
 
+// Internal link entry saved alongside report/blog/PR content
+export interface InternalLinkEntry {
+  keyword: string;
+  targetId: number;
+  targetTitle: string;
+  targetType: 'report' | 'blog' | 'press-release';
+  targetUrl: string;
+  linkedCount: number;
+}
+
 // Report status enum
 export type ReportStatus = 'draft' | 'published';
 
@@ -185,6 +195,7 @@ export interface Report {
   thumbnailUrl?: string; // Optional thumbnail
   isFeatured?: boolean; // Defaults to false
   internalNotes?: string; // Admin-only notes
+  internalLinks?: InternalLinkEntry[];
   createdAt: string;
   updatedAt: string;
   deletedAt?: string; // ISO timestamp when report was soft-deleted
@@ -240,6 +251,7 @@ export interface ReportFormData {
   metadata: ReportMetadata;
   isFeatured?: boolean;
   internalNotes?: string;
+  internalLinks?: InternalLinkEntry[];
 
   // Note: These fields are auto-managed and should NOT be in form data:
   // - id (auto-generated)

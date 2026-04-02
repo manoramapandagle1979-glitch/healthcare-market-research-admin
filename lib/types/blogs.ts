@@ -1,5 +1,6 @@
 // Re-use UserReference from reports
-import type { UserReference, ReportAuthor } from './reports';
+import type { UserReference, ReportAuthor, InternalLinkEntry } from './reports';
+export type { InternalLinkEntry };
 
 // Blog status enum with workflow states
 export type BlogStatus = 'draft' | 'review' | 'published';
@@ -92,6 +93,7 @@ export interface Blog {
   viewCount: number; // calculated or from cache
   location?: string;
   metadata: BlogMetadata;
+  internalLinks?: InternalLinkEntry[];
   versions?: BlogVersion[];
   createdAt: string;
   updatedAt: string;
@@ -152,6 +154,7 @@ export interface UpdateBlogRequest {
   publishDate?: string;
   location?: string;
   metadata?: BlogMetadata;
+  internalLinks?: InternalLinkEntry[];
 }
 
 // Form data (for create/update)
@@ -167,6 +170,7 @@ export interface BlogFormData {
   publishDate: string;
   location: string;
   metadata: BlogMetadata;
+  internalLinks?: InternalLinkEntry[];
 }
 
 // Category type
