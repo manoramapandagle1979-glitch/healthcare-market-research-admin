@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import {
   useInternalLinkKeywords,
+  MAX_LINKS,
   type TiptapEditorLike,
   type InternalLinkEntry,
 } from '@/hooks/use-internal-link-keywords';
@@ -69,9 +70,13 @@ export function InternalLinkPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entries]);
 
+  const linkedCount = entries.filter(e => e.linked !== null).length;
+  const atLimit = linkedCount >= MAX_LINKS;
+
   const handleAdd = () => {
     const trimmed = inputValue.trim();
     if (!trimmed) return;
+    if (atLimit) return;
     addKeyword(trimmed, editor).then(() => {
       // After linking, push new HTML to parent form so changes are captured
       if (editor) {
@@ -88,8 +93,6 @@ export function InternalLinkPanel({
       handleAdd();
     }
   };
-
-  const linkedCount = entries.filter(e => e.linked !== null).length;
 
   return (
     <Card className="mt-4">
@@ -128,18 +131,25 @@ export function InternalLinkPanel({
               onKeyDown={handleKeyDown}
               placeholder="Add keyword to auto-link…"
               className="h-8 text-sm"
+              disabled={atLimit}
             />
             <Button
               type="button"
               size="sm"
               className="h-8 shrink-0"
               onClick={handleAdd}
-              disabled={!inputValue.trim()}
+              disabled={!inputValue.trim() || atLimit}
             >
               <Plus className="h-3.5 w-3.5 mr-1" />
               Add
             </Button>
           </div>
+          {atLimit && (
+            <p className="flex items-center gap-1.5 text-xs text-destructive">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+              Maximum of {MAX_LINKS} internal links reached. Remove one to add another.
+            </p>
+          )}
 
           {/* Linked keyword chips */}
           {entries.length > 0 && (

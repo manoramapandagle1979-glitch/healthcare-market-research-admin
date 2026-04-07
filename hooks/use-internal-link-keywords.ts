@@ -121,12 +121,15 @@ function applyLinksInEditor(
 // Hook
 // ---------------------------------------------------------------------------
 
+export const MAX_LINKS = 5;
+
 /**
  * Manages keyword-based internal linking.
  *
- * On `addKeyword`, the hook searches for matching content, auto-selects the
- * first result, applies links in the editor, and stores the result summary.
- * No results dropdown — the first match is used automatically.
+ * On `addKeyword`, the hook searches for matching content, auto-selects a
+ * random result, applies a single link in the editor, and stores the result.
+ * No results dropdown — one random match is used automatically.
+ * Maximum of 5 linked keywords is enforced.
  */
 export function useInternalLinkKeywords(initialLinks?: InternalLinkEntry[]) {
   const [entries, setEntries] = useState<KeywordEntry[]>(() =>
@@ -143,14 +146,19 @@ export function useInternalLinkKeywords(initialLinks?: InternalLinkEntry[]) {
     if (!trimmed) return;
 
     let isDuplicate = false;
+    let isAtLimit = false;
     setEntries(prev => {
       if (prev.some(e => e.keyword.toLowerCase() === trimmed.toLowerCase())) {
         isDuplicate = true;
         return prev;
       }
+      if (prev.filter(e => e.linked !== null).length >= MAX_LINKS) {
+        isAtLimit = true;
+        return prev;
+      }
       return [...prev, { keyword: trimmed, isSearching: true, linked: null, notFound: false }];
     });
-    if (isDuplicate) return;
+    if (isDuplicate || isAtLimit) return;
 
     try {
       const [reportsRes, blogsRes, prsRes] = await Promise.allSettled([
@@ -240,18 +248,19 @@ export function useInternalLinkKeywords(initialLinks?: InternalLinkEntry[]) {
         return;
       }
 
-      const first = results[0];
+      // Pick one result at random
+      const chosen = results[Math.floor(Math.random() * results.length)];
       let linkedCount = 0;
       if (editor) {
-        linkedCount = applyLinksInEditor(editor, trimmed, first.url);
+        linkedCount = applyLinksInEditor(editor, trimmed, chosen.url, 1);
       }
 
       const linked: InternalLinkEntry = {
         keyword: trimmed,
-        targetId: first.id,
-        targetTitle: first.title,
-        targetType: first.type,
-        targetUrl: first.url,
+        targetId: chosen.id,
+        targetTitle: chosen.title,
+        targetType: chosen.type,
+        targetUrl: chosen.url,
         linkedCount,
       };
 

@@ -173,7 +173,7 @@ export interface PressReleaseFormData {
   publishDate: string;
   scheduledPublishEnabled?: boolean;
   location?: string;
-  reportUrl?: string;
+  reportUrl: string;
   metadata?: PressReleaseMetadata;
   internalLinks?: InternalLinkEntry[];
 }

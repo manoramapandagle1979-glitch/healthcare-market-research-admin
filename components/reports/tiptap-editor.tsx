@@ -190,6 +190,7 @@ export function TiptapEditor({
   const [showHtmlCode, setShowHtmlCode] = useState(false);
   const [htmlCode, setHtmlCode] = useState('');
   const [htmlCursorPos, setHtmlCursorPos] = useState(-1);
+  const [pendingVisualCursorPos, setPendingVisualCursorPos] = useState(-1);
   const htmlTextareaRef = useRef<HTMLTextAreaElement>(null);
   const editor = useEditor({
     immediatelyRender: false,
@@ -346,6 +347,21 @@ export function TiptapEditor({
       setHtmlCursorPos(-1);
     }
   }, [showHtmlCode, htmlCursorPos]);
+
+  // After switching back to visual view, focus the editor at the mapped
+  // position and scroll it into view. Must run after EditorContent re-mounts,
+  // otherwise ProseMirror has no DOM to scroll and the viewport jumps to the top.
+  useEffect(() => {
+    if (showHtmlCode || pendingVisualCursorPos < 0 || !editor) return;
+
+    const raf = requestAnimationFrame(() => {
+      const safePos = Math.min(pendingVisualCursorPos, editor.state.doc.content.size);
+      editor.chain().focus().setTextSelection(safePos).scrollIntoView().run();
+      setPendingVisualCursorPos(-1);
+    });
+
+    return () => cancelAnimationFrame(raf);
+  }, [showHtmlCode, pendingVisualCursorPos, editor]);
 
   // Serialize a ProseMirror doc fragment to HTML string
   const serializeFragment = useCallback(
@@ -538,7 +554,10 @@ export function TiptapEditor({
       editor.commands.setContent(minifiedClean);
       onChange(minifiedClean);
 
-      // Find ProseMirror position from the marker's location
+      // Find ProseMirror position from the marker's location. Don't apply the
+      // selection here — EditorContent is still unmounted at this point, so
+      // ProseMirror would have no DOM to scroll. Store the position and let
+      // the post-remount effect focus + scrollIntoView.
       try {
         const minifiedWithMarker = minifyHtml(htmlWithMarker);
         const markerInMinified = minifiedWithMarker.indexOf(CURSOR_MARKER);
@@ -547,7 +566,7 @@ export function TiptapEditor({
           // Count actual text characters (not tags) before marker
           const textOffset = countTextCharsBeforePos(htmlBefore, htmlBefore.length);
           const pmPos = textOffsetToPmPos(editor.state.doc, textOffset);
-          editor.commands.setTextSelection(pmPos);
+          setPendingVisualCursorPos(pmPos);
         }
       } catch {
         // Cursor positioning failed, editor content is still set correctly
