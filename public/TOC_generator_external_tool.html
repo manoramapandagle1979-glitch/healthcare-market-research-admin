@@ -866,6 +866,14 @@
 
                     // Standard Report Commercials & Add-ons
                     this.dt.push(this.createCommercialsChapter(currentChapter));
+                    currentChapter++;
+
+                    // List Of Figures
+                    this.dt.push(this.createListOfFiguresChapter(currentChapter));
+                    currentChapter++;
+
+                    // List Of Tables
+                    this.dt.push(this.createListOfTablesChapter(currentChapter));
                 },
                 createChapter1ReportIntroduction: function () {
                     return {
@@ -1125,6 +1133,22 @@
                             { itemText: `${chapterNumber}.1. Customization Options`, SubItem: [] },
                             { itemText: `${chapterNumber}.2. Subscription Module For Market Research Reports`, SubItem: [] },
                             { itemText: `${chapterNumber}.3. Client Testimonials`, SubItem: [] }
+                        ]
+                    };
+                },
+                createListOfFiguresChapter: function (chapterNumber) {
+                    return {
+                        itemText: `Chapter ${chapterNumber}. List Of Figures`,
+                        SubItem: [
+                            { itemText: `${chapterNumber}.1. Figures No 1 to `, SubItem: [] }
+                        ]
+                    };
+                },
+                createListOfTablesChapter: function (chapterNumber) {
+                    return {
+                        itemText: `Chapter ${chapterNumber}. List Of Tables`,
+                        SubItem: [
+                            { itemText: `${chapterNumber}.1. Tables No 1 to `, SubItem: [] }
                         ]
                     };
                 },

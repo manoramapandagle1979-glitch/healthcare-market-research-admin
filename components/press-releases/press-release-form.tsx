@@ -138,6 +138,7 @@ export function PressReleaseForm({
       categoryId: categories.length > 0 ? categories[0].id : 0,
       tags: 'AI in healthcare, clinical decision support, healthcare technology, digital health',
       location: 'San Francisco, CA',
+      reportUrl: 'https://example.com/reports/healthcare-ai-platform',
       metadata: {
         metaTitle: 'Healthcare Tech Company Launches AI Clinical Platform | Press Release',
         metaDescription:
@@ -365,7 +366,10 @@ export function PressReleaseForm({
               name="reportUrl"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Report URL</FormLabel>
+                  <FormLabel className="flex items-center gap-1">
+                    Report URL
+                    <span className="text-destructive">*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input placeholder="https://example.com/reports/report-slug" {...field} />
                   </FormControl>
