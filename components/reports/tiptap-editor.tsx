@@ -395,7 +395,7 @@ export function TiptapEditor({
 
   // Convert a text character offset into a ProseMirror document position
   const textOffsetToPmPos = useCallback((doc: any, textOffset: number): number => {
-    let result = 1;
+    let result = doc.content.size; // default to end so out-of-range offsets land at end, not start
     let textCount = 0;
     let found = false;
 
@@ -567,9 +567,13 @@ export function TiptapEditor({
           const textOffset = countTextCharsBeforePos(htmlBefore, htmlBefore.length);
           const pmPos = textOffsetToPmPos(editor.state.doc, textOffset);
           setPendingVisualCursorPos(pmPos);
+        } else {
+          // Marker was removed by minifier — fall back to end of document
+          setPendingVisualCursorPos(editor.state.doc.content.size);
         }
       } catch {
-        // Cursor positioning failed, editor content is still set correctly
+        // Cursor positioning failed — fall back to end of document
+        setPendingVisualCursorPos(editor.state.doc.content.size);
       }
     }
     setShowHtmlCode(!showHtmlCode);
