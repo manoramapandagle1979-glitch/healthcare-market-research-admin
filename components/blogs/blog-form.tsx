@@ -144,7 +144,7 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving, formId }: BlogFo
           authorId: '',
           status: 'draft',
           publishDate: new Date().toISOString(),
-          location: '',
+          location: 'Austin, TX, USA',
           metadata: {
             metaTitle: '',
             metaDescription: '',
@@ -231,7 +231,11 @@ export function BlogForm({ blog, onSubmit, onPreview, isSaving, formId }: BlogFo
                   <FormLabel>Slug</FormLabel>
                   <div className="flex gap-2">
                     <FormControl>
-                      <Input placeholder="url-friendly-slug-for-blog" {...field} />
+                      <Input
+                        placeholder="url-friendly-slug-for-blog"
+                        {...field}
+                        onChange={e => field.onChange(generateSlug(e.target.value))}
+                      />
                     </FormControl>
                     <Button
                       type="button"

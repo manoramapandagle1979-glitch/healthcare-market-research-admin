@@ -206,7 +206,11 @@ export function PressReleaseForm({
                   <FormLabel>Slug</FormLabel>
                   <div className="flex gap-2">
                     <FormControl>
-                      <Input placeholder="url-friendly-slug-for-press-release" {...field} />
+                      <Input
+                        placeholder="url-friendly-slug-for-press-release"
+                        {...field}
+                        onChange={e => field.onChange(generateSlug(e.target.value))}
+                      />
                     </FormControl>
                     <Button
                       type="button"

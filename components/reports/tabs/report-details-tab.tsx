@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { generateSlug } from '@/lib/utils/slug';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -173,7 +174,11 @@ export function ReportDetailsTab({
                 </FormLabel>
                 <div className="flex gap-2">
                   <FormControl>
-                    <Input placeholder="e.g., global-healthcare-market-analysis-2024" {...field} />
+                    <Input
+                      placeholder="e.g., global-healthcare-market-analysis-2024"
+                      {...field}
+                      onChange={e => field.onChange(generateSlug(e.target.value))}
+                    />
                   </FormControl>
                   <Button
                     type="button"
