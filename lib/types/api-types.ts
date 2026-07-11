@@ -349,12 +349,7 @@ export interface FormSubmissionFilters {
 
 export interface FormSubmissionsListResponse extends ApiResponse<ApiFormSubmission[]> {
   data: ApiFormSubmission[];
-  pagination: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
+  meta: ApiMeta;
 }
 
 export interface FormSubmissionDetailResponse extends ApiResponse<ApiFormSubmission> {

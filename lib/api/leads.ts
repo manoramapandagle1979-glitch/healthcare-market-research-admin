@@ -9,15 +9,40 @@ import type {
   FormCategory,
 } from '@/lib/types/api-types';
 
+export interface FormSubmissionsResult {
+  data: FormSubmissionsListResponse['data'];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+function normalizeSubmissionsResponse(
+  response: FormSubmissionsListResponse
+): FormSubmissionsResult {
+  return {
+    data: response.data ?? [],
+    pagination: {
+      total: response.meta?.total ?? 0,
+      page: response.meta?.page ?? 1,
+      limit: response.meta?.limit ?? 20,
+      totalPages: response.meta?.total_pages ?? 0,
+    },
+  };
+}
+
 /**
  * Fetches form submissions with filtering and pagination
  */
 export async function fetchFormSubmissions(
   filters?: FormSubmissionFilters
-): Promise<FormSubmissionsListResponse> {
-  return apiClient.get<FormSubmissionsListResponse>('/v1/forms/submissions', {
+): Promise<FormSubmissionsResult> {
+  const response = await apiClient.get<FormSubmissionsListResponse>('/v1/forms/submissions', {
     params: filters as Record<string, unknown>,
   });
+  return normalizeSubmissionsResponse(response);
 }
 
 /**
@@ -33,10 +58,12 @@ export async function fetchFormSubmissionById(id: string): Promise<FormSubmissio
 export async function fetchFormSubmissionsByCategory(
   category: FormCategory,
   filters?: Omit<FormSubmissionFilters, 'category'>
-): Promise<FormSubmissionsListResponse> {
-  return apiClient.get<FormSubmissionsListResponse>(`/v1/forms/submissions/category/${category}`, {
-    params: filters as Record<string, unknown>,
-  });
+): Promise<FormSubmissionsResult> {
+  const response = await apiClient.get<FormSubmissionsListResponse>(
+    `/v1/forms/submissions/category/${category}`,
+    { params: filters as Record<string, unknown> }
+  );
+  return normalizeSubmissionsResponse(response);
 }
 
 /**

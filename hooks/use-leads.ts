@@ -54,10 +54,10 @@ export function useLeads(initialFilters?: FormSubmissionFilters): UseLeadsReturn
 
       const response = await fetchFormSubmissions(filters);
 
-      setSubmissions(response.data || []);
-      setTotal(response.pagination?.total || 0);
-      setCurrentPage(response.pagination?.page || 1);
-      setTotalPages(response.pagination?.totalPages || 0);
+      setSubmissions(response.data);
+      setTotal(response.pagination.total);
+      setCurrentPage(response.pagination.page);
+      setTotalPages(response.pagination.totalPages);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load form submissions';
       setError(errorMessage);
